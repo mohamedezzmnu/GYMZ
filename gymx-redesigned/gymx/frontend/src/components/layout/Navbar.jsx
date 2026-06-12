@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Dumbbell, LayoutGrid } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLang } from '../../context/LangContext';
 
@@ -24,6 +24,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/programs', label: lang === 'ar' ? 'البرامج' : 'Programs', icon: LayoutGrid },
     { href: '/exercises', label: lang === 'ar' ? 'التمارين' : 'Exercises', icon: Dumbbell },
+    { href: '/shapes', label: lang === 'ar' ? 'أشكال التمارين' : 'Shapes', icon: ImageIcon },
   ];
 
   return (
