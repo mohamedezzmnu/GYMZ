@@ -1,105 +1,54 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import { createContext, useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
-});
-
-// Intercept requests — add access token
-api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('gymx_access_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-// Intercept responses — auto refresh on 401
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 &&
-        error.response?.data?.code === 'TOKEN_EXPIRED' &&
-        !original._retry) {
-      original._retry = true;
-      try {
-        const refreshToken = Cookies.get('gymx_refresh');
-        if (!refreshToken) throw new Error('No refresh token');
-
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, { refreshToken });
-        sessionStorage.setItem('gymx_access_token', res.data.accessToken);
-        Cookies.set('gymx_refresh', res.data.refreshToken, { secure: true, sameSite: 'strict', expires: 7 });
-
-        original.headers.Authorization = `Bearer ${res.data.accessToken}`;
-        return api(original);
-      } catch {
-        sessionStorage.removeItem('gymx_access_token');
-        Cookies.remove('gymx_refresh');
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzcwZS4IU9eIDc3LQPOdRdn3YaQzFzn8I379JYpDJUAYZ_P1x3Lr1RkgJNe7SKSHxXk/exec";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const loadUser = useCallback(async () => {
-    try {
-      const token = sessionStorage.getItem('gymx_access_token');
-      if (!token) { setLoading(false); return; }
-
-      const res = await api.get('/auth/me');
-      setUser(res.data.user);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
+  const [user, setUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('gymx_user');
+      return saved ? JSON.parse(saved) : null;
     }
-  }, []);
+    return null;
+  });
+  const [loading] = useState(false);
 
-  useEffect(() => { loadUser(); }, [loadUser]);
-
-  const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    sessionStorage.setItem('gymx_access_token', res.data.accessToken);
-    Cookies.set('gymx_refresh', res.data.refreshToken, {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      expires: 7,
+  const sheetRequest = async (body) => {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body),
     });
-    setUser(res.data.user);
-    return res.data.user;
+    return await res.json();
   };
 
   const register = async (name, email, password) => {
-    const res = await api.post('/auth/register', { name, email, password });
-    sessionStorage.setItem('gymx_access_token', res.data.accessToken);
-    Cookies.set('gymx_refresh', res.data.refreshToken, {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      expires: 7,
-    });
-    setUser(res.data.user);
-    return res.data.user;
+    const data = await sheetRequest({ action: 'register', name, email, password });
+    if (data.error) throw new Error(data.error);
+    sessionStorage.setItem('gymx_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data.user;
   };
 
-  const logout = async () => {
-    try {
-      const refreshToken = Cookies.get('gymx_refresh');
-      await api.post('/auth/logout', { refreshToken });
-    } finally {
-      sessionStorage.removeItem('gymx_access_token');
-      Cookies.remove('gymx_refresh');
-      setUser(null);
-      toast.success('Logged out');
-    }
+  const login = async (email, password) => {
+    const data = await sheetRequest({ action: 'login', email, password });
+    if (data.error) throw new Error(data.error);
+    sessionStorage.setItem('gymx_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data.user;
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem('gymx_user');
+    setUser(null);
+    toast.success('Logged out');
+  };
+
+  const api = {
+    get: async () => ({ data: {} }),
+    post: async () => ({ data: {} }),
   };
 
   return (
@@ -115,4 +64,5 @@ export const useAuth = () => {
   return ctx;
 };
 
-export { api };
+export { AuthContext };
+export const api = { get: async () => ({ data: {} }), post: async () => ({ data: {} }) };
