@@ -1,3 +1,28 @@
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --carbon: #111;
+  --chalk: #f5f5f5;
+  --ash: #888;
+  --iron: #2a2a2a;
+  --iron-light: #333;
+  --obsidian: #000;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f5;
+  --carbon: #ffffff;
+  --chalk: #111111;
+  --ash: #666;
+  --iron: #ddd;
+  --iron-light: #ccc;
+  --obsidian: #fff;
+}
+
+body {
+  background: var(--bg);
+  color: var(--chalk);
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* =============================================

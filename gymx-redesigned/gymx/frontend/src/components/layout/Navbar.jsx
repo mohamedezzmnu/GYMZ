@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, Dumbbell, LayoutGrid } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useLang } from '../../context/LangContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { lang, toggleLang, theme, toggleTheme } = useLang();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -20,8 +22,8 @@ export default function Navbar() {
   useEffect(() => { setMenuOpen(false); }, [router.pathname]);
 
   const navLinks = [
-    { href: '/programs', label: 'Programs', icon: LayoutGrid },
-    { href: '/exercises', label: 'Exercises', icon: Dumbbell },
+    { href: '/programs', label: lang === 'ar' ? 'البرامج' : 'Programs', icon: LayoutGrid },
+    { href: '/exercises', label: lang === 'ar' ? 'التمارين' : 'Exercises', icon: Dumbbell },
   ];
 
   return (
@@ -38,18 +40,11 @@ export default function Navbar() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          /* Liquid Glass Navbar */
-          background: scrolled
-            ? 'rgba(8, 8, 16, 0.75)'
-            : 'transparent',
+          background: scrolled ? 'rgba(8, 8, 16, 0.75)' : 'transparent',
           backdropFilter: scrolled ? 'blur(24px) saturate(180%)' : 'none',
           WebkitBackdropFilter: scrolled ? 'blur(24px) saturate(180%)' : 'none',
-          borderBottom: scrolled
-            ? '1px solid rgba(255,255,255,0.08)'
-            : '1px solid transparent',
-          boxShadow: scrolled
-            ? '0 4px 32px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(255,255,255,0.04)'
-            : 'none',
+          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
+          boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(255,255,255,0.04)' : 'none',
           transition: 'all 350ms cubic-bezier(0.4,0,0.2,1)',
         }}
       >
@@ -67,10 +62,7 @@ export default function Navbar() {
             }}
             whileHover={{ scale: 1.04 }}
           >
-            GYM<span style={{
-              color: 'var(--volt)',
-              textShadow: '0 0 20px rgba(61,127,255,0.6)',
-            }}>X</span>
+            GYM<span style={{ color: 'var(--volt)', textShadow: '0 0 20px rgba(61,127,255,0.6)' }}>X</span>
           </motion.div>
         </Link>
 
@@ -94,6 +86,33 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+
+          {/* زراير اللغة والثيم */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={toggleLang} style={{
+              background: 'none',
+              border: '1px solid var(--volt)',
+              color: 'var(--volt)',
+              padding: '4px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+            }}>
+              {lang === 'ar' ? 'EN' : 'عر'}
+            </button>
+            <button onClick={toggleTheme} style={{
+              background: 'none',
+              border: '1px solid var(--volt)',
+              color: 'var(--volt)',
+              padding: '4px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+          </div>
 
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -122,16 +141,16 @@ export default function Navbar() {
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ash-light)'}
               >
                 <LogOut size={14} />
-                Logout
+                {lang === 'ar' ? 'خروج' : 'Logout'}
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 12 }}>
               <Link href="/login" className="btn btn-ghost" style={{ padding: '8px 16px', fontSize: '0.75rem' }}>
-                Login
+                {lang === 'ar' ? 'دخول' : 'Login'}
               </Link>
               <Link href="/register" className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem' }}>
-                Join Now
+                {lang === 'ar' ? 'انضم الآن' : 'Join Now'}
               </Link>
             </div>
           )}
@@ -140,13 +159,7 @@ export default function Navbar() {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--chalk)',
-            cursor: 'pointer',
-            display: 'none',
-          }}
+          style={{ background: 'none', border: 'none', color: 'var(--chalk)', cursor: 'pointer', display: 'none' }}
           className="mobile-menu-btn"
           aria-label="Toggle menu"
         >
@@ -154,7 +167,7 @@ export default function Navbar() {
         </button>
       </motion.nav>
 
-      {/* Mobile Menu — Liquid Glass */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -200,6 +213,33 @@ export default function Navbar() {
 
             <hr className="divider" />
 
+            {/* زراير اللغة والثيم في الموبايل */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={toggleLang} style={{
+                background: 'none',
+                border: '1px solid var(--volt)',
+                color: 'var(--volt)',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.85rem',
+              }}>
+                {lang === 'ar' ? 'EN' : 'عر'}
+              </button>
+              <button onClick={toggleTheme} style={{
+                background: 'none',
+                border: '1px solid var(--volt)',
+                color: 'var(--volt)',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+              }}>
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+            </div>
+
             {user ? (
               <button
                 onClick={logout}
@@ -217,15 +257,15 @@ export default function Navbar() {
                 }}
               >
                 <LogOut size={20} />
-                Logout
+                {lang === 'ar' ? 'خروج' : 'Logout'}
               </button>
             ) : (
               <div style={{ display: 'flex', gap: 12 }}>
                 <Link href="/login" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }}>
-                  Login
+                  {lang === 'ar' ? 'دخول' : 'Login'}
                 </Link>
                 <Link href="/register" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
-                  Join Now
+                  {lang === 'ar' ? 'انضم الآن' : 'Join Now'}
                 </Link>
               </div>
             )}
