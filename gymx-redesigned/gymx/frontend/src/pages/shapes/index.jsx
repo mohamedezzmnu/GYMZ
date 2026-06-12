@@ -5,17 +5,35 @@ import Head from 'next/head';
 
 const SHAPES = [
   // ── Chest ──
-  { id: 1,  category: 'Chest', name: 'Bench Press',         name_ar: 'ضغط البنش',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfdkkZYBajt85_uXRCLJWzf_FunhIkVuQXHgokJiETwA&s=10' },
-  { id: 2,  category: 'Chest', name: 'Incline Bench Press',  name_ar: 'ضغط البنش المائل',  imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoerxmCNgSTxV7x-8aOQ0DLEixIkdzCwEBECR93l9ZtQ&s=10' },
-  { id: 3,  category: 'Chest', name: 'Push-Ups',             name_ar: 'تمرين الضغط',       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3fsAh83D9CpPlEo93dxB7Vt1kRpV0lcvrsS7-e-xx9Q&s=10' },
-  { id: 4,  category: 'Chest', name: 'Cable Flys',           name_ar: 'فلاي كيبل',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAHAw_21OLHvdbhldlnJFM4fiXyNSiTJ1L4O7zMlddzg&s=10' },
-  { id: 5,  category: 'Chest', name: 'Chest Dips',           name_ar: 'دبس الصدر',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxEpKEmgFNvcKKc3-XxulUJB0PhtpM8MpENIjnQsyFwA&s=10' },
+  { id: 1,  category: 'Chest',     name: 'Bench Press',         name_ar: 'ضغط البنش',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfdkkZYBajt85_uXRCLJWzf_FunhIkVuQXHgokJiETwA&s=10' },
+  { id: 2,  category: 'Chest',     name: 'Incline Bench Press',  name_ar: 'ضغط البنش المائل',  imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoerxmCNgSTxV7x-8aOQ0DLEixIkdzCwEBECR93l9ZtQ&s=10' },
+  { id: 3,  category: 'Chest',     name: 'Push-Ups',             name_ar: 'تمرين الضغط',       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3fsAh83D9CpPlEo93dxB7Vt1kRpV0lcvrsS7-e-xx9Q&s=10' },
+  { id: 4,  category: 'Chest',     name: 'Cable Flys',           name_ar: 'فلاي كيبل',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAHAw_21OLHvdbhldlnJFM4fiXyNSiTJ1L4O7zMlddzg&s=10' },
+  { id: 5,  category: 'Chest',     name: 'Chest Dips',           name_ar: 'دبس الصدر',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxEpKEmgFNvcKKc3-XxulUJB0PhtpM8MpENIjnQsyFwA&s=10' },
   // ── Back ──
-  { id: 6,  category: 'Back',  name: 'Pull-Ups',             name_ar: 'عقلة',              imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvqtwh0aq0h80IqU9kIQH_-Sangg93yWu6dpYgxqvHAQ&s=10' },
-  { id: 7,  category: 'Back',  name: 'Barbell Row',          name_ar: 'رووينج بار',        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlZxbZuIF5FDjYbe4kI2KixAwued6Q8wwfaclRkYy3oQ&s=10' },
-  { id: 8,  category: 'Back',  name: 'Lat Pulldown',         name_ar: 'لات بول داون',      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6lFLt2zQKxrBBVQXUk9YmEy2kzLoVuJuR0lr_EXhNBQ&s=10' },
-  { id: 9,  category: 'Back',  name: 'Deadlift',             name_ar: 'ديد ليفت',          imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqYhFb1LZnnqhHy2Cqo_Y2DogUVM_C1F_zefek5vB6KQ&s=10' },
-  { id: 10, category: 'Back',  name: 'Seated Row',           name_ar: 'رووينج كيبل جالس', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9uSrRBo5_uV7IbZk9Vqy6EG32S-Fjf3-1mqsZ4Fe_pw&s=10' },
+  { id: 6,  category: 'Back',      name: 'Pull-Ups',             name_ar: 'عقلة',              imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvqtwh0aq0h80IqU9kIQH_-Sangg93yWu6dpYgxqvHAQ&s=10' },
+  { id: 7,  category: 'Back',      name: 'Barbell Row',          name_ar: 'رووينج بار',        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlZxbZuIF5FDjYbe4kI2KixAwued6Q8wwfaclRkYy3oQ&s=10' },
+  { id: 8,  category: 'Back',      name: 'Lat Pulldown',         name_ar: 'لات بول داون',      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6lFLt2zQKxrBBVQXUk9YmEy2kzLoVuJuR0lr_EXhNBQ&s=10' },
+  { id: 9,  category: 'Back',      name: 'Deadlift',             name_ar: 'ديد ليفت',          imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqYhFb1LZnnqhHy2Cqo_Y2DogUVM_C1F_zefek5vB6KQ&s=10' },
+  { id: 10, category: 'Back',      name: 'Seated Row',           name_ar: 'رووينج كيبل جالس', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9uSrRBo5_uV7IbZk9Vqy6EG32S-Fjf3-1mqsZ4Fe_pw&s=10' },
+  // ── Shoulders ──
+  { id: 11, category: 'Shoulders', name: 'Overhead Press',       name_ar: 'ضغط كتف بار',      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRscst6LyGkyleRZ1PoY6waoBY0diI2-zbx3OtdzkOsGA&s=10' },
+  { id: 12, category: 'Shoulders', name: 'Lateral Raises',       name_ar: 'رفع جانبي',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqQDScFqDr3tkzFC5DD568gTOIhgIfMuEgFdI-VkNcOg&s=10' },
+  { id: 13, category: 'Shoulders', name: 'Front Raises',         name_ar: 'رفع أمامي',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI9fk4RL7L4Rbzzcro5ZJFwkrKWk0Nv1IF3AyY_1UOtQ&s=10' },
+  { id: 14, category: 'Shoulders', name: 'Arnold Press',         name_ar: 'ضغط أرنولد',        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjhJV0wGU3yzSx_jDqw97o7NZ_05HmMhOYLSm-UH2eyQ&s=10' },
+  { id: 15, category: 'Shoulders', name: 'Face Pulls',           name_ar: 'فيس بول',           imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEGIaZtFlAbq6PNxzXlifJpVfR9QLolgQV36bQWR7kew&s=10' },
+  // ── Biceps ──
+  { id: 16, category: 'Biceps',    name: 'Barbell Curl',         name_ar: 'كيرل بار',          imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdc0KlcDOCsK5rbn5Ps81sXanT8OlnR7yxmMyiKPF0qQ&s=10' },
+  { id: 17, category: 'Biceps',    name: 'Dumbbell Curl',        name_ar: 'كيرل دمبل',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFgQOppqd_QMF-h4Ng8ASZJIHfszO0pV6P-npR_j5s2Q&s=10' },
+  { id: 18, category: 'Biceps',    name: 'Hammer Curl',          name_ar: 'هامر كيرل',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5P_9LYCu3pYEWIDRJtACm8qY-hricQTK2oGOcpOc_nQ&s=10' },
+  { id: 19, category: 'Biceps',    name: 'Preacher Curl',        name_ar: 'بريتشر كيرل',       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6Vr_DDA9Ii_DPg4dCUF4M9FDpwfboB-DLccNyVQt-yw&s' },
+  { id: 20, category: 'Biceps',    name: 'Cable Curl',           name_ar: 'كيرل كيبل',         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbus1GPCesF1V2NbF-ZshOpqMPMYcUFDEAFlywHiexQ&s=10' },
+  // ── Triceps ──
+  { id: 21, category: 'Triceps',   name: 'Tricep Pushdown',      name_ar: 'تراسبس بوش داون',   imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQij0VxJ0AQGyAWhlOtoFE465uIbM2H3PgXoiJemND-tw&s=10' },
+  { id: 22, category: 'Triceps',   name: 'Skull Crushers',       name_ar: 'سكال كراشر',        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSWw2HCP3tIJN-gm5zK7dPQOOAL4Z5D-gdOIPIfS64A&s=10' },
+  { id: 23, category: 'Triceps',   name: 'Overhead Extension',   name_ar: 'مط تراسبس فوق الرأس', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStVJ2fUQa3iulLEWEmgymHW47wwpCrorBNT-7jXnDjbw&s=10' },
+  { id: 24, category: 'Triceps',   name: 'Close Grip Bench',     name_ar: 'بنش قبضة ضيقة',     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBUL0RZDtlb0rlBriHSNVHo84k9j_Go8JF2SKYG-nFCw&s=10' },
+  { id: 25, category: 'Triceps',   name: 'Dips',                 name_ar: 'دبس تراسبس',        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLEfZqqCjEtrteQBfP-bQ7inIkXhJX4VOLIRw3mKMP5Q&s=10' },
 ];
 
 const CAT_COLOR = {
@@ -49,22 +67,13 @@ function ShapeCard({ shape, index }) {
         style={{ position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, transition: 'all 300ms ease', height: '100%' }}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)' }} />
-
-        {/* Image */}
         <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', background: 'rgba(61,127,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {!imgError && shape.imageUrl ? (
-            <img
-              src={shape.imageUrl}
-              alt={shape.name}
-              onError={() => setImgError(true)}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <img src={shape.imageUrl} alt={shape.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'rgba(61,127,255,0.3)' }}>IMG</div>
           )}
         </div>
-
-        {/* Info */}
         <div style={{ padding: 16 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--chalk)', lineHeight: 1.2, marginBottom: 4 }}>
             {shape.name}
