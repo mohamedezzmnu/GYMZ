@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Filter, ChevronRight } from 'lucide-react';
 import Head from 'next/head';
-import { api } from '../context/AuthContext';
+import { api } from '../../context/AuthContext';
 
 const fetcher = (url) => api.get(url).then(r => r.data);
 

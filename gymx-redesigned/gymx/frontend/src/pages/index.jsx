@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { ArrowRight, ChevronDown, Zap, Target, TrendingUp } from 'lucide-react';
+import { ArrowRight, ChevronDown, Zap, Target, TrendingUp, Dumbbell } from 'lucide-react';
 import Head from 'next/head';
 
 function Reveal({ children, delay = 0, style = {} }) {
