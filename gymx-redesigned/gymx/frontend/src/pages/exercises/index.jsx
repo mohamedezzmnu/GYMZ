@@ -1,4 +1,3 @@
-cat > src/pages/exercises/index.jsx << 'EOF'
 import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Search } from 'lucide-react';
