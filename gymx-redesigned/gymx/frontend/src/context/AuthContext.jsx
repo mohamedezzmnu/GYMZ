@@ -7,7 +7,7 @@ const SHEET_URL = "https://script.google.com/macros/s/AKfycbzcwZS4IU9eIDc3LQPOdR
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('gymx_user');
+      const saved = localStorage.getItem('gymx_user');
       return saved ? JSON.parse(saved) : null;
     }
     return null;
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     const data = await sheetRequest({ action: 'register', name, email, password });
     if (data.error) throw new Error(data.error);
-    sessionStorage.setItem('gymx_user', JSON.stringify(data.user));
+    localStorage.setItem('gymx_user', JSON.stringify(data.user));
     setUser(data.user);
     return data.user;
   };
@@ -35,13 +35,13 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const data = await sheetRequest({ action: 'login', email, password });
     if (data.error) throw new Error(data.error);
-    sessionStorage.setItem('gymx_user', JSON.stringify(data.user));
+    localStorage.setItem('gymx_user', JSON.stringify(data.user));
     setUser(data.user);
     return data.user;
   };
 
   const logout = () => {
-    sessionStorage.removeItem('gymx_user');
+    localStorage.removeItem('gymx_user');
     setUser(null);
     toast.success('Logged out');
   };
