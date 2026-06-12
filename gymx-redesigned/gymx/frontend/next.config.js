@@ -1,35 +1,19 @@
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'cloudinary-images',
-        expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
-      },
-    },
-    {
-      urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: { cacheName: 'google-fonts', expiration: { maxAgeSeconds: 60 * 60 * 24 * 365 } },
-    },
-  ],
-});
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  images: {
-    domains: ['res.cloudinary.com'],
-    formats: ['image/avif', 'image/webp'],
-  },
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'" },
+        ],
+      },
+    ];
   },
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;
