@@ -299,7 +299,7 @@ export default function HomePage() {
               textShadow: '0 0 16px rgba(61,127,255,0.5)',
             }}
           >
-            Est. 2024 · Premium Training
+            Est. 2026 · Premium Training
           </motion.div>
 
           <motion.h1

@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }) {
             GYM<span style={{ color: 'var(--volt)' }}>X</span>
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.1em' }}>
-            © 2024 GYMX. TRAIN LIKE YOU MEAN IT.
+            © 2026 GYMX. جميع الحقوق محفوظة لدي MZ
           </div>
         </footer>
 
