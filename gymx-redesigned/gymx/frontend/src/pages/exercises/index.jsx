@@ -247,7 +247,7 @@ export default function ExercisesPage() {
         <div className="container">
           {data && (
             <div className="mono" style={{ color: 'var(--ash)', marginBottom: 24 }}>
-              {data.pagination.total} exercises found
+              {data?.pagination?.total ?? 0} exercises found
             </div>
           )}
 

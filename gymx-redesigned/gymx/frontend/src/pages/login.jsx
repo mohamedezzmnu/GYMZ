@@ -122,7 +122,7 @@ export function LoginPage() {
       toast.success(`Welcome back, ${user.name}!`);
       router.push(router.query.from || '/');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      toast.error(err.message || 'Login failed');
     } finally { setLoading(false); }
   };
 
@@ -207,7 +207,7 @@ export function RegisterPage() {
       toast.success(`Welcome to GYMX, ${user.name}!`);
       router.push('/');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      toast.error(err.message || 'Registration failed');
     } finally { setLoading(false); }
   };
 
