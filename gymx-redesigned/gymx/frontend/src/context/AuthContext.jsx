@@ -1,49 +1,74 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext(null);
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzcwZS4IU9eIDc3LQPOdRdn3YaQzFzn8I379JYpDJUAYZ_P1x3Lr1RkgJNe7SKSHxXk/exec";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('gymx_user');
-      return saved ? JSON.parse(saved) : null;
-    }
-    return null;
-  });
-  const [loading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const sheetRequest = async (body) => {
-    const res = await fetch(SHEET_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(body),
+  useEffect(() => {
+    // جيب الـ session الحالية لو موجودة
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+        });
+      }
+      setLoading(false);
     });
-    return await res.json();
-  };
+
+    // استمع لأي تغيير في الـ auth (login, logout, refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const register = async (name, email, password) => {
-    const data = await sheetRequest({ action: 'register', name, email, password });
-    if (data.error) throw new Error(data.error);
-    localStorage.setItem('gymx_user', JSON.stringify(data.user));
-    setUser(data.user);
-    return data.user;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+      },
+    });
+    if (error) throw new Error(error.message);
+    // Supabase بيبعت email confirmation — لو عايز تشيله روح Authentication > Email Templates
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      name,
+    };
   };
 
   const login = async (email, password) => {
-    const data = await sheetRequest({ action: 'login', email, password });
-    if (data.error) throw new Error(data.error);
-    localStorage.setItem('gymx_user', JSON.stringify(data.user));
-    setUser(data.user);
-    return data.user;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error(error.message);
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.user_metadata?.name || email.split('@')[0],
+    };
   };
 
-  const logout = () => {
-    localStorage.removeItem('gymx_user');
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    toast.success('Logged out');
+    toast.success('تم تسجيل الخروج');
   };
 
   const api = {
@@ -65,5 +90,3 @@ export const useAuth = () => {
 };
 
 export { AuthContext };
-import axios from 'axios';
-export const api = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api' });
