@@ -9,6 +9,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 
 // ── helper ──────────────────────────────────────────────────
@@ -85,24 +86,8 @@ function StatCard({ icon: Icon, label, value, accent = 'var(--volt)', delay }) {
 }
 
 // ── mock data (replace with real API calls) ──────────────────
-const ENROLLED_PROGRAMS = [
-  { id: 1, title: 'Full Body', title_ar: 'كامل الجسم', days: '3 أيام', level: 'مبتدئ', levelColor: '#4ade80', progress: 65, startedDaysAgo: 14 },
-  { id: 2, title: 'Upper Lower', title_ar: 'أعلى وأسفل', days: '4 أيام', level: 'متوسط', levelColor: '#facc15', progress: 20, startedDaysAgo: 4 },
-];
-
-const RECENT_ACTIVITY = [
-  { day: 'الإثنين', label: 'اليوم الأول — Full Body', done: true },
-  { day: 'الأربعاء', label: 'اليوم التاني — Full Body', done: true },
-  { day: 'الجمعة', label: 'اليوم التالت — Full Body', done: true },
-  { day: 'السبت', label: 'اليوم الأول — Upper Lower', done: false },
-];
-
-const ACHIEVEMENTS = [
-  { icon: '🔥', label: 'أول تمرين', earned: true },
-  { icon: '💪', label: '7 أيام متتالية', earned: true },
-  { icon: '🏆', label: 'أكملت برنامج', earned: false },
-  { icon: '⚡', label: '30 جلسة', earned: false },
-];
+const [enrolledPrograms, setEnrolledPrograms] = useState([]);
+const [recentActivity, setRecentActivity] = useState([]);
 
 // ── CHANGE PASSWORD MODAL ────────────────────────────────────
 function ChangePasswordModal({ onClose }) {
@@ -217,6 +202,18 @@ function ChangePasswordModal({ onClose }) {
 // ═══════════════════════════════════════════════════════════
 export default function ProfilePage() {
   const { user, logout } = useAuth();
+  const [enrolledPrograms, setEnrolledPrograms] = useState([]);
+const [recentActivity, setRecentActivity] = useState([]);
+
+useEffect(() => {
+  if (!user) return;
+  supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
+    if (data) setEnrolledPrograms(data);
+  });
+  supabase.from('workout_sessions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(4).then(({ data }) => {
+    if (data) setRecentActivity(data);
+  });
+}, [user]);
   const router = useRouter();
   const [showPassModal, setShowPassModal] = useState(false);
 
@@ -349,7 +346,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {ENROLLED_PROGRAMS.map((prog) => (
+                  {enrolledPrograms.map((prog) => (
                     <div key={prog.id} style={{
                       padding: '16px',
                       background: 'rgba(255,255,255,0.03)',
@@ -425,7 +422,7 @@ export default function ProfilePage() {
                     آخر الجلسات
                   </h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {RECENT_ACTIVITY.map((a, i) => (
+                    {recentActivity.map((a, i) => (
                       <div key={i} style={{
                         display: 'flex', alignItems: 'center', gap: 12,
                         padding: '10px 12px',
