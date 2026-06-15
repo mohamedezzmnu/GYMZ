@@ -457,7 +457,12 @@ useEffect(() => {
                     الإنجازات
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                    {ACHIEVEMENTS.map((ach, i) => (
+                    {[
+  { icon: "🔥", label: "أول تمرين", earned: true },
+  { icon: "💪", label: "7 أيام متتالية", earned: false },
+  { icon: "🏆", label: "أكملت برنامج", earned: false },
+  { icon: "⚡", label: "30 جلسة", earned: false },
+].map((ach, i) => (
                       <div key={i} style={{
                         padding: '14px 12px', borderRadius: 10, textAlign: 'center',
                         background: ach.earned ? 'rgba(61,127,255,0.08)' : 'rgba(255,255,255,0.02)',
