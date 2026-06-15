@@ -24,6 +24,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/programs', label: lang === 'ar' ? 'البرامج' : 'Programs', icon: LayoutGrid },
     { href: '/exercises', label: lang === 'ar' ? 'التمارين' : 'Exercises', icon: Dumbbell },
+    { href: '/profile', label: lang === 'ar' ? 'حسابي' : 'Profile', icon: User },
     { href: '/shapes', label: lang === 'ar' ? 'أشكال التمارين' : 'Shapes', icon: ImageIcon },
   ];
 
