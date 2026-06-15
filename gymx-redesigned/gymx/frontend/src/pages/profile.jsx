@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
   User, Mail, Calendar, Target, Dumbbell, TrendingUp,
@@ -86,8 +86,6 @@ function StatCard({ icon: Icon, label, value, accent = 'var(--volt)', delay }) {
 }
 
 // ── mock data (replace with real API calls) ──────────────────
-const [enrolledPrograms, setEnrolledPrograms] = useState([]);
-const [recentActivity, setRecentActivity] = useState([]);
 
 // ── CHANGE PASSWORD MODAL ────────────────────────────────────
 function ChangePasswordModal({ onClose }) {
