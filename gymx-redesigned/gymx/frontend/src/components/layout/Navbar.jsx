@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLang } from '../../context/LangContext';
 
