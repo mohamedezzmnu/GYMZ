@@ -451,7 +451,7 @@ export default function ProgramsPage() {
       {/* Programs */}
       <section style={{ padding: '40px 0' }}>
         <div className="container">
-          {PROGRAMS.map((p, i) => <ProgramCard key={p.id} program={p} index={i} highlighted={router.query.program === p.subtitle} />)}
+          {PROGRAMS.map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
         </div>
       </section>
 
