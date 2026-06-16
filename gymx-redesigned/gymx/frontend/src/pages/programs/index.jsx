@@ -279,10 +279,10 @@ const DAY_STRUCTURE = [
 // ══════════════════════════════════════════
 // Components
 // ══════════════════════════════════════════
-function ProgramCard({ program, index }) {
+function ProgramCard({ program, index, highlighted = false }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(highlighted);
   const [activeDay, setActiveDay] = useState(0);
 
   return (
@@ -296,7 +296,7 @@ function ProgramCard({ program, index }) {
       {/* Card Header */}
       <motion.div
         whileHover={{ borderColor: program.accentColor + '66' }}
-        style={{ position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: open ? '16px 16px 0 0' : 16, transition: 'all 300ms ease', cursor: 'pointer', padding: '24px 28px' }}
+        style={{ position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: highlighted ? '1px solid rgba(61,127,255,0.5)' : '1px solid rgba(255,255,255,0.08)', borderRadius: open ? '16px 16px 0 0' : 16, transition: 'all 300ms ease', cursor: 'pointer', padding: '24px 28px' }}
         onClick={() => setOpen(!open)}
       >
         {/* shimmer */}
@@ -451,7 +451,7 @@ export default function ProgramsPage() {
       {/* Programs */}
       <section style={{ padding: '40px 0' }}>
         <div className="container">
-          {PROGRAMS.map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
+          {PROGRAMS.map((p, i) => <ProgramCard key={p.id} program={p} index={i} highlighted={router.query.program === p.subtitle} />)}
         </div>
       </section>
 
