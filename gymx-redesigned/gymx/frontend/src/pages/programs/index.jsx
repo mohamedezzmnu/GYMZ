@@ -429,7 +429,6 @@ function StructureStep({ step, index }) {
 
 // ══════════════════════════════════════════
 // Main Page
-  const router = useRouter();
 export default function ProgramsPage() {
   const router = useRouter();
   return (
