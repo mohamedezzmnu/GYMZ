@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLang } from '../../context/LangContext';
 
@@ -22,12 +22,14 @@ export default function Navbar() {
   useEffect(() => { setMenuOpen(false); }, [router.pathname]);
 
   const navLinks = [
-    { href: '/programs', label: lang === 'ar' ? 'البرامج' : 'Programs', icon: LayoutGrid },
+    { href: '/programs',  label: lang === 'ar' ? 'البرامج'  : 'Programs',  icon: LayoutGrid },
     { href: '/exercises', label: lang === 'ar' ? 'التمارين' : 'Exercises', icon: Dumbbell },
-    { href: '/onboarding', label: lang === 'ar' ? 'ابدأ' : 'Start', icon: Zap },
-    { href: '/bmi', label: lang === 'ar' ? 'BMI' : 'BMI', icon: Activity },
-    { href: '/profile', label: lang === 'ar' ? 'حسابي' : 'Profile', icon: User },
-    { href: '/shapes', label: lang === 'ar' ? 'أشكال التمارين' : 'Shapes', icon: ImageIcon },
+    { href: '/tools',     label: lang === 'ar' ? 'الحاسبات' : 'Tools',     icon: Calculator },
+    { href: '/dashboard', label: lang === 'ar' ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
+    { href: '/onboarding',label: lang === 'ar' ? 'ابدأ'     : 'Start',     icon: Zap },
+    { href: '/bmi',       label: lang === 'ar' ? 'BMI'      : 'BMI',       icon: Activity },
+    { href: '/profile',   label: lang === 'ar' ? 'حسابي'    : 'Profile',   icon: User },
+    { href: '/shapes',    label: lang === 'ar' ? 'أشكال'    : 'Shapes',    icon: ImageIcon },
   ];
 
   return (
