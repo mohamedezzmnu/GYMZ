@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Calendar, Users, Target, Zap } from 'lucide-react';
 import Head from 'next/head';
@@ -426,6 +427,8 @@ function StructureStep({ step, index }) {
 // ══════════════════════════════════════════
 // Main Page
 export default function ProgramsPage() {
+  const router = useRouter();
+  const filterProgram = router.query.program || null;
   return (
     <>
       <Head><title>Programs - GYMX</title></Head>
@@ -446,7 +449,7 @@ export default function ProgramsPage() {
       {/* Programs */}
       <section style={{ padding: '40px 0' }}>
         <div className="container">
-          {PROGRAMS.map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
+          {(filterProgram ? PROGRAMS.filter(p => p.subtitle === filterProgram) : PROGRAMS).map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
         </div>
       </section>
 
