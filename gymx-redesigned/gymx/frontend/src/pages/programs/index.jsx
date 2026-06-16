@@ -1,8 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabaseClient';
-import toast from 'react-hot-toast';
+import { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Calendar, Users, Target, Zap } from 'lucide-react';
 import Head from 'next/head';
@@ -430,7 +426,6 @@ function StructureStep({ step, index }) {
 // ══════════════════════════════════════════
 // Main Page
 export default function ProgramsPage() {
-  const router = useRouter();
   return (
     <>
       <Head><title>Programs - GYMX</title></Head>
