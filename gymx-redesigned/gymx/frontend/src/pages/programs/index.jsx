@@ -1,4 +1,7 @@
 import { useRef, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
+import toast from 'react-hot-toast';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Calendar, Users, Target, Zap } from 'lucide-react';
 import Head from 'next/head';
