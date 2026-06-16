@@ -435,7 +435,7 @@ export default function ProgramsPage() {
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="mono" style={{ color: 'var(--volt)', marginBottom: 12 }}>— Training Programs</div>
-            <h1 className="display-lg" id={'program-' + program.subtitle} style={{ marginBottom: 16 }}>اختار<br /><span style={{ color: 'var(--volt)' }}>برنامجك</span></h1>
+            <h1 className="display-lg" style={{ marginBottom: 16 }}>اختار<br /><span style={{ color: 'var(--volt)' }}>برنامجك</span></h1>
             <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 560, lineHeight: 1.8, direction: 'rtl', fontFamily: 'sans-serif' }}>
               4 برامج تمرين جاهزة — كل واحد ليه أسلوبه وناسه. اختار اللي يناسب مستواك ووقتك وابدأ.
             </p>
