@@ -136,20 +136,6 @@ function ProgramCard({ title, days, level, goal, delay }) {
         background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
       }} />
 
-      {/* X watermark */}
-      <div style={{
-        position: 'absolute',
-        right: -20, top: -20,
-        fontFamily: 'var(--font-display)',
-        fontSize: '10rem',
-        color: 'rgba(61,127,255,0.04)',
-        lineHeight: 1,
-        userSelect: 'none',
-        pointerEvents: 'none',
-      }}>
-        X
-      </div>
-
       {/* Level accent strip */}
       <div style={{
         height: 3,
@@ -480,7 +466,7 @@ export default function HomePage() {
                     }}
                   >
                     {muscle}
-                    <span style={{ color: 'var(--volt)', opacity: 0.6, fontSize: '1.1rem' }}>?</span>
+                    <ArrowRight size={16} style={{ color: 'var(--volt)', opacity: 0.6 }} />
                   </motion.div>
                 </Link>
               </Reveal>
