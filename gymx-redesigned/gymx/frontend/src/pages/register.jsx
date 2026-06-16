@@ -127,7 +127,7 @@ export default function RegisterPage() {
     try {
       const user = await register(form.name.trim(), form.email.toLowerCase(), form.password);
       toast.success(`أهلاً بيك في GYMZ، ${user.name}! 💪`);
-      router.push('/');
+      router.push('/onboarding');
     } catch (err) {
       toast.error(err.message || 'مشكلة في التسجيل');
     } finally {
