@@ -177,7 +177,7 @@ export default function OnboardingPage() {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.1em' }}>
                       {txt.step} {step + 1} {txt.of} {steps.length}
                     </span>
-                    <button onClick={() => router.push('/programs')} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.8rem', cursor: 'pointer' }}>
+                    <button onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.8rem', cursor: 'pointer' }}>
                       {txt.skip} ←
                     </button>
                   </div>
@@ -273,7 +273,7 @@ export default function OnboardingPage() {
               </div>
 
               <motion.button
-                onClick={() => router.push('/programs')}
+                onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().name))}
                 whileTap={{ scale: 0.97 }}
                 style={{
                   width: '100%', padding: '14px',
