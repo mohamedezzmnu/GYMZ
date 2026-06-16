@@ -449,7 +449,7 @@ export default function ProgramsPage() {
       {/* Programs */}
       <section style={{ padding: '40px 0' }}>
         <div className="container">
-          {(filterProgram ? PROGRAMS.filter(p => p.subtitle === filterProgram) : PROGRAMS).map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
+          {(filterProgram ? PROGRAMS.filter(p => p.title === filterProgram || p.subtitle === filterProgram) : PROGRAMS).map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
         </div>
       </section>
 

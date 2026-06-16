@@ -78,31 +78,31 @@ const STEPS = {
 
 const PROGRAM_MAP = {
   ar: {
-    burn_beginner:      { name: 'كامل الجسم',      reason: 'الأفضل للحرق مع بناء قاعدة عضلية' },
-    burn_intermediate:  { name: 'دفع وسحب وأرجل',  reason: 'حجم تمرين أعلى = حرق أكتر' },
-    burn_advanced:      { name: 'دفع وسحب وأرجل',  reason: 'شدة عالية ومناسب لمستواك' },
-    muscle_beginner:    { name: 'كامل الجسم',      reason: 'تردد عالي على كل عضلة = نمو أسرع للمبتدئ' },
-    muscle_intermediate:{ name: 'أعلى وأسفل',      reason: 'توازن ممتاز بين الحجم والتعافي' },
-    muscle_advanced:    { name: 'دفع وسحب وأرجل',  reason: 'الأكثر تخصصاً لبناء العضل' },
+    burn_beginner:      { name: 'كامل الجسم', sub: 'Full Body',      reason: 'الأفضل للحرق مع بناء قاعدة عضلية' },
+    burn_intermediate:  { name: 'دفع وسحب وأرجل', sub: 'Push / Pull / Legs', reason: 'حجم تمرين أعلى = حرق أكتر' },
+    burn_advanced:      { name: 'دفع وسحب وأرجل', sub: 'Push / Pull / Legs', reason: 'شدة عالية ومناسب لمستواك' },
+    muscle_beginner:    { name: 'كامل الجسم', sub: 'Full Body', reason: 'تردد عالي على كل عضلة = نمو أسرع للمبتدئ' },
+    muscle_intermediate:{ name: 'أعلى وأسفل', sub: 'Upper / Lower', reason: 'توازن ممتاز بين الحجم والتعافي' },
+    muscle_advanced:    { name: 'دفع وسحب وأرجل', sub: 'Push / Pull / Legs', reason: 'الأكثر تخصصاً لبناء العضل' },
     fitness_beginner:   { name: 'كامل الجسم',      reason: 'شامل وبسيط ومثالي للبداية' },
-    fitness_intermediate:{ name: 'أعلى وأسفل',     reason: 'تنوع ممتاز ومناسب لمستواك' },
-    fitness_advanced:   { name: 'دفع وسحب وأرجل',  reason: 'تنوع عالي وشدة مناسبة' },
+    fitness_intermediate:{ name: 'أعلى وأسفل', sub: 'Upper / Lower', reason: 'تنوع ممتاز ومناسب لمستواك' },
+    fitness_advanced:   { name: 'دفع وسحب وأرجل', sub: 'Push / Pull / Legs', reason: 'تنوع عالي وشدة مناسبة' },
     health_beginner:    { name: 'كامل الجسم',      reason: 'خفيف ومتوازن ومناسب للصحة العامة' },
-    health_intermediate:{ name: 'كامل الجسم',      reason: 'تردد عالي بشدة معتدلة' },
-    health_advanced:    { name: 'أعلى وأسفل',      reason: 'متوازن ومناسب للحفاظ على الصحة' },
+    health_intermediate:{ name: 'كامل الجسم', sub: 'Full Body', reason: 'تردد عالي بشدة معتدلة' },
+    health_advanced:    { name: 'أعلى وأسفل', sub: 'Upper / Lower', reason: 'متوازن ومناسب للحفاظ على الصحة' },
   },
   en: {
-    burn_beginner:      { name: 'Full Body',         reason: 'Best for burning fat while building a base' },
+    burn_beginner:      { name: 'Full Body', nameAr: 'كامل الجسم',         reason: 'Best for burning fat while building a base' },
     burn_intermediate:  { name: 'Push Pull Legs',    reason: 'Higher volume = more calories burned' },
     burn_advanced:      { name: 'Push Pull Legs',    reason: 'High intensity, suits your level' },
-    muscle_beginner:    { name: 'Full Body',         reason: 'High frequency per muscle = faster gains' },
+    muscle_beginner:    { name: 'Full Body', nameAr: 'كامل الجسم',         reason: 'High frequency per muscle = faster gains' },
     muscle_intermediate:{ name: 'Upper Lower',       reason: 'Great balance between volume and recovery' },
     muscle_advanced:    { name: 'Push Pull Legs',    reason: 'Most specialized for muscle building' },
-    fitness_beginner:   { name: 'Full Body',         reason: 'Comprehensive, simple, perfect to start' },
+    fitness_beginner:   { name: 'Full Body', nameAr: 'كامل الجسم',         reason: 'Comprehensive, simple, perfect to start' },
     fitness_intermediate:{ name: 'Upper Lower',      reason: 'Great variety, suits your level' },
     fitness_advanced:   { name: 'Push Pull Legs',    reason: 'High variety and suitable intensity' },
-    health_beginner:    { name: 'Full Body',         reason: 'Light, balanced, great for general health' },
-    health_intermediate:{ name: 'Full Body',         reason: 'High frequency at moderate intensity' },
+    health_beginner:    { name: 'Full Body', nameAr: 'كامل الجسم',         reason: 'Light, balanced, great for general health' },
+    health_intermediate:{ name: 'Full Body', nameAr: 'كامل الجسم',         reason: 'High frequency at moderate intensity' },
     health_advanced:    { name: 'Upper Lower',       reason: 'Balanced and great for maintaining health' },
   },
 };
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
     const key = `${answers.goal}_${answers.level}`;
     return programMap[key] || (lang === 'ar'
       ? { name: 'كامل الجسم', reason: 'الأنسب لبدايتك' }
-      : { name: 'Full Body', reason: 'Best to start with' });
+      : { name: 'Full Body', nameAr: 'كامل الجسم', reason: 'Best to start with' });
   };
 
   const txt = {
@@ -177,7 +177,7 @@ export default function OnboardingPage() {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.1em' }}>
                       {txt.step} {step + 1} {txt.of} {steps.length}
                     </span>
-                    <button onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.8rem', cursor: 'pointer' }}>
+                    <button onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.8rem', cursor: 'pointer' }}>
                       {txt.skip} ←
                     </button>
                   </div>
@@ -273,7 +273,7 @@ export default function OnboardingPage() {
               </div>
 
               <motion.button
-                onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().name))}
+                onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))}
                 whileTap={{ scale: 0.97 }}
                 style={{
                   width: '100%', padding: '14px',
