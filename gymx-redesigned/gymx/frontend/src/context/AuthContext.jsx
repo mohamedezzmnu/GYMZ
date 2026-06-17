@@ -8,27 +8,33 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // جيب الـ role من جدول users
+  async function buildUser(supabaseUser) {
+    if (!supabaseUser) return null;
+    const { data } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', supabaseUser.id)
+      .single();
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
+      role: data?.role || 'user',
+    };
+  }
+
   useEffect(() => {
-    // جيب الـ session الحالية لو موجودة
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-        });
+        setUser(await buildUser(session.user));
       }
       setLoading(false);
     });
 
-    // استمع لأي تغيير في الـ auth (login, logout, refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-        });
+        setUser(await buildUser(session.user));
       } else {
         setUser(null);
       }
@@ -42,27 +48,17 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { name },
-      },
+      options: { data: { name } },
     });
     if (error) throw new Error(error.message);
-    // Supabase بيبعت email confirmation — لو عايز تشيله روح Authentication > Email Templates
-    return {
-      id: data.user.id,
-      email: data.user.email,
-      name,
-    };
+    return { id: data.user.id, email: data.user.email, name, role: 'user' };
   };
 
   const login = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
-    return {
-      id: data.user.id,
-      email: data.user.email,
-      name: data.user.user_metadata?.name || email.split('@')[0],
-    };
+    const built = await buildUser(data.user);
+    return built;
   };
 
   const logout = async () => {
