@@ -145,7 +145,7 @@ export default function AdminPage() {
     if (uid === user.id) { toast.error('مش تقدر تحذف نفسك'); return; }
     if (!confirm('متأكد إنك عايز تحذف اليوزر ده؟')) return;
     setDeletingId(uid);
-    const { error } = await supabase.from('users').delete().eq('id', uid);
+    const { error } = await supabase.rpc('delete_user_permanently', { user_id: uid });
     if (error) { toast.error('فشل الحذف — تحقق من الـ RLS policies'); }
     else {
       toast.success('تم حذف اليوزر');
