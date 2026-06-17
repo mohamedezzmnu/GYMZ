@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLang } from '../../context/LangContext';
 
@@ -245,6 +245,25 @@ export default function Navbar() {
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
             </div>
+
+            {user?.role === 'admin' && (
+              <Link
+                href="/admin"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1.4rem',
+                  letterSpacing: '0.05em',
+                  color: 'var(--fire)',
+                  textDecoration: 'none',
+                }}
+              >
+                <ShieldAlert size={20} />
+                Admin
+              </Link>
+            )}
 
             {user ? (
               <button
