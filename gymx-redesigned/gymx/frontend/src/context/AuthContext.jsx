@@ -10,43 +10,42 @@ export function AuthProvider({ children }) {
 
   async function buildUser(supabaseUser) {
     if (!supabaseUser) return null;
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('role, name')
-        .eq('id', supabaseUser.id)
-        .single();
 
-      if (error) console.error('buildUser error:', error.message);
+    // اقرأ الـ role من الـ app_metadata أولاً (أسرع وأضمن)
+    const metaRole = supabaseUser.app_metadata?.role;
 
-      return {
-        id: supabaseUser.id,
-        email: supabaseUser.email,
-        name: data?.name || supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
-        role: data?.role || 'user',
-      };
-    } catch (e) {
-      console.error('buildUser exception:', e);
+    if (metaRole) {
       return {
         id: supabaseUser.id,
         email: supabaseUser.email,
         name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
-        role: 'user',
+        role: metaRole,
       };
     }
+
+    // fallback — اقرأ من جدول users
+    const { data } = await supabase
+      .from('users')
+      .select('role, name')
+      .eq('id', supabaseUser.id)
+      .single();
+
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      name: data?.name || supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
+      role: data?.role || 'user',
+    };
   }
 
   useEffect(() => {
-    // جيب الـ session الحالية
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        const built = await buildUser(session.user);
-        setUser(built);
+        setUser(await buildUser(session.user));
       }
       setLoading(false);
     });
 
-    // استمع لأي تغيير في الـ auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
@@ -54,8 +53,7 @@ export function AuthProvider({ children }) {
         return;
       }
       if (session?.user) {
-        const built = await buildUser(session.user);
-        setUser(built);
+        setUser(await buildUser(session.user));
       }
       setLoading(false);
     });
