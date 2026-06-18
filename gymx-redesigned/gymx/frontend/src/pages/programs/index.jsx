@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2 } from 'lucide-react';
@@ -286,7 +286,22 @@ function ProgramCard({ program, index, highlighted = false }) {
   const [activeDay, setActiveDay] = useState(0);
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [sessionDone, setSessionDone] = useState(false);
+  const [savingSession, setSavingSession] = useState(false);
   const { user } = useAuth();
+
+  // تحقق لو سجّل جلسة النهارده قبل كده
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    supabase.from('workout_sessions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('program_title', program.subtitle || program.title)
+      .eq('session_day', today)
+      .single()
+      .then(({ data }) => { if (data) setSessionDone(true); });
+  }, [user]);
 
   const handleJoin = async (e) => {
     e.stopPropagation();
@@ -305,6 +320,25 @@ function ProgramCard({ program, index, highlighted = false }) {
     if (error) { toast.error('حصل خطأ'); return; }
     setJoined(true);
     toast.success(`انضممت لبرنامج ${program.title} ✅`);
+  };
+
+  const handleLogSession = async (e) => {
+    e.stopPropagation();
+    if (!user) { toast.error('سجّل دخول الأول'); return; }
+    setSavingSession(true);
+    const today = new Date().toISOString().split('T')[0];
+    const dayLabel = program.days_detail?.[activeDay]?.day || `يوم ${activeDay + 1}`;
+    const { error } = await supabase.from('workout_sessions').insert({
+      user_id: user.id,
+      program_title: program.subtitle || program.title,
+      day_label: dayLabel,
+      session_day: today,
+      done: true,
+    });
+    setSavingSession(false);
+    if (error) { toast.error('حصل خطأ'); return; }
+    setSessionDone(true);
+    toast.success('تم تسجيل جلسة النهارده 💪');
   };
 
   return (
@@ -433,6 +467,27 @@ function ProgramCard({ program, index, highlighted = false }) {
                 }}
               >
                 {joined ? <><CheckCircle2 size={16} /> منضم للبرنامج</> : joining ? 'جاري الانضمام...' : <><Zap size={15} /> ابدأ البرنامج</>}
+              </motion.button>
+
+              {/* زرار تسجيل الجلسة */}
+              <motion.button
+                onClick={handleLogSession}
+                disabled={savingSession || sessionDone}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  marginTop: 10, width: '100%', padding: '12px',
+                  background: sessionDone ? 'rgba(74,222,128,0.06)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${sessionDone ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: 12, cursor: sessionDone ? 'default' : 'pointer',
+                  color: sessionDone ? '#4ade80' : 'var(--ash-light)',
+                  fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.06em',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                {sessionDone
+                  ? <><CheckCircle2 size={15} /> تمت جلسة النهارده 💪</>
+                  : savingSession ? 'جاري الحفظ...'
+                  : <>✅ سجّل جلسة النهارده</>}
               </motion.button>
             </div>
           </motion.div>
