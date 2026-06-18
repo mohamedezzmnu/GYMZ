@@ -46,11 +46,17 @@ body {
   --iron-light: #1E1E3A;
   --iron-mid: #252545;
 
-  /* Primary accent — Electric Blue */
-  --volt: #3D7FFF;
-  --volt-dim: rgba(61, 127, 255, 0.12);
-  --volt-glow: rgba(61, 127, 255, 0.30);
-  --volt-bright: #6FA3FF;
+  /* Primary accent — Fire Red */
+  --accent: #FF3B30;
+  --accent-dim: rgba(255, 59, 48, 0.12);
+  --accent-glow: rgba(255, 59, 48, 0.30);
+  --accent-bright: #FF6B60;
+
+  /* Legacy volt kept for compatibility */
+  --volt: #FF3B30;
+  --volt-dim: rgba(255, 59, 48, 0.12);
+  --volt-glow: rgba(255, 59, 48, 0.30);
+  --volt-bright: #FF6B60;
 
   /* Secondary accent — Fire Orange */
   --fire: #FF6B2B;
@@ -209,13 +215,13 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--carbon); }
 ::-webkit-scrollbar-thumb { background: var(--iron-light); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--volt); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* =============================================
    SELECTION
    ============================================= */
 ::selection {
-  background: var(--volt);
+  background: var(--accent);
   color: var(--obsidian);
 }
 
@@ -256,14 +262,14 @@ body {
 
 /* Glass primary button */
 .btn-primary {
-  background: linear-gradient(135deg, var(--volt) 0%, #5A9BFF 100%);
+  background: linear-gradient(135deg, #FF3B30 0%, #FF6B60 100%);
   color: #fff;
-  box-shadow: 0 4px 20px var(--volt-glow);
+  box-shadow: 0 4px 20px rgba(255,59,48,0.35);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px var(--volt-glow);
+  box-shadow: 0 8px 28px rgba(255,59,48,0.45);
   filter: brightness(1.1);
 }
 
@@ -280,10 +286,10 @@ body {
 }
 
 .btn-outline:hover {
-  border-color: var(--volt);
-  color: var(--volt-bright);
+  border-color: var(--accent);
+  color: var(--accent-bright);
   background: var(--glass-bg-hover);
-  box-shadow: 0 4px 16px var(--volt-glow);
+  box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .btn-ghost {
@@ -487,7 +493,7 @@ body::before {
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: radial-gradient(circle, rgba(61,127,255,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,59,48,0.05) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -499,7 +505,7 @@ body::after {
   right: -10%;
   width: 40vw;
   height: 40vw;
-  background: radial-gradient(circle, rgba(255,107,43,0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,59,48,0.04) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
