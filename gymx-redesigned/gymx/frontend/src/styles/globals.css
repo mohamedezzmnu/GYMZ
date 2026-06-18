@@ -509,3 +509,19 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+
+/* =============================================
+   BOTTOM NAV BODY PADDING (Mobile)
+   ============================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 70px;
+  }
+}
+
+/* =============================================
+   REDUCED GLOW on cards
+   ============================================= */
+.glass-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}

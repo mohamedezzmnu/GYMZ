@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
-  TrendingUp, Dumbbell, Flame, Target, Calendar,
-  ChevronRight, Plus, BarChart2, Award, Clock,
-  CheckCircle, Circle, Zap, Scale, Activity
+  TrendingUp, Dumbbell, Flame, Target, ChevronRight,
+  Plus, BarChart2, Clock, CheckCircle, Zap, Scale, Activity
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -11,7 +10,6 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 
-// ── helpers ──────────────────────────────────────────────
 function Reveal({ children, delay = 0 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-50px' });
@@ -24,20 +22,17 @@ function Reveal({ children, delay = 0 }) {
   );
 }
 
-function GlassCard({ children, style = {}, accent }) {
+function GlassCard({ children, style = {}, accentColor }) {
   return (
     <motion.div
-      whileHover={{ borderColor: accent ? `${accent}44` : 'rgba(61,127,255,0.25)', y: -2 }}
+      whileHover={{ borderColor: accentColor ? `${accentColor}44` : 'rgba(255,59,48,0.25)', y: -2 }}
       transition={{ duration: 0.2 }}
       style={{
-        background: 'var(--glass-bg)',
-        backdropFilter: 'var(--glass-blur)',
-        WebkitBackdropFilter: 'var(--glass-blur)',
-        border: '1px solid var(--glass-border)',
-        borderRadius: 'var(--radius-md)',
-        boxShadow: 'var(--glass-shadow)',
-        position: 'relative',
-        overflow: 'hidden',
+        background: 'rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        position: 'relative', overflow: 'hidden',
         ...style,
       }}
     >
@@ -47,11 +42,10 @@ function GlassCard({ children, style = {}, accent }) {
   );
 }
 
-// ── mini stat ─────────────────────────────────────────────
-function StatBox({ icon: Icon, label, value, sub, accent = 'var(--volt)', delay = 0 }) {
+function StatBox({ icon: Icon, label, value, sub, accent = '#FF3B30', delay = 0 }) {
   return (
     <Reveal delay={delay}>
-      <GlassCard accent={accent} style={{ padding: '20px 22px' }}>
+      <GlassCard accentColor={accent} style={{ padding: '20px 22px' }}>
         <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:12 }}>
           <div style={{ width:38, height:38, borderRadius:10, background:`${accent}18`, border:`1px solid ${accent}30`, display:'flex', alignItems:'center', justifyContent:'center' }}>
             <Icon size={17} color={accent} />
@@ -65,15 +59,50 @@ function StatBox({ icon: Icon, label, value, sub, accent = 'var(--volt)', delay 
   );
 }
 
-// ── weight log entry ──────────────────────────────────────
+// ── Mini Weight Chart (SVG) ────────────────────────────────
+function WeightChart({ data }) {
+  if (!data || data.length < 2) return null;
+  const weights = data.map(d => d.weight).reverse();
+  const min = Math.min(...weights) - 1;
+  const max = Math.max(...weights) + 1;
+  const W = 260, H = 80;
+  const pts = weights.map((w, i) => {
+    const x = (i / (weights.length - 1)) * W;
+    const y = H - ((w - min) / (max - min)) * H;
+    return `${x},${y}`;
+  });
+  const path = 'M ' + pts.join(' L ');
+  const areaPath = `M 0,${H} L ` + pts.join(' L ') + ` L ${W},${H} Z`;
+
+  return (
+    <div style={{ marginTop: 16, marginBottom: 8 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:80, overflow:'visible' }}>
+        <defs>
+          <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FF3B30" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#FF3B30" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill="url(#wg)" />
+        <path d={path} fill="none" stroke="#FF3B30" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {weights.map((w, i) => {
+          const x = (i / (weights.length - 1)) * W;
+          const y = H - ((w - min) / (max - min)) * H;
+          return <circle key={i} cx={x} cy={y} r="3" fill="#FF3B30" />;
+        })}
+      </svg>
+    </div>
+  );
+}
+
 function WeightEntry({ date, weight, change }) {
   const positive = change > 0;
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-      <span style={{ fontSize:'0.78rem', color:'var(--ash-light)', fontFamily:'var(--font-mono)' }}>{date}</span>
-      <span style={{ fontSize:'0.95rem', fontFamily:'var(--font-display)', letterSpacing:'0.05em', color:'var(--chalk)' }}>{weight} kg</span>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 0', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+      <span style={{ fontSize:'0.75rem', color:'var(--ash-light)', fontFamily:'var(--font-mono)' }}>{date}</span>
+      <span style={{ fontSize:'0.92rem', fontFamily:'var(--font-display)', letterSpacing:'0.05em', color:'var(--chalk)' }}>{weight} kg</span>
       {change !== 0 && (
-        <span style={{ fontSize:'0.65rem', fontFamily:'var(--font-mono)', color: positive ? '#f87171' : '#4ade80', padding:'2px 7px', borderRadius:4, background: positive ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)' }}>
+        <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color: positive ? '#f87171' : '#4ade80', padding:'2px 7px', borderRadius:4, background: positive ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)' }}>
           {positive ? '+' : ''}{change.toFixed(1)}
         </span>
       )}
@@ -81,36 +110,29 @@ function WeightEntry({ date, weight, change }) {
   );
 }
 
-// ── main ──────────────────────────────────────────────────
 export default function DashboardPage() {
   const { user } = useAuth();
-  const router = useRouter();
-  const [programs, setPrograms] = useState([]);
-  const [sessions, setSessions] = useState([]);
+  const router   = useRouter();
+  const [programs,  setPrograms]  = useState([]);
+  const [sessions,  setSessions]  = useState([]);
   const [weightLog, setWeightLog] = useState([]);
   const [newWeight, setNewWeight] = useState('');
   const [loadingWeight, setLoadingWeight] = useState(false);
-  const [weekDays, setWeekDays] = useState([]);
+  const [weekDays,  setWeekDays]  = useState([]);
 
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
 
-    // enrolled programs
     supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
       if (data) setPrograms(data);
     });
-
-    // recent workout sessions
     supabase.from('workout_sessions').select('*').eq('user_id', user.id)
       .order('created_at', { ascending: false }).limit(5)
       .then(({ data }) => { if (data) setSessions(data); });
-
-    // weight log
     supabase.from('weight_log').select('*').eq('user_id', user.id)
-      .order('logged_at', { ascending: false }).limit(7)
+      .order('logged_at', { ascending: false }).limit(10)
       .then(({ data }) => { if (data) setWeightLog(data); });
 
-    // build this week grid
     const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
     const today = new Date().getDay();
     setWeekDays(days.map((d, i) => ({ label: d, done: i < today, today: i === today })));
@@ -120,62 +142,63 @@ export default function DashboardPage() {
     if (!newWeight || isNaN(newWeight)) return;
     setLoadingWeight(true);
     await supabase.from('weight_log').insert({ user_id: user.id, weight: parseFloat(newWeight), logged_at: new Date().toISOString() });
-    const { data } = await supabase.from('weight_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(7);
+    const { data } = await supabase.from('weight_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(10);
     if (data) setWeightLog(data);
     setNewWeight('');
     setLoadingWeight(false);
   };
 
-  // mock stats (replace with real aggregates)
+  const streak        = 3;
   const totalSessions = sessions.length || 0;
-  const streak = 3; // replace with real streak logic
   const currentWeight = weightLog[0]?.weight ?? '—';
-  const weightChange = weightLog.length >= 2 ? weightLog[0].weight - weightLog[1].weight : 0;
+  const weightChange  = weightLog.length >= 2 ? weightLog[0].weight - weightLog[1].weight : 0;
+
+  // Goal progress mock — replace with real data
+  const goalWeight    = 75;
+  const startWeight   = weightLog.length ? Math.max(...weightLog.map(w => w.weight)) : currentWeight;
+  const progressPct   = startWeight && goalWeight && currentWeight !== '—'
+    ? Math.min(100, Math.round(((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
+    : 0;
+
+  const lastSession = sessions[0];
 
   if (!user) return null;
 
   return (
     <>
-      <Head><title>Dashboard — GYMZ</title></Head>
-      <div style={{ minHeight:'100vh', paddingTop:88, paddingBottom:60, position:'relative' }}>
-        {/* ambient */}
-        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, rgba(61,127,255,0.07) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(255,107,43,0.05) 0%,transparent 60%)' }} />
+      <Head><title>داشبورد — GYMZ</title></Head>
+      <div style={{ minHeight:'100vh', paddingTop:72, paddingBottom:80, position:'relative' }}>
+        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, rgba(255,59,48,0.06) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(255,59,48,0.04) 0%,transparent 60%)' }} />
 
         <div style={{ maxWidth:960, margin:'0 auto', padding:'0 20px', position:'relative', zIndex:1 }}>
 
           {/* ── GREETING ── */}
           <Reveal>
-            <div style={{ marginBottom:32 }}>
-              <div className="mono" style={{ color:'var(--volt)', marginBottom:6 }}>— Dashboard</div>
-              <h1 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2rem,5vw,3rem)', letterSpacing:'0.04em', lineHeight:1.1 }}>
-                أهلاً، <span style={{ color:'var(--volt)' }}>{user.name?.split(' ')[0]}</span> 💪
+            <div style={{ marginBottom:24, direction:'rtl' }}>
+              <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.62rem', color:'rgba(255,59,48,0.7)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6 }}>
+                — أهلاً بك
+              </div>
+              <h1 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2rem,5vw,3rem)', letterSpacing:'0.03em', color:'var(--chalk)', lineHeight:1 }}>
+                {user.email?.split('@')[0] || 'بطل'} <span style={{ color:'#FF3B30' }}>💪</span>
               </h1>
-              <p style={{ color:'var(--ash-light)', marginTop:8, fontSize:'0.875rem' }}>
-                {new Date().toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
-              </p>
             </div>
           </Reveal>
 
-          {/* ── THIS WEEK ── */}
+          {/* ── WEEK STRIP ── */}
           <Reveal delay={0.05}>
-            <GlassCard style={{ padding:'22px 24px', marginBottom:20 }}>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-                <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.1rem', letterSpacing:'0.05em' }}>هذا الأسبوع</h2>
-                <span style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)' }}>{streak} أيام متتالية 🔥</span>
+            <GlassCard style={{ padding:'18px 22px', marginBottom:20 }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+                <span style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', letterSpacing:'0.05em' }}>أيام الأسبوع</span>
+                <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.6rem', color:'rgba(255,59,48,0.7)', letterSpacing:'0.08em' }}>{streak} أيام متتالية 🔥</span>
               </div>
               <div style={{ display:'flex', gap:8, justifyContent:'space-between' }}>
                 {weekDays.map((d, i) => (
-                  <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
-                    <div style={{
-                      width:36, height:36, borderRadius:'50%',
-                      background: d.today ? 'linear-gradient(135deg,var(--volt),rgba(61,127,255,0.7))' : d.done ? 'rgba(74,222,128,0.12)' : 'rgba(255,255,255,0.04)',
-                      border: d.today ? '2px solid var(--volt)' : d.done ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      boxShadow: d.today ? '0 0 16px rgba(61,127,255,0.35)' : 'none',
-                    }}>
-                      {d.done && !d.today ? <CheckCircle size={14} color="#4ade80" /> : d.today ? <Zap size={14} color="#fff" /> : <Circle size={14} color="rgba(255,255,255,0.15)" />}
+                  <div key={i} style={{ textAlign:'center', flex:1 }}>
+                    <div style={{ width:'100%', aspectRatio:'1', borderRadius:8, border:`1px solid ${d.today ? '#FF3B30' : d.done ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)'}`, background: d.today ? 'rgba(255,59,48,0.15)' : d.done ? 'rgba(74,222,128,0.08)' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:5 }}>
+                      {d.done && !d.today && <span style={{ fontSize:'0.6rem', color:'#4ade80' }}>✓</span>}
+                      {d.today && <span style={{ fontSize:'0.6rem', color:'#FF3B30' }}>●</span>}
                     </div>
-                    <span style={{ fontSize:'0.55rem', fontFamily:'var(--font-mono)', color: d.today ? 'var(--volt)' : d.done ? '#4ade80' : 'var(--ash)', letterSpacing:'0.05em' }}>
+                    <span style={{ fontSize:'0.5rem', fontFamily:'var(--font-mono)', color: d.today ? '#FF3B30' : d.done ? '#4ade80' : 'var(--ash)', letterSpacing:'0.04em' }}>
                       {d.label.slice(0,3)}
                     </span>
                   </div>
@@ -186,11 +209,33 @@ export default function DashboardPage() {
 
           {/* ── STATS GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
-            <StatBox icon={Flame}     label="الاستمرارية" value={`${streak}d`}            sub="+1 اليوم"  accent="var(--fire)"  delay={0.05} />
-            <StatBox icon={Dumbbell}  label="جلسات هذا الشهر" value={totalSessions || '—'} accent="var(--volt)"  delay={0.1}  />
-            <StatBox icon={Scale}     label="الوزن الحالي" value={`${currentWeight}`}       accent="#4ade80"      delay={0.15} />
-            <StatBox icon={Target}    label="برامج نشطة"   value={programs.length || '—'}   accent="#facc15"      delay={0.2}  />
+            <StatBox icon={Flame}    label="الاستمرارية"     value={`${streak}d`}          sub="+1 اليوم" accent="#FF3B30"  delay={0.05} />
+            <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FF9F0A"  delay={0.1}  />
+            <StatBox icon={Scale}    label="الوزن الحالي"    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
+            <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#64D2FF"  delay={0.2}  />
           </div>
+
+          {/* ── LAST WORKOUT ── */}
+          {lastSession && (
+            <Reveal delay={0.08}>
+              <GlassCard style={{ padding:'18px 22px', marginBottom:20 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', direction:'rtl' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <div style={{ width:36, height:36, borderRadius:10, background:'rgba(255,59,48,0.12)', border:'1px solid rgba(255,59,48,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <Dumbbell size={16} color="#FF3B30" />
+                    </div>
+                    <div>
+                      <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.58rem', color:'var(--ash)', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:3 }}>آخر تمرين</div>
+                      <div style={{ fontFamily:'var(--font-display)', fontSize:'1rem', color:'var(--chalk)' }}>{lastSession.name || lastSession.program_name || 'جلسة تمرين'}</div>
+                    </div>
+                  </div>
+                  <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.65rem', color:'var(--ash-light)' }}>
+                    {new Date(lastSession.created_at).toLocaleDateString('ar-EG', { month:'short', day:'numeric' })}
+                  </span>
+                </div>
+              </GlassCard>
+            </Reveal>
+          )}
 
           {/* ── BOTTOM GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:18 }}>
@@ -198,32 +243,46 @@ export default function DashboardPage() {
             {/* WEIGHT LOG */}
             <Reveal delay={0.1}>
               <GlassCard style={{ padding:'24px' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:18 }}>
-                  <Scale size={16} color="var(--volt)" />
-                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.1rem', letterSpacing:'0.05em' }}>سجل الوزن</h2>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
+                  <Scale size={15} color="#FF3B30" />
+                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>سجل الوزن</h2>
                 </div>
 
-                {/* log input */}
-                <div style={{ display:'flex', gap:8, marginBottom:18 }}>
+                <div style={{ display:'flex', gap:8, marginBottom:4 }}>
                   <input
-                    type="number"
-                    placeholder="وزنك اليوم (kg)"
-                    value={newWeight}
-                    onChange={e => setNewWeight(e.target.value)}
+                    type="number" placeholder="وزنك اليوم (kg)"
+                    value={newWeight} onChange={e => setNewWeight(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && logWeight()}
-                    style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'var(--radius-sm)', padding:'9px 12px', color:'var(--chalk)', fontFamily:'var(--font-body)', fontSize:'0.875rem', outline:'none', direction:'rtl' }}
+                    style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'var(--chalk)', fontFamily:'var(--font-body)', fontSize:'0.875rem', outline:'none', direction:'rtl' }}
                   />
                   <motion.button onClick={logWeight} disabled={loadingWeight} whileTap={{ scale:0.95 }}
-                    style={{ padding:'9px 14px', background:'linear-gradient(135deg,var(--volt),rgba(61,127,255,0.7))', border:'none', borderRadius:'var(--radius-sm)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:'0.8rem', fontFamily:'var(--font-mono)' }}>
+                    style={{ padding:'9px 14px', background:'linear-gradient(135deg,#FF3B30,#FF6B60)', border:'none', borderRadius:8, color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:'0.8rem', fontFamily:'var(--font-mono)' }}>
                     <Plus size={14} /> سجل
                   </motion.button>
                 </div>
 
+                {/* Chart */}
+                <WeightChart data={weightLog} />
+
+                {/* Goal progress bar */}
+                {currentWeight !== '—' && (
+                  <div style={{ marginBottom:14 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', textTransform:'uppercase', letterSpacing:'0.07em' }}>تقدم نحو الهدف</span>
+                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'#FF3B30' }}>{progressPct}%</span>
+                    </div>
+                    <div style={{ height:4, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
+                      <motion.div initial={{ width:0 }} animate={{ width:`${Math.max(progressPct,0)}%` }} transition={{ duration:1, delay:0.3 }}
+                        style={{ height:'100%', borderRadius:2, background:'linear-gradient(90deg,#FF3B30,#FF6B60)' }} />
+                    </div>
+                  </div>
+                )}
+
                 {weightLog.length === 0 ? (
-                  <p style={{ color:'var(--ash)', fontSize:'0.8rem', textAlign:'center', padding:'20px 0', direction:'rtl' }}>
-                    ما سجلتش وزنك بعد — ابدأ دلوقتي!
+                  <p style={{ color:'var(--ash)', fontSize:'0.78rem', textAlign:'center', padding:'16px 0', direction:'rtl' }}>
+                    سجّل وزنك اليوم وابدأ تتابع!
                   </p>
-                ) : weightLog.map((entry, i) => (
+                ) : weightLog.slice(0,5).map((entry, i) => (
                   <WeightEntry
                     key={entry.id || i}
                     date={new Date(entry.logged_at).toLocaleDateString('ar-EG', { month:'short', day:'numeric' })}
@@ -242,26 +301,29 @@ export default function DashboardPage() {
                 <GlassCard style={{ padding:'24px' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <BarChart2 size={16} color="var(--volt)" />
-                      <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.1rem', letterSpacing:'0.05em' }}>برامجي</h2>
+                      <BarChart2 size={15} color="#FF3B30" />
+                      <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>برامجي</h2>
                     </div>
-                    <Link href="/programs" style={{ fontSize:'0.65rem', fontFamily:'var(--font-mono)', color:'var(--volt)', textDecoration:'none', display:'flex', alignItems:'center', gap:3 }}>
+                    <Link href="/programs" style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'#FF3B30', textDecoration:'none', display:'flex', alignItems:'center', gap:3 }}>
                       كل البرامج <ChevronRight size={11} />
                     </Link>
                   </div>
 
                   {programs.length === 0 ? (
-                    <Link href="/programs" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'14px', background:'rgba(61,127,255,0.06)', border:'1px dashed rgba(61,127,255,0.2)', borderRadius:'var(--radius-sm)', color:'var(--volt)', fontSize:'0.8rem', textDecoration:'none' }}>
+                    <Link href="/programs" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'14px', background:'rgba(255,59,48,0.06)', border:'1px dashed rgba(255,59,48,0.2)', borderRadius:10, color:'#FF3B30', fontSize:'0.8rem', textDecoration:'none' }}>
                       <Zap size={13} /> انضم لأول برنامج
                     </Link>
                   ) : programs.slice(0, 2).map((p, i) => (
-                    <div key={i} style={{ padding:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'var(--radius-sm)', marginBottom:8 }}>
-                      <div style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', marginBottom:8 }}>{p.program_name || 'برنامج'}</div>
-                      <div style={{ height:3, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
-                        <motion.div initial={{ width:0 }} animate={{ width:`${p.progress || 20}%` }} transition={{ duration:0.8, delay:0.3 }}
-                          style={{ height:'100%', borderRadius:2, background:'linear-gradient(90deg,var(--volt),var(--fire))', boxShadow:'0 0 6px var(--volt-glow)' }} />
+                    <div key={i} style={{ padding:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, marginBottom:8 }}>
+                      <div style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', marginBottom:10, direction:'rtl' }}>{p.program_name || 'برنامج'}</div>
+                      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', textTransform:'uppercase', letterSpacing:'0.07em' }}>التقدم</span>
+                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'#FF3B30' }}>{p.progress || 20}%</span>
                       </div>
-                      <div style={{ fontSize:'0.65rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginTop:6 }}>{p.progress || 20}% مكتمل</div>
+                      <div style={{ height:4, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
+                        <motion.div initial={{ width:0 }} animate={{ width:`${p.progress || 20}%` }} transition={{ duration:0.8, delay:0.3 }}
+                          style={{ height:'100%', borderRadius:2, background:'linear-gradient(90deg,#FF3B30,#FF9F0A)' }} />
+                      </div>
                     </div>
                   ))}
                 </GlassCard>
@@ -270,25 +332,25 @@ export default function DashboardPage() {
               {/* RECENT SESSIONS */}
               <Reveal delay={0.2}>
                 <GlassCard style={{ padding:'24px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                    <Clock size={16} color="var(--fire)" />
-                    <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.1rem', letterSpacing:'0.05em' }}>آخر الجلسات</h2>
+                  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
+                    <Clock size={15} color="#FF9F0A" />
+                    <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>آخر الجلسات</h2>
                   </div>
 
                   {sessions.length === 0 ? (
-                    <p style={{ color:'var(--ash)', fontSize:'0.8rem', textAlign:'center', padding:'16px 0', direction:'rtl' }}>
+                    <p style={{ color:'var(--ash)', fontSize:'0.78rem', textAlign:'center', padding:'16px 0', direction:'rtl' }}>
                       ما عندكش جلسات مسجلة لسه
                     </p>
                   ) : sessions.map((s, i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 0', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-                      <CheckCircle size={14} color="#4ade80" />
+                    <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 0', borderBottom:'1px solid rgba(255,255,255,0.05)', direction:'rtl' }}>
+                      <CheckCircle size={14} color="#4ade80" style={{ flexShrink:0 }} />
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:'0.8rem', color:'var(--chalk)' }}>{s.name || s.program_name || 'جلسة تمرين'}</div>
-                        <div style={{ fontSize:'0.65rem', color:'var(--ash)', fontFamily:'var(--font-mono)', marginTop:2 }}>
+                        <div style={{ fontSize:'0.62rem', color:'var(--ash)', fontFamily:'var(--font-mono)', marginTop:2 }}>
                           {new Date(s.created_at).toLocaleDateString('ar-EG', { month:'short', day:'numeric' })}
                         </div>
                       </div>
-                      {s.duration_min && <span style={{ fontSize:'0.65rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)' }}>{s.duration_min}min</span>}
+                      {s.duration_min && <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', flexShrink:0 }}>{s.duration_min}d</span>}
                     </div>
                   ))}
                 </GlassCard>
@@ -300,13 +362,13 @@ export default function DashboardPage() {
                   <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1rem', letterSpacing:'0.05em', marginBottom:14 }}>روابط سريعة</h2>
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                     {[
-                      { href:'/exercises', label:'التمارين', icon:'🏋️', color:'var(--volt)' },
-                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'var(--fire)' },
+                      { href:'/exercises', label:'التمارين', icon:'🏋️', color:'#FF3B30' },
+                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FF9F0A' },
                       { href:'/tools',     label:'الحاسبات', icon:'🧮', color:'#4ade80' },
-                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#facc15' },
+                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#64D2FF' },
                     ].map(({ href, label, icon, color }) => (
-                      <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'var(--radius-sm)', textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'background 200ms' }}>
-                        <span style={{ fontSize:'1rem' }}>{icon}</span>
+                      <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'all 150ms' }}>
+                        <span>{icon}</span>
                         <span style={{ color }}>{label}</span>
                       </Link>
                     ))}
