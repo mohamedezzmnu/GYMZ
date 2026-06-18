@@ -98,7 +98,13 @@ function ChangePasswordModal({ onClose }) {
     if (form.next.length < 8) { toast.error('الباسورد الجديد 8 حروف على الأقل'); return; }
     if (form.next !== form.confirm) { toast.error('الباسوردين مش متطابقين'); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800)); // replace with real API call
+    // تأكد إن الباسورد الحالي صح عن طريق re-login
+    const { data: { user: u } } = await supabase.auth.getUser();
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email: u.email, password: form.current });
+    if (signInErr) { toast.error('الباسورد الحالي غلط'); setLoading(false); return; }
+    // غيّر الباسورد
+    const { error } = await supabase.auth.updateUser({ password: form.next });
+    if (error) { toast.error('فشل تغيير الباسورد'); setLoading(false); return; }
     toast.success('تم تغيير الباسورد ✅');
     setLoading(false);
     onClose();
@@ -201,17 +207,36 @@ function ChangePasswordModal({ onClose }) {
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const [enrolledPrograms, setEnrolledPrograms] = useState([]);
-const [recentActivity, setRecentActivity] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [onboarding, setOnboarding] = useState(null);
+  const [realStats, setRealStats] = useState({ sessions: 0, streak: 0, hours: 0, programs: 0 });
 
-useEffect(() => {
-  if (!user) return;
-  supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
-    if (data) setEnrolledPrograms(data);
-  });
-  supabase.from('workout_sessions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(4).then(({ data }) => {
-    if (data) setRecentActivity(data);
-  });
-}, [user]);
+  useEffect(() => {
+    if (!user) return;
+
+    // برامج اليوزر
+    supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
+      if (data) {
+        setEnrolledPrograms(data);
+        setRealStats(s => ({ ...s, programs: data.length }));
+      }
+    });
+
+    // آخر الجلسات
+    supabase.from('workout_sessions').select('*').eq('user_id', user.id)
+      .order('created_at', { ascending: false }).limit(4)
+      .then(({ data }) => {
+        if (data) {
+          setRecentActivity(data);
+          setRealStats(s => ({ ...s, sessions: data.length }));
+        }
+      });
+
+    // بيانات الـ onboarding
+    supabase.from('user_onboarding').select('*').eq('user_id', user.id).single()
+      .then(({ data }) => { if (data) setOnboarding(data); });
+
+  }, [user]);
   const router = useRouter();
   const [showPassModal, setShowPassModal] = useState(false);
 
@@ -318,10 +343,10 @@ useEffect(() => {
 
           {/* ── STATS ROW ────────────────────────── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
-            <StatCard icon={Dumbbell}    label="التمارين"     value="47"   accent="var(--volt)"  delay={0.05} />
-            <StatCard icon={TrendingUp}  label="السلاسل"      value="3"    accent="#4ade80"       delay={0.1}  />
-            <StatCard icon={Clock}       label="ساعات التمرين" value="19h"  accent="var(--fire)"  delay={0.15} />
-            <StatCard icon={Target}      label="البرامج"      value="2"    accent="#facc15"       delay={0.2}  />
+            <StatCard icon={Dumbbell}   label="الجلسات"       value={realStats.sessions}  accent="var(--volt)"  delay={0.05} />
+            <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"      delay={0.1}  />
+            <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق', muscle: '💪 ضخامة', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="#facc15" delay={0.15} />
+            <StatCard icon={Zap}        label="البرنامج المقترح" value={onboarding?.recommended_program || '—'} accent="var(--fire)" delay={0.2} />
           </div>
 
           {/* ── BOTTOM GRID ──────────────────────── */}
@@ -344,7 +369,16 @@ useEffect(() => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {enrolledPrograms.map((prog) => (
+                  {enrolledPrograms.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)', marginBottom: 8 }}>
+                        {onboarding ? `البرنامج المقترح ليك: ${onboarding.recommended_program}` : 'لسه ما اخترتش برنامج'}
+                      </p>
+                      <Link href={onboarding ? `/programs?program=${encodeURIComponent(onboarding.recommended_program)}` : '/onboarding'} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--volt)', textDecoration: 'none' }}>
+                        {onboarding ? 'ابدأ البرنامج ←' : 'اختار برنامجك ←'}
+                      </Link>
+                    </div>
+                  ) : enrolledPrograms.map((prog) => (
                     <div key={prog.id} style={{
                       padding: '16px',
                       background: 'rgba(255,255,255,0.03)',
@@ -394,6 +428,8 @@ useEffect(() => {
                     </div>
                   ))}
 
+                  ))}
+
                   <Link href="/programs" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     padding: '10px',
@@ -402,7 +438,6 @@ useEffect(() => {
                     borderRadius: 'var(--radius-sm)',
                     color: 'var(--volt)', fontSize: '0.8rem',
                     textDecoration: 'none',
-                    transition: 'background 200ms, border-color 200ms',
                   }}>
                     <Zap size={13} /> انضم لبرنامج جديد
                   </Link>
@@ -420,7 +455,11 @@ useEffect(() => {
                     آخر الجلسات
                   </h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {recentActivity.map((a, i) => (
+                    {recentActivity.length === 0 ? (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)', textAlign: 'center', padding: '20px 0' }}>
+                        لسه ما سجّلتش أي جلسة
+                      </p>
+                    ) : recentActivity.map((a, i) => (
                       <div key={i} style={{
                         display: 'flex', alignItems: 'center', gap: 12,
                         padding: '10px 12px',
