@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { motion, useInView } from 'framer-motion';
 import { Search } from 'lucide-react';
 import Head from 'next/head';
@@ -135,10 +136,18 @@ function ExerciseCard({ exercise, index }) {
 }
 
 export default function ExercisesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [muscleGroup, setMuscleGroup] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [equipment, setEquipment] = useState('');
+
+  // قرا الـ muscle_group من URL لما الصفحة تفتح
+  useEffect(() => {
+    if (router.isReady && router.query.muscle_group) {
+      setMuscleGroup(router.query.muscle_group);
+    }
+  }, [router.isReady, router.query.muscle_group]);
 
   const filtered = EXERCISES.filter(ex => {
     const s = search.toLowerCase();

@@ -68,7 +68,7 @@ export default function Navbar() {
             }}
             whileHover={{ scale: 1.04 }}
           >
-            GYM<span style={{ color: 'var(--volt)', textShadow: '0 0 20px rgba(61,127,255,0.6)' }}>X</span>
+            GYM<span style={{ color: 'var(--volt)', textShadow: '0 0 20px rgba(61,127,255,0.6)' }}>Z</span>
           </motion.div>
         </Link>
 
