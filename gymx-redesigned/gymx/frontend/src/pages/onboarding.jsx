@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
+import { supabase } from '../lib/supabaseClient';
 
 const STEPS = {
   ar: [
@@ -109,6 +110,7 @@ const PROGRAM_MAP = {
 
 export default function OnboardingPage() {
   const { lang } = useLang();
+  const { user } = useAuth();
   const router = useRouter();
   const steps = STEPS[lang];
   const programMap = PROGRAM_MAP[lang];
@@ -116,6 +118,38 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // لو اليوزر عمل onboarding قبل كده — جيب بياناته
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('user_onboarding')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setAnswers({ goal: data.goal, level: data.level, days: data.days_per_week?.toString() });
+          setDone(true);
+        }
+      });
+  }, [user]);
+
+  // احفظ في Supabase لما يخلص
+  const saveOnboarding = async (finalAnswers, program) => {
+    if (!user) return;
+    setSaving(true);
+    await supabase.from('user_onboarding').upsert({
+      user_id: user.id,
+      goal: finalAnswers.goal,
+      level: finalAnswers.level,
+      days_per_week: parseInt(finalAnswers.days),
+      recommended_program: program.sub || program.name,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
+    setSaving(false);
+  };
 
   const select = (optionId) => {
     const newAnswers = { ...answers, [steps[step].id]: optionId };
@@ -123,7 +157,14 @@ export default function OnboardingPage() {
     if (step < steps.length - 1) {
       setTimeout(() => setStep(step + 1), 300);
     } else {
-      setTimeout(() => setDone(true), 300);
+      setTimeout(async () => {
+        const key = `${newAnswers.goal}_${newAnswers.level}`;
+        const program = programMap[key] || (lang === 'ar'
+          ? { name: 'كامل الجسم', reason: 'الأنسب لبدايتك' }
+          : { name: 'Full Body', reason: 'Best to start with' });
+        await saveOnboarding(newAnswers, program);
+        setDone(true);
+      }, 300);
     }
   };
 
@@ -284,8 +325,16 @@ export default function OnboardingPage() {
                   boxShadow: '0 4px 20px rgba(61,127,255,0.35)',
                 }}
               >
-                {txt.go} {lang === 'ar' ? '←' : '→'}
+                {saving ? '...' : txt.go} {lang === 'ar' ? '←' : '→'}
               </motion.button>
+
+              {/* زرار إعادة الاختيار */}
+              <button
+                onClick={() => { setDone(false); setStep(0); setAnswers({}); }}
+                style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.82rem', cursor: 'pointer', width: '100%', textAlign: 'center' }}
+              >
+                {lang === 'ar' ? '↺ اختار برنامج تاني' : '↺ Choose a different program'}
+              </button>
             </motion.div>
           )}
         </div>
