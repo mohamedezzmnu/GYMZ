@@ -140,6 +140,7 @@ export default function OnboardingPage() {
   const saveOnboarding = async (finalAnswers, program) => {
     if (!user) return;
     setSaving(true);
+    // احفظ الـ onboarding
     await supabase.from('user_onboarding').upsert({
       user_id: user.id,
       goal: finalAnswers.goal,
@@ -148,6 +149,19 @@ export default function OnboardingPage() {
       recommended_program: program.sub || program.name,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id' });
+
+    // سجّله في البرنامج تلقائياً
+    const levelMap = { beginner: 'beginner', intermediate: 'intermediate', advanced: 'advanced' };
+    await supabase.from('user_programs').upsert({
+      user_id: user.id,
+      program_title: program.sub || program.name,
+      program_title_ar: program.name,
+      days_per_week: parseInt(finalAnswers.days),
+      level: levelMap[finalAnswers.level] || finalAnswers.level,
+      progress: 0,
+      is_active: true,
+    }, { onConflict: 'user_id,program_title' });
+
     setSaving(false);
   };
 
@@ -302,17 +316,25 @@ export default function OnboardingPage() {
                 {getProgram().name}
               </h2>
 
-              <div style={{
-                padding: '16px 20px', borderRadius: 12,
-                background: 'rgba(61,127,255,0.06)', border: '1px solid rgba(61,127,255,0.15)',
-                marginBottom: 28, direction: lang === 'ar' ? 'rtl' : 'ltr',
-              }}>
+              {/* تفاصيل البرنامج */}
+              <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(61,127,255,0.06)', border: '1px solid rgba(61,127,255,0.15)', marginBottom: 16, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.08em', marginBottom: 6 }}>{txt.reason}</p>
                 <p style={{ fontFamily: 'sans-serif', fontSize: '0.9rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>
                   💡 {getProgram().reason}
                 </p>
               </div>
 
+              {/* تأكيد الانضمام التلقائي */}
+              {user && (
+                <div style={{ padding: '10px 16px', borderRadius: 10, background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                  <span style={{ color: '#4ade80', fontSize: '0.85rem' }}>✅</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#4ade80' }}>
+                    {lang === 'ar' ? 'تم تسجيلك في البرنامج تلقائياً' : 'You have been enrolled automatically'}
+                  </span>
+                </div>
+              )}
+
+              {/* زرار ابدأ */}
               <motion.button
                 onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))}
                 whileTap={{ scale: 0.97 }}
@@ -323,9 +345,10 @@ export default function OnboardingPage() {
                   color: '#fff', fontFamily: 'var(--font-display)',
                   fontSize: '1.2rem', letterSpacing: '0.1em', cursor: 'pointer',
                   boxShadow: '0 4px 20px rgba(61,127,255,0.35)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
-                {saving ? '...' : txt.go} {lang === 'ar' ? '←' : '→'}
+                {saving ? (lang === 'ar' ? 'جاري الحفظ...' : 'Saving...') : (lang === 'ar' ? '🏋️ شوف البرنامج' : '🏋️ View Program')}
               </motion.button>
 
               {/* زرار إعادة الاختيار */}

@@ -307,17 +307,22 @@ function ProgramCard({ program, index, highlighted = false }) {
     e.stopPropagation();
     if (!user) { toast.error('سجّل دخول الأول'); return; }
     setJoining(true);
+    // استخرج الرقم من days (مثلاً "3 أيام أسبوعياً" → 3)
+    const daysNum = parseInt(program.days) || 3;
+    // حوّل الـ level للإنجليزي
+    const levelMap = { 'مبتدئ': 'beginner', 'متوسط': 'intermediate', 'متقدم': 'advanced' };
+    const levelEn = levelMap[program.level] || program.level;
     const { error } = await supabase.from('user_programs').upsert({
       user_id: user.id,
       program_title: program.subtitle || program.title,
       program_title_ar: program.title,
-      days_per_week: program.days,
-      level: program.level,
+      days_per_week: daysNum,
+      level: levelEn,
       progress: 0,
       is_active: true,
     }, { onConflict: 'user_id,program_title' });
     setJoining(false);
-    if (error) { toast.error('حصل خطأ'); return; }
+    if (error) { toast.error('حصل خطأ: ' + error.message); return; }
     setJoined(true);
     toast.success(`انضممت لبرنامج ${program.title} ✅`);
   };
