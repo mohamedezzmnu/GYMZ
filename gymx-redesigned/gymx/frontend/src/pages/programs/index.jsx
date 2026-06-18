@@ -290,6 +290,17 @@ function ProgramCard({ program, index, highlighted = false }) {
   const [savingSession, setSavingSession] = useState(false);
   const { user } = useAuth();
 
+  // تحقق لو منضم قبل كده
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('user_programs')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('program_title', program.subtitle || program.title)
+      .single()
+      .then(({ data }) => { if (data) setJoined(true); });
+  }, [user]);
+
   // تحقق لو سجّل جلسة النهارده قبل كده
   useEffect(() => {
     if (!user) return;
