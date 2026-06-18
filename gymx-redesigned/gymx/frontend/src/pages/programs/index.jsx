@@ -279,7 +279,7 @@ const DAY_STRUCTURE = [
 // ══════════════════════════════════════════
 // Components
 // ══════════════════════════════════════════
-function ProgramCard({ program, index, highlighted = false }) {
+function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEnrolledTitle }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
   const [open, setOpen] = useState(highlighted);
@@ -289,6 +289,11 @@ function ProgramCard({ program, index, highlighted = false }) {
   const [sessionDone, setSessionDone] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
   const { user } = useAuth();
+
+  // هل البرنامج ده هو المسجل فيه؟
+  const isMyProgram = enrolledTitle === (program.subtitle || program.title);
+  // هل مسجل في برنامج تاني؟
+  const hasOtherProgram = enrolledTitle && !isMyProgram;
 
   // تحقق لو منضم قبل كده
   useEffect(() => {
@@ -335,6 +340,7 @@ function ProgramCard({ program, index, highlighted = false }) {
     setJoining(false);
     if (error) { toast.error('حصل خطأ: ' + error.message); return; }
     setJoined(true);
+    setEnrolledTitle(program.subtitle || program.title);
     toast.success(`انضممت لبرنامج ${program.title} ✅`);
   };
 
@@ -386,6 +392,11 @@ function ProgramCard({ program, index, highlighted = false }) {
               <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: program.levelColor.bg, border: '1px solid ' + program.levelColor.border, color: program.levelColor.text }}>
                 {program.level}
               </span>
+              {isMyProgram && (
+                <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  ✅ برنامجك الحالي
+                </span>
+              )}
             </div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--chalk)', margin: '0 0 4px 0', lineHeight: 1.2 }}>
               {program.title}
@@ -466,6 +477,32 @@ function ProgramCard({ program, index, highlighted = false }) {
                 </div>
               </motion.div>
 
+              {/* banner لو مسجل في برنامج تاني */}
+              {hasOtherProgram && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    marginBottom: 16, padding: '10px 14px',
+                    background: 'rgba(250,204,21,0.07)',
+                    border: '1px solid rgba(250,204,21,0.25)',
+                    borderRadius: 10,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    direction: 'rtl',
+                  }}
+                >
+                  <span style={{ fontSize: '1rem' }}>⚠️</span>
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#facc15', margin: 0 }}>
+                      إنت مسجل حالياً في برنامج <strong>{enrolledTitle}</strong>
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', margin: '3px 0 0' }}>
+                      لو انضممت لده هيتغير برنامجك الأساسي
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
               {/* زرار الانضمام */}
               <motion.button
                 onClick={handleJoin}
@@ -543,10 +580,24 @@ function StructureStep({ step, index }) {
 // Main Page
 export default function ProgramsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const filterProgram = router.query.program || null;
+  const [enrolledTitle, setEnrolledTitle] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('user_programs')
+      .select('program_title')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data) setEnrolledTitle(data.program_title); });
+  }, [user]);
+
   return (
     <>
-      <Head><title>Programs - GYMX</title></Head>
+      <Head><title>Programs - GYMZ</title></Head>
 
       {/* Hero */}
       <section style={{ padding: '60px 0 40px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -564,7 +615,9 @@ export default function ProgramsPage() {
       {/* Programs */}
       <section style={{ padding: '40px 0' }}>
         <div className="container">
-          {(filterProgram ? PROGRAMS.filter(p => p.title === filterProgram || p.subtitle === filterProgram) : PROGRAMS).map((p, i) => <ProgramCard key={p.id} program={p} index={i} />)}
+          {(filterProgram ? PROGRAMS.filter(p => p.title === filterProgram || p.subtitle === filterProgram) : PROGRAMS).map((p, i) => (
+            <ProgramCard key={p.id} program={p} index={i} enrolledTitle={enrolledTitle} setEnrolledTitle={setEnrolledTitle} />
+          ))}
         </div>
       </section>
 
