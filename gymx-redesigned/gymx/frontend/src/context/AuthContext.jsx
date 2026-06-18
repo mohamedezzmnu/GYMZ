@@ -8,35 +8,54 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // جيب الـ role من جدول users
   async function buildUser(supabaseUser) {
     if (!supabaseUser) return null;
-    const { data } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', supabaseUser.id)
-      .single();
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email,
-      name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
-      role: data?.role || 'user',
-    };
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role, name')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error) console.error('buildUser error:', error.message);
+
+      return {
+        id: supabaseUser.id,
+        email: supabaseUser.email,
+        name: data?.name || supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
+        role: data?.role || 'user',
+      };
+    } catch (e) {
+      console.error('buildUser exception:', e);
+      return {
+        id: supabaseUser.id,
+        email: supabaseUser.email,
+        name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
+        role: 'user',
+      };
+    }
   }
 
   useEffect(() => {
+    // جيب الـ session الحالية
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser(await buildUser(session.user));
+        const built = await buildUser(session.user);
+        setUser(built);
       }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        setUser(await buildUser(session.user));
-      } else {
+    // استمع لأي تغيير في الـ auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
         setUser(null);
+        setLoading(false);
+        return;
+      }
+      if (session?.user) {
+        const built = await buildUser(session.user);
+        setUser(built);
       }
       setLoading(false);
     });
@@ -58,6 +77,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
     const built = await buildUser(data.user);
+    setUser(built);
     return built;
   };
 
