@@ -428,8 +428,6 @@ export default function ProfilePage() {
                     </div>
                   ))}
 
-                  ))}
-
                   <Link href="/programs" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     padding: '10px',
