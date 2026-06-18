@@ -144,9 +144,9 @@ export default function HomePage() {
       desc: 'خطط تدريب مصممة خصيصاً لمستواك وهدفك — تخسيس أو ضخامة أو قوة. كل برنامج بجدول أسبوعي واضح.',
     },
     {
-      icon: Apple, accent: '#FF9F0A', linkHref: '/tools',
+      icon: Apple, accent: '#FF9F0A', linkHref: '/nutrition',
       title: 'تغذية وسعرات دقيقة',
-      desc: 'احسب احتياجاتك اليومية من السعرات والبروتين والكارب تبعاً لوزنك وهدفك. علم حقيقي مش تخمين.',
+      desc: 'أنظمة غذائية مصرية جاهزة بأكل بتعرفه — فراخ، أرز، قريش، بيض. اختار هدفك وبدّل الوجبات زي ما تحب.',
     },
     {
       icon: Activity, accent: '#30D158', linkHref: '/dashboard',
@@ -175,9 +175,9 @@ export default function HomePage() {
       desc: 'Programs built for your level and goal — fat loss, muscle gain, or strength. Clear weekly schedules included.',
     },
     {
-      icon: Apple, accent: '#FF9F0A', linkHref: '/tools',
-      title: 'Nutrition & Calories',
-      desc: 'Calculate your daily calorie, protein, and carb needs based on your body and goals. Real science, not guesswork.',
+      icon: Apple, accent: '#FF9F0A', linkHref: '/nutrition',
+      title: 'Nutrition & Meal Plans',
+      desc: 'Ready-made Egyptian meal plans — chicken, rice, eggs, cottage cheese. Pick your goal and swap meals freely.',
     },
     {
       icon: Activity, accent: '#30D158', linkHref: '/dashboard',

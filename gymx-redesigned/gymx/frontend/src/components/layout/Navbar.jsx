@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator, ShieldAlert, Home } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator, ShieldAlert, Home, Apple } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLang } from '../../context/LangContext';
 
@@ -25,6 +25,7 @@ export default function Navbar() {
     { href: '/programs',   label: lang === 'ar' ? 'البرامج'  : 'Programs',  icon: LayoutGrid },
     { href: '/exercises',  label: lang === 'ar' ? 'التمارين' : 'Exercises', icon: Dumbbell },
     { href: '/tools',      label: lang === 'ar' ? 'الحاسبات' : 'Tools',     icon: Calculator },
+    { href: '/nutrition',  label: lang === 'ar' ? 'التغذية'  : 'Nutrition', icon: Apple },
     { href: '/dashboard',  label: lang === 'ar' ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
     { href: '/bmi',        label: lang === 'ar' ? 'BMI'      : 'BMI',       icon: Activity },
     { href: '/profile',    label: lang === 'ar' ? 'حسابي'    : 'Profile',   icon: User },
