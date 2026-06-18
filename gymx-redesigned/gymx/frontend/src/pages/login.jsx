@@ -198,19 +198,26 @@ export function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.password) { toast.error('Please fill all fields'); return; }
-    if (form.password.length < 8) { toast.error('Password must be at least 8 characters'); return; }
-    setLoading(true);
-    try {
-      const user = await register(form.name, form.email, form.password);
-      toast.success(`Welcome to GYMX, ${user.name}!`);
-      router.push('/');
-    } catch (err) {
-      toast.error(err.message || 'Registration failed');
-    } finally { setLoading(false); }
-  };
-
+ const handleSubmit = async () => {
+  if (!form.email || !form.password) { 
+    toast.error('Please fill all fields'); 
+    return; 
+  }
+  setLoading(true);
+  try {
+    const user = await login(form.email, form.password);
+    toast.success(`Welcome back, ${user.name}!`);
+    // redirect حسب الـ role
+    if (user.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push(router.query.from || '/dashboard');
+    }
+  } catch (err) {
+    toast.error(err.message || 'Login failed');
+    setLoading(false); // بس في حالة الـ error
+  }
+};
   const passStrength = () => {
     const p = form.password;
     if (p.length === 0) return null;
