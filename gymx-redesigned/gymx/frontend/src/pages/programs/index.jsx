@@ -1,8 +1,11 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Calendar, Users, Target, Zap } from 'lucide-react';
+import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2 } from 'lucide-react';
 import Head from 'next/head';
+import toast from 'react-hot-toast';
+import { supabase } from '../../lib/supabaseClient';
+import { useAuth } from '../../context/AuthContext';
 
 // ══════════════════════════════════════════
 // بيانات البرامج
@@ -281,6 +284,28 @@ function ProgramCard({ program, index, highlighted = false }) {
   const isInView = useInView(ref, { once: true, margin: '-40px' });
   const [open, setOpen] = useState(highlighted);
   const [activeDay, setActiveDay] = useState(0);
+  const [joined, setJoined] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const { user } = useAuth();
+
+  const handleJoin = async (e) => {
+    e.stopPropagation();
+    if (!user) { toast.error('سجّل دخول الأول'); return; }
+    setJoining(true);
+    const { error } = await supabase.from('user_programs').upsert({
+      user_id: user.id,
+      program_title: program.subtitle || program.title,
+      program_title_ar: program.title,
+      days_per_week: program.days,
+      level: program.level,
+      progress: 0,
+      is_active: true,
+    }, { onConflict: 'user_id,program_title' });
+    setJoining(false);
+    if (error) { toast.error('حصل خطأ'); return; }
+    setJoined(true);
+    toast.success(`انضممت لبرنامج ${program.title} ✅`);
+  };
 
   return (
     <motion.div
@@ -390,6 +415,25 @@ function ProgramCard({ program, index, highlighted = false }) {
                   ))}
                 </div>
               </motion.div>
+
+              {/* زرار الانضمام */}
+              <motion.button
+                onClick={handleJoin}
+                disabled={joining || joined}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  marginTop: 20, width: '100%', padding: '13px',
+                  background: joined ? 'rgba(74,222,128,0.1)' : `linear-gradient(135deg, ${program.accentColor}, rgba(61,127,255,0.7))`,
+                  border: joined ? '1px solid rgba(74,222,128,0.3)' : 'none',
+                  borderRadius: 12, cursor: joined ? 'default' : 'pointer',
+                  color: joined ? '#4ade80' : '#fff',
+                  fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.08em',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  boxShadow: joined ? 'none' : `0 4px 20px ${program.accentColor}44`,
+                }}
+              >
+                {joined ? <><CheckCircle2 size={16} /> منضم للبرنامج</> : joining ? 'جاري الانضمام...' : <><Zap size={15} /> ابدأ البرنامج</>}
+              </motion.button>
             </div>
           </motion.div>
         )}
