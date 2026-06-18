@@ -388,41 +388,31 @@ export default function ProfilePage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                         <div>
                           <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.03em' }}>
-                            {prog.title_ar}
+                            {prog.program_title_ar || prog.program_title}
                           </p>
                           <p style={{ fontSize: '0.7rem', color: 'var(--ash-light)', marginTop: 2 }}>
-                            {prog.days} • بدأ منذ {prog.startedDaysAgo} يوم
+                            {prog.days_per_week} أيام/أسبوع · بدأ {new Date(prog.started_at).toLocaleDateString('ar-EG')}
                           </p>
                         </div>
                         <span style={{
                           fontSize: '0.6rem', fontFamily: 'var(--font-mono)',
                           padding: '3px 7px', borderRadius: 4,
-                          background: `${prog.levelColor}1A`,
-                          border: `1px solid ${prog.levelColor}33`,
-                          color: prog.levelColor,
-                        }}>{prog.level}</span>
+                          background: 'rgba(61,127,255,0.1)',
+                          border: '1px solid rgba(61,127,255,0.25)',
+                          color: 'var(--volt)',
+                        }}>{prog.level || 'active'}</span>
                       </div>
-
-                      {/* Progress bar */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{
-                          flex: 1, height: 4, borderRadius: 2,
-                          background: 'rgba(255,255,255,0.07)',
-                          overflow: 'hidden',
-                        }}>
+                        <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${prog.progress}%` }}
-                            transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-                            style={{
-                              height: '100%', borderRadius: 2,
-                              background: `linear-gradient(90deg, var(--volt), ${prog.levelColor})`,
-                              boxShadow: `0 0 8px var(--volt-glow)`,
-                            }}
+                            animate={{ width: `${prog.progress || 0}%` }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            style={{ height: '100%', borderRadius: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire))' }}
                           />
                         </div>
                         <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', minWidth: 28 }}>
-                          {prog.progress}%
+                          {prog.progress || 0}%
                         </span>
                       </div>
                     </div>
@@ -470,10 +460,10 @@ export default function ProfilePage() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: '0.8rem', color: a.done ? 'var(--chalk)' : 'var(--ash-light)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {a.label}
+                            {a.day_label || a.program_title || 'جلسة تدريب'}
                           </p>
                           <p style={{ fontSize: '0.65rem', color: 'var(--ash)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
-                            {a.day}
+                            {a.session_day || new Date(a.created_at).toLocaleDateString('ar-EG')}
                           </p>
                         </div>
                         {!a.done && (
