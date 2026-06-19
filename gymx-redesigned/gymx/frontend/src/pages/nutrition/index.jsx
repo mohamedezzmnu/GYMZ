@@ -1,7 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Apple, RefreshCw, ChevronDown, ChevronUp, Utensils, Flame, Beef, Wheat, Droplets } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp, Lock, Loader } from 'lucide-react';
 import Head from 'next/head';
+import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/router';
+import { supabase } from '../../lib/supabaseClient';
+
+// ── شاشة غير مشترك ────────────────────────────────────────
+function PremiumGate({ user }) {
+  const router = useRouter();
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px', direction: 'rtl' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
+      >
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--fire),transparent)' }} />
+
+        {/* أيقونة */}
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,107,43,0.1)', border: '1px solid rgba(255,107,43,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 26 }}>
+          🔒
+        </div>
+
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 8 }}>
+          للمشتركين فقط
+        </h2>
+        <p style={{ fontSize: '0.85rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 24 }}>
+          الأنظمة الغذائية متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش واتفتحلك فوراً.
+        </p>
+
+        {/* فودافون كاش */}
+        <div style={{ padding: '16px', background: 'rgba(255,59,48,0.07)', border: '1px solid rgba(255,59,48,0.2)', borderRadius: 'var(--radius-sm)', marginBottom: 16 }}>
+          <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 8 }}>ابعت على فودافون كاش</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--chalk)', letterSpacing: '0.06em', direction: 'ltr' }}>01097931713</div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--fire)', lineHeight: 1 }}>29</div>
+              <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>جنيه</div>
+            </div>
+          </div>
+        </div>
+
+        {/* واتساب */}
+        <a
+          href={`https://wa.me/201097931713?text=عايز اشتراك الأنظمة الغذائية — إيميلي: ${user?.email || ''}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: 'var(--radius-sm)', marginBottom: 12, textDecoration: 'none', color: '#25D166', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em' }}
+        >
+          📲 ابعت السكرين شوت على واتساب
+        </a>
+
+        <p style={{ fontSize: '0.72rem', color: 'var(--ash)', textAlign: 'center', lineHeight: 1.6 }}>
+          بعد التأكيد هيتفتحلك الاشتراك على إيميلك
+          <br />
+          <span style={{ color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>{user?.email}</span>
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
 
 // ── قاعدة بيانات الأطعمة المصرية ──────────────────────────
 const PROTEIN_OPTIONS = [
@@ -452,7 +513,54 @@ function MealCard({ meal, planColor, mealIndex }) {
 const PLAN_KEYS = Object.keys(PLANS);
 
 export default function NutritionPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [isPremium, setIsPremium] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [activePlan, setActivePlan] = useState('maintain2500');
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    // لو مش logged in → روح صفحة اللوجين
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    // شيك إيميله في جدول nutrition_premium
+    const checkPremium = async () => {
+      const { data } = await supabase
+        .from('nutrition_premium')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+
+      setIsPremium(!!data);
+      setChecking(false);
+    };
+
+    checkPremium();
+  }, [user, authLoading]);
+
+  if (authLoading || checking) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader size={28} color="var(--fire)" style={{ animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (!isPremium) {
+    return (
+      <>
+        <Head><title>الأنظمة الغذائية — GYMZ</title></Head>
+        <PremiumGate user={user} />
+      </>
+    );
+  }
+
   const plan = PLANS[activePlan];
 
   // حساب إجمالي الماكرو
