@@ -29,6 +29,7 @@ export default function Navbar() {
     { href: '/dashboard',  label: lang === 'ar' ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
     { href: '/bmi',        label: lang === 'ar' ? 'BMI'      : 'BMI',       icon: Activity },
     { href: '/profile',    label: lang === 'ar' ? 'حسابي'    : 'Profile',   icon: User },
+    { href: '/workout', label: lang === 'ar' ? 'جلستي' : 'Workout', icon: Dumbbell },
   ];
 
   // Bottom nav — 5 أهم صفحات فقط
@@ -38,6 +39,7 @@ export default function Navbar() {
     { href: '/exercises', label: lang === 'ar' ? 'تمارين'   : 'Exercises', icon: Dumbbell },
     { href: '/dashboard', label: lang === 'ar' ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
     { href: '/profile',   label: lang === 'ar' ? 'حسابي'    : 'Profile',   icon: User },
+    { href: '/workout', label: lang === 'ar' ? 'جلستي' : 'Workout', icon: Dumbbell },
   ];
 
   const isActive = (href) => href === '/' ? router.pathname === '/' : router.pathname.startsWith(href);
