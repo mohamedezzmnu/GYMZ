@@ -1,6 +1,7 @@
+// src/pages/nutrition/index.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, User } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -8,7 +9,6 @@ import { supabase } from '../../lib/supabaseClient';
 
 // ── شاشة غير مشترك ────────────────────────────────────────
 function PremiumGate({ user }) {
-  const router = useRouter();
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px', direction: 'rtl' }}>
       <motion.div
@@ -51,34 +51,54 @@ function PremiumGate({ user }) {
 
 // ── قاعدة بيانات الأطعمة ──────────────────────────────────
 const PROTEIN_OPTIONS = [
-  { name: '100جم صدر فراخ مشوي', protein: 31, carbs: 0, fat: 3.6, cal: 165 },
-  { name: '150جم تونة في الماء', protein: 33, carbs: 0, fat: 1.5, cal: 147 },
-  { name: '5 بيضات مسلوقة', protein: 30, carbs: 2, fat: 25, cal: 350 },
-  { name: '150جم جبنة قريش', protein: 24, carbs: 4, fat: 1, cal: 121 },
-  { name: '100جم لحمة بتلو مشوية', protein: 26, carbs: 0, fat: 12, cal: 217 },
-  { name: '150جم كبدة دجاج', protein: 30, carbs: 2, fat: 8, cal: 198 },
-  { name: '120جم سمك بلطي مشوي', protein: 27, carbs: 0, fat: 4, cal: 144 },
+  { name: '100جم صدر فراخ مشوي',   protein: 31,  carbs: 0,  fat: 3.6, cal: 165 },
+  { name: '150جم تونة في الماء',    protein: 33,  carbs: 0,  fat: 1.5, cal: 147 },
+  { name: '5 بيضات مسلوقة',         protein: 30,  carbs: 2,  fat: 25,  cal: 350 },
+  { name: '150جم جبنة قريش',        protein: 24,  carbs: 4,  fat: 1,   cal: 121 },
+  { name: '100جم لحمة بتلو مشوية',  protein: 26,  carbs: 0,  fat: 12,  cal: 217 },
+  { name: '150جم كبدة دجاج',        protein: 30,  carbs: 2,  fat: 8,   cal: 198 },
+  { name: '120جم سمك بلطي مشوي',    protein: 27,  carbs: 0,  fat: 4,   cal: 144 },
 ];
 
 const CARB_OPTIONS = [
-  { name: '100جم أرز أبيض مطبوخ', protein: 2.7, carbs: 28, fat: 0.3, cal: 130 },
-  { name: '150جم مكرونة مطبوخة', protein: 5, carbs: 36, fat: 1, cal: 174 },
-  { name: '80جم شوفان', protein: 5, carbs: 54, fat: 3.5, cal: 267 },
-  { name: '2 رغيف بلدي', protein: 8, carbs: 60, fat: 2, cal: 290 },
-  { name: '300جم بطاطس مسلوقة', protein: 6, carbs: 51, fat: 0.4, cal: 231 },
-  { name: '150جم كوسة مطبوخة + خبز', protein: 4, carbs: 28, fat: 1, cal: 140 },
-  { name: '100جم عدس مطبوخ', protein: 9, carbs: 20, fat: 0.4, cal: 116 },
+  { name: '100جم أرز أبيض مطبوخ',       protein: 2.7, carbs: 28, fat: 0.3, cal: 130 },
+  { name: '150جم مكرونة مطبوخة',         protein: 5,   carbs: 36, fat: 1,   cal: 174 },
+  { name: '80جم شوفان',                  protein: 5,   carbs: 54, fat: 3.5, cal: 267 },
+  { name: '2 رغيف بلدي',                 protein: 8,   carbs: 60, fat: 2,   cal: 290 },
+  { name: '300جم بطاطس مسلوقة',          protein: 6,   carbs: 51, fat: 0.4, cal: 231 },
+  { name: '150جم كوسة مطبوخة + خبز',    protein: 4,   carbs: 28, fat: 1,   cal: 140 },
+  { name: '100جم عدس مطبوخ',             protein: 9,   carbs: 20, fat: 0.4, cal: 116 },
 ];
 
+// ✅ إصلاح: FAT_OPTIONS متصلة دلوقتي بالوجبات
 const FAT_OPTIONS = [
-  { name: '1 ملعقة كبيرة زيت زيتون', protein: 0, carbs: 0, fat: 14, cal: 120 },
-  { name: '20جم مكسرات مشكلة', protein: 4, carbs: 4, fat: 12, cal: 140 },
-  { name: 'نص أفوكادو', protein: 1, carbs: 4, fat: 11, cal: 120 },
-  { name: '1 ملعقة زبدة فول سوداني طبيعية', protein: 3.5, carbs: 3, fat: 8, cal: 94 },
+  { name: '1 ملعقة كبيرة زيت زيتون',         protein: 0,   carbs: 0, fat: 14, cal: 120 },
+  { name: '20جم مكسرات مشكلة',                protein: 4,   carbs: 4, fat: 12, cal: 140 },
+  { name: 'نص أفوكادو',                        protein: 1,   carbs: 4, fat: 11, cal: 120 },
+  { name: '1 ملعقة زبدة فول سوداني طبيعية',  protein: 3.5, carbs: 3, fat: 8,  cal: 94  },
 ];
+
+// ── مكملات مقترحة حسب الهدف ──────────────────────────────
+const SUPPLEMENTS = {
+  cut: [
+    { name: 'كرياتين مونوهيدرات', dose: '5g يومياً', reason: 'يحافظ على العضل وانت بتنشف', important: true },
+    { name: 'بروتين واي', dose: '1-2 سكوب بعد التمرين', reason: 'لو صعب توصل للبروتين من الأكل', important: false },
+    { name: 'أوميجا 3', dose: '2-3 كبسولة مع الأكل', reason: 'يقلل الالتهاب ويحسن حرق الدهون', important: false },
+  ],
+  bulk: [
+    { name: 'كرياتين مونوهيدرات', dose: '5g يومياً', reason: 'يزود القوة وحجم العضل', important: true },
+    { name: 'بروتين واي', dose: '1-2 سكوب بعد التمرين', reason: 'يساعد توصل للبروتين المطلوب', important: true },
+    { name: 'كارب باودر / مالتوديكسترين', dose: '30-50g بعد التمرين', reason: 'يعيد الجليكوجين بسرعة', important: false },
+    { name: 'أوميجا 3', dose: '2-3 كبسولة مع الأكل', reason: 'صحة المفاصل وهرمونات أفضل', important: false },
+  ],
+  maintain: [
+    { name: 'كرياتين مونوهيدرات', dose: '5g يومياً', reason: 'يحافظ على الأداء والقوة', important: true },
+    { name: 'أوميجا 3', dose: '2-3 كبسولة مع الأكل', reason: 'صحة عامة وقلب', important: false },
+    { name: 'فيتامين D3', dose: '2000-4000 IU يومياً', reason: 'الأغلبية ناقصاه خصوصاً في مصر', important: false },
+  ],
+};
 
 // ── حساب TDEE ─────────────────────────────────────────────
-// Harris-Benedict Revised
 function calcTDEE({ weight, height, age, gender, activity }) {
   let bmr;
   if (gender === 'male') {
@@ -86,137 +106,111 @@ function calcTDEE({ weight, height, age, gender, activity }) {
   } else {
     bmr = 447.593 + 9.247 * weight + 3.098 * height - 4.330 * age;
   }
-  const activityMap = {
-    sedentary: 1.2,
-    light: 1.375,
-    moderate: 1.55,
-    active: 1.725,
-    veryActive: 1.9,
-  };
+  const activityMap = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, veryActive: 1.9 };
   return Math.round(bmr * (activityMap[activity] || 1.55));
 }
 
-// ── توليد الخطط بناءً على TDEE والهدف ────────────────────
+// ── توليد الخطط ───────────────────────────────────────────
 function generatePlans(tdee) {
-  // تعريفات الأهداف
   return {
     cut_strong: {
-      label: `${tdee - 600} سعرة`,
-      goal: 'تنشيف قوي',
-      goalType: 'cut',
-      color: '#f87171',
-      icon: '🔥',
-      deficit: -600,
-      targetCal: tdee - 600,
+      label: `${tdee - 600} سعرة`, goal: 'تنشيف قوي', goalType: 'cut',
+      color: '#f87171', icon: '🔥', deficit: -600, targetCal: tdee - 600,
       macros: {
         protein: Math.round(((tdee - 600) * 0.40) / 4),
-        carbs: Math.round(((tdee - 600) * 0.35) / 4),
-        fat: Math.round(((tdee - 600) * 0.25) / 9),
+        carbs:   Math.round(((tdee - 600) * 0.35) / 4),
+        fat:     Math.round(((tdee - 600) * 0.25) / 9),
       },
       meals: buildMeals('cut_strong'),
     },
     cut_light: {
-      label: `${tdee - 300} سعرة`,
-      goal: 'تنشيف خفيف',
-      goalType: 'cut',
-      color: '#fb923c',
-      icon: '⚡',
-      deficit: -300,
-      targetCal: tdee - 300,
+      label: `${tdee - 300} سعرة`, goal: 'تنشيف خفيف', goalType: 'cut',
+      color: '#fb923c', icon: '⚡', deficit: -300, targetCal: tdee - 300,
       macros: {
         protein: Math.round(((tdee - 300) * 0.38) / 4),
-        carbs: Math.round(((tdee - 300) * 0.37) / 4),
-        fat: Math.round(((tdee - 300) * 0.25) / 9),
+        carbs:   Math.round(((tdee - 300) * 0.37) / 4),
+        fat:     Math.round(((tdee - 300) * 0.25) / 9),
       },
       meals: buildMeals('cut_light'),
     },
     maintain: {
-      label: `${tdee} سعرة`,
-      goal: 'محافظة',
-      goalType: 'maintain',
-      color: '#facc15',
-      icon: '⚖️',
-      deficit: 0,
-      targetCal: tdee,
+      label: `${tdee} سعرة`, goal: 'محافظة', goalType: 'maintain',
+      color: '#facc15', icon: '⚖️', deficit: 0, targetCal: tdee,
       macros: {
         protein: Math.round((tdee * 0.30) / 4),
-        carbs: Math.round((tdee * 0.45) / 4),
-        fat: Math.round((tdee * 0.25) / 9),
+        carbs:   Math.round((tdee * 0.45) / 4),
+        fat:     Math.round((tdee * 0.25) / 9),
       },
       meals: buildMeals('maintain'),
     },
     bulk_lean: {
-      label: `${tdee + 300} سعرة`,
-      goal: 'تضخيم نظيف',
-      goalType: 'bulk',
-      color: '#4ade80',
-      icon: '💪',
-      deficit: +300,
-      targetCal: tdee + 300,
+      label: `${tdee + 300} سعرة`, goal: 'تضخيم نظيف', goalType: 'bulk',
+      color: '#4ade80', icon: '💪', deficit: +300, targetCal: tdee + 300,
       macros: {
         protein: Math.round(((tdee + 300) * 0.30) / 4),
-        carbs: Math.round(((tdee + 300) * 0.48) / 4),
-        fat: Math.round(((tdee + 300) * 0.22) / 9),
+        carbs:   Math.round(((tdee + 300) * 0.48) / 4),
+        fat:     Math.round(((tdee + 300) * 0.22) / 9),
       },
       meals: buildMeals('bulk_lean'),
     },
     bulk_strong: {
-      label: `${tdee + 600} سعرة`,
-      goal: 'تضخيم قوي',
-      goalType: 'bulk',
-      color: '#a78bfa',
-      icon: '🏆',
-      deficit: +600,
-      targetCal: tdee + 600,
+      label: `${tdee + 600} سعرة`, goal: 'تضخيم قوي', goalType: 'bulk',
+      color: '#a78bfa', icon: '🏆', deficit: +600, targetCal: tdee + 600,
       macros: {
         protein: Math.round(((tdee + 600) * 0.28) / 4),
-        carbs: Math.round(((tdee + 600) * 0.50) / 4),
-        fat: Math.round(((tdee + 600) * 0.22) / 9),
+        carbs:   Math.round(((tdee + 600) * 0.50) / 4),
+        fat:     Math.round(((tdee + 600) * 0.22) / 9),
       },
       meals: buildMeals('bulk_strong'),
     },
   };
 }
 
-// ── بناء الوجبات حسب النوع ────────────────────────────────
+// ✅ إصلاح: إضافة fatKey لكل وجبة + وجبة قبل التمرين واضحة
 function buildMeals(type) {
   const templates = {
     cut_strong: [
-      { name: 'الفطار', time: '8:00 ص', proteinKey: 3, carbKey: 2 },
-      { name: 'سناك', time: '11:00 ص', proteinKey: 1, carbKey: null },
-      { name: 'الغداء', time: '2:00 م', proteinKey: 0, carbKey: 0 },
-      { name: 'العشاء', time: '7:00 م', proteinKey: 2, carbKey: 3 },
+      { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 3,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: 'سناك',                     time: '11:00 ص', proteinKey: 1,    carbKey: null, fatKey: 0,    preWorkout: false, postWorkout: false },
+      { name: 'الغداء',                   time: '2:00 م',  proteinKey: 0,    carbKey: 0,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: '🏋️ قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: '✅ بعد التمرين',           time: '7:30 م',  proteinKey: 0,    carbKey: 3,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'العشاء',                   time: '9:00 م',  proteinKey: 2,    carbKey: null, fatKey: 0,    preWorkout: false, postWorkout: false },
     ],
     cut_light: [
-      { name: 'الفطار', time: '8:00 ص', proteinKey: 2, carbKey: 2 },
-      { name: 'سناك صباحي', time: '11:00 ص', proteinKey: 3, carbKey: 6 },
-      { name: 'الغداء', time: '2:00 م', proteinKey: 0, carbKey: 0 },
-      { name: 'سناك مسائي', time: '5:00 م', proteinKey: 1, carbKey: 3 },
-      { name: 'العشاء', time: '8:00 م', proteinKey: 5, carbKey: 4 },
+      { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 2,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: 'سناك صباحي',              time: '11:00 ص', proteinKey: 3,    carbKey: 6,    fatKey: 0,    preWorkout: false, postWorkout: false },
+      { name: 'الغداء',                   time: '2:00 م',  proteinKey: 0,    carbKey: 0,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: '🏋️ قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 3,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: '✅ بعد التمرين',           time: '7:00 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'العشاء',                   time: '9:00 م',  proteinKey: 5,    carbKey: null, fatKey: 0,    preWorkout: false, postWorkout: false },
     ],
     maintain: [
-      { name: 'الفطار', time: '8:00 ص', proteinKey: 2, carbKey: 2 },
-      { name: 'سناك', time: '11:00 ص', proteinKey: 3, carbKey: 3 },
-      { name: 'الغداء', time: '2:00 م', proteinKey: 0, carbKey: 0 },
-      { name: 'سناك مسائي', time: '5:00 م', proteinKey: 1, carbKey: 6 },
-      { name: 'العشاء', time: '8:00 م', proteinKey: 6, carbKey: 1 },
+      { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 2,    carbKey: 2,    fatKey: 1,    preWorkout: false, postWorkout: false },
+      { name: 'سناك',                     time: '11:00 ص', proteinKey: 3,    carbKey: 3,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: 'الغداء',                   time: '2:00 م',  proteinKey: 0,    carbKey: 0,    fatKey: 0,    preWorkout: false, postWorkout: false },
+      { name: '🏋️ قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: '✅ بعد التمرين',           time: '7:00 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'العشاء',                   time: '9:00 م',  proteinKey: 6,    carbKey: 1,    fatKey: 0,    preWorkout: false, postWorkout: false },
     ],
     bulk_lean: [
-      { name: 'الفطار', time: '8:00 ص', proteinKey: 2, carbKey: 2 },
-      { name: 'سناك صباحي', time: '10:30 ص', proteinKey: 3, carbKey: 6 },
-      { name: 'الغداء', time: '2:00 م', proteinKey: 4, carbKey: 0 },
-      { name: 'ما بعد التمرين', time: '5:30 م', proteinKey: 1, carbKey: 4 },
-      { name: 'العشاء', time: '8:00 م', proteinKey: 0, carbKey: 1 },
-      { name: 'قبل النوم', time: '11:00 م', proteinKey: 3, carbKey: null },
+      { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 2,    carbKey: 2,    fatKey: 1,    preWorkout: false, postWorkout: false },
+      { name: 'سناك صباحي',              time: '10:30 ص', proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: 'الغداء',                   time: '1:00 م',  proteinKey: 4,    carbKey: 0,    fatKey: 0,    preWorkout: false, postWorkout: false },
+      { name: '🏋️ قبل التمرين (بساعة)', time: '4:30 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: '✅ بعد التمرين',           time: '6:30 م',  proteinKey: 0,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'العشاء',                   time: '8:30 م',  proteinKey: 5,    carbKey: 1,    fatKey: 1,    preWorkout: false, postWorkout: false },
+      { name: 'قبل النوم',                time: '11:00 م', proteinKey: 3,    carbKey: null, fatKey: 3,    preWorkout: false, postWorkout: false },
     ],
     bulk_strong: [
-      { name: 'الفطار', time: '7:30 ص', proteinKey: 2, carbKey: 2 },
-      { name: 'سناك 1', time: '10:00 ص', proteinKey: 3, carbKey: 4 },
-      { name: 'الغداء', time: '1:00 م', proteinKey: 4, carbKey: 0 },
-      { name: 'سناك 2', time: '4:00 م', proteinKey: 1, carbKey: 6 },
-      { name: 'ما بعد التمرين', time: '6:00 م', proteinKey: 0, carbKey: 1 },
-      { name: 'العشاء', time: '8:30 م', proteinKey: 5, carbKey: 4 },
-      { name: 'قبل النوم', time: '11:00 م', proteinKey: 3, carbKey: null },
+      { name: 'الفطار',                   time: '7:30 ص',  proteinKey: 2,    carbKey: 2,    fatKey: 1,    preWorkout: false, postWorkout: false },
+      { name: 'سناك 1',                  time: '10:00 ص', proteinKey: 3,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: false },
+      { name: 'الغداء',                   time: '1:00 م',  proteinKey: 4,    carbKey: 0,    fatKey: 0,    preWorkout: false, postWorkout: false },
+      { name: '🏋️ قبل التمرين (بساعة)', time: '4:00 م',  proteinKey: 1,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: '✅ بعد التمرين',           time: '6:00 م',  proteinKey: 0,    carbKey: 1,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'سناك 2',                  time: '8:00 م',  proteinKey: 3,    carbKey: 4,    fatKey: 1,    preWorkout: false, postWorkout: false },
+      { name: 'العشاء',                   time: '9:30 م',  proteinKey: 5,    carbKey: 2,    fatKey: 0,    preWorkout: false, postWorkout: false },
+      { name: 'قبل النوم',                time: '11:30 م', proteinKey: 3,    carbKey: null, fatKey: 3,    preWorkout: false, postWorkout: false },
     ],
   };
   return templates[type] || templates.maintain;
@@ -225,22 +219,42 @@ function buildMeals(type) {
 // ── Meal Card ──────────────────────────────────────────────
 function MealCard({ meal, planColor, mealIndex }) {
   const [proteinChoice, setProteinChoice] = useState(meal.proteinKey);
-  const [carbChoice, setCarbChoice] = useState(meal.carbKey);
-  const [open, setOpen] = useState(false);
+  const [carbChoice,    setCarbChoice]    = useState(meal.carbKey);
+  const [fatChoice,     setFatChoice]     = useState(meal.fatKey);   // ✅ جديد
+  const [open,    setOpen]    = useState(false);
   const [swapping, setSwapping] = useState(null);
 
   const currentProtein = proteinChoice !== null ? PROTEIN_OPTIONS[proteinChoice] : null;
-  const currentCarb = carbChoice !== null ? CARB_OPTIONS[carbChoice] : null;
+  const currentCarb    = carbChoice    !== null ? CARB_OPTIONS[carbChoice]        : null;
+  const currentFat     = fatChoice     !== null ? FAT_OPTIONS[fatChoice]          : null;  // ✅ جديد
 
-  const mealCal = (currentProtein?.cal || 0) + (currentCarb?.cal || 0);
+  const mealCal = (currentProtein?.cal || 0) + (currentCarb?.cal || 0) + (currentFat?.cal || 0);
+
+  // لون خاص لوجبة قبل/بعد التمرين
+  const cardBorderColor = meal.preWorkout
+    ? 'rgba(250,204,21,0.25)'
+    : meal.postWorkout
+    ? 'rgba(74,222,128,0.25)'
+    : 'var(--glass-border)';
+
+  const cardBg = meal.preWorkout
+    ? 'rgba(250,204,21,0.04)'
+    : meal.postWorkout
+    ? 'rgba(74,222,128,0.04)'
+    : 'var(--glass-bg)';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: mealIndex * 0.07 }}
-      style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 12 }}
+      style={{ background: cardBg, backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: `1px solid ${cardBorderColor}`, borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 12 }}
     >
+      {/* ✅ شريط علوي ملون لوجبات التمرين */}
+      {(meal.preWorkout || meal.postWorkout) && (
+        <div style={{ height: 2, background: meal.preWorkout ? 'linear-gradient(90deg,#facc15,transparent)' : 'linear-gradient(90deg,#4ade80,transparent)' }} />
+      )}
+
       {/* Header */}
       <div
         onClick={() => setOpen(p => !p)}
@@ -249,7 +263,7 @@ function MealCard({ meal, planColor, mealIndex }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: planColor, boxShadow: `0 0 8px ${planColor}80` }} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>{meal.name}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', marginRight: 4 }}>{meal.time}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)' }}>{meal.time}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: planColor }}>{mealCal} كال</span>
@@ -269,72 +283,72 @@ function MealCard({ meal, planColor, mealIndex }) {
           >
             <div style={{ padding: '14px 18px', direction: 'rtl' }}>
 
-              {/* البروتين */}
-              {currentProtein && (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 6 }}>🥩 البروتين</div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.18)', borderRadius: 'var(--radius-sm)' }}>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{currentProtein.name}</span>
-                    <button
-                      onClick={() => setSwapping(swapping === 'protein' ? null : 'protein')}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 6, color: '#f87171', cursor: 'pointer', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}
-                    >
-                      <RefreshCw size={11} /> بدّل
-                    </button>
-                  </div>
-                  <AnimatePresence>
-                    {swapping === 'protein' && (
-                      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {PROTEIN_OPTIONS.map((opt, i) => (
-                          <button key={i} onClick={() => { setProteinChoice(i); setSwapping(null); }}
-                            style={{ textAlign: 'right', padding: '8px 12px', background: i === proteinChoice ? 'rgba(248,113,113,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${i === proteinChoice ? 'rgba(248,113,113,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 6, color: 'var(--chalk)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.62rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{opt.cal} كال</span>
-                            {opt.name}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+              {/* نصيحة وجبة التمرين */}
+              {meal.preWorkout && (
+                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.2)', borderRadius: 8, fontSize: '0.75rem', color: '#facc15', fontFamily: 'var(--font-body)' }}>
+                  💡 تجنب الدهون قبل التمرين — بتبطئ الهضم وبتأثر على الأداء
+                </div>
+              )}
+              {meal.postWorkout && (
+                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 8, fontSize: '0.75rem', color: '#4ade80', fontFamily: 'var(--font-body)' }}>
+                  💡 النافذة الذهبية — بروتين سريع + كارب بسيط خلال 30-60 دقيقة بعد التمرين
                 </div>
               )}
 
-              {/* الكارب */}
+              {/* ── البروتين ── */}
+              {currentProtein && (
+                <FoodRow
+                  label="🥩 البروتين"
+                  item={currentProtein}
+                  color="#f87171"
+                  swapKey="protein"
+                  swapping={swapping}
+                  setSwapping={setSwapping}
+                  options={PROTEIN_OPTIONS}
+                  currentIndex={proteinChoice}
+                  onSelect={(i) => { setProteinChoice(i); setSwapping(null); }}
+                />
+              )}
+
+              {/* ── الكارب ── */}
               {currentCarb && (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 6 }}>🍚 الكارب</div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(250,204,21,0.07)', border: '1px solid rgba(250,204,21,0.18)', borderRadius: 'var(--radius-sm)' }}>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{currentCarb.name}</span>
-                    <button
-                      onClick={() => setSwapping(swapping === 'carb' ? null : 'carb')}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 6, color: '#facc15', cursor: 'pointer', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}
-                    >
-                      <RefreshCw size={11} /> بدّل
-                    </button>
-                  </div>
-                  <AnimatePresence>
-                    {swapping === 'carb' && (
-                      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {CARB_OPTIONS.map((opt, i) => (
-                          <button key={i} onClick={() => { setCarbChoice(i); setSwapping(null); }}
-                            style={{ textAlign: 'right', padding: '8px 12px', background: i === carbChoice ? 'rgba(250,204,21,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${i === carbChoice ? 'rgba(250,204,21,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 6, color: 'var(--chalk)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.62rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{opt.cal} كال</span>
-                            {opt.name}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                <FoodRow
+                  label="🍚 الكارب"
+                  item={currentCarb}
+                  color="#facc15"
+                  swapKey="carb"
+                  swapping={swapping}
+                  setSwapping={setSwapping}
+                  options={CARB_OPTIONS}
+                  currentIndex={carbChoice}
+                  onSelect={(i) => { setCarbChoice(i); setSwapping(null); }}
+                />
+              )}
+
+              {/* ✅ الدهون — متصلة دلوقتي */}
+              {currentFat && (
+                <FoodRow
+                  label="🥑 الدهون الصحية"
+                  item={currentFat}
+                  color="#4ade80"
+                  swapKey="fat"
+                  swapping={swapping}
+                  setSwapping={setSwapping}
+                  options={FAT_OPTIONS}
+                  currentIndex={fatChoice}
+                  onSelect={(i) => { setFatChoice(i); setSwapping(null); }}
+                />
               )}
 
               {/* ملخص الماكرو */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginTop: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, marginTop: 14 }}>
                 {[
-                  { label: 'بروتين', val: (currentProtein?.protein || 0) + (currentCarb?.protein || 0), unit: 'g', color: '#f87171' },
-                  { label: 'كارب', val: (currentProtein?.carbs || 0) + (currentCarb?.carbs || 0), unit: 'g', color: '#facc15' },
-                  { label: 'دهون', val: (currentProtein?.fat || 0) + (currentCarb?.fat || 0), unit: 'g', color: '#4ade80' },
+                  { label: 'سعرات', val: mealCal, unit: '', color: planColor },
+                  { label: 'بروتين', val: Math.round((currentProtein?.protein||0)+(currentCarb?.protein||0)+(currentFat?.protein||0)), unit: 'g', color: '#f87171' },
+                  { label: 'كارب',   val: Math.round((currentProtein?.carbs||0)+(currentCarb?.carbs||0)+(currentFat?.carbs||0)),   unit: 'g', color: '#facc15' },
+                  { label: 'دهون',   val: Math.round((currentProtein?.fat||0)+(currentCarb?.fat||0)+(currentFat?.fat||0)),           unit: 'g', color: '#4ade80' },
                 ].map(({ label, val, unit, color }) => (
-                  <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: `${color}0a`, border: `1px solid ${color}1a`, borderRadius: 6 }}>
+                  <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: `${color}0a`, border: `1px solid ${color}18`, borderRadius: 6 }}>
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color }}>{val}<span style={{ fontSize: '0.6rem' }}>{unit}</span></div>
                     <div style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2 }}>{label}</div>
                   </div>
@@ -348,51 +362,130 @@ function MealCard({ meal, planColor, mealIndex }) {
   );
 }
 
-// ── كارت إدخال البيانات ────────────────────────────────────
+// ── مكون صف الأكل القابل للتبديل ─────────────────────────
+function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, currentIndex, onSelect }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: `${color}09`, border: `1px solid ${color}25`, borderRadius: 'var(--radius-sm)' }}>
+        <span style={{ fontSize: '0.82rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{item.name}</span>
+        <button
+          onClick={() => setSwapping(swapping === swapKey ? null : swapKey)}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: `${color}18`, border: `1px solid ${color}40`, borderRadius: 6, color, cursor: 'pointer', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}
+        >
+          <RefreshCw size={11} /> بدّل
+        </button>
+      </div>
+      <AnimatePresence>
+        {swapping === swapKey && (
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {options.map((opt, i) => (
+              <button key={i} onClick={() => onSelect(i)}
+                style={{ textAlign: 'right', padding: '8px 12px', background: i === currentIndex ? `${color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${i === currentIndex ? color + '50' : 'rgba(255,255,255,0.07)'}`, borderRadius: 6, color: 'var(--chalk)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.62rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{opt.cal} كال · {opt.protein}g بروتين</span>
+                {opt.name}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Supplements Card ──────────────────────────────────────
+function SupplementsCard({ goalType }) {
+  const supps = SUPPLEMENTS[goalType] || SUPPLEMENTS.maintain;
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginBottom: 16, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+      <div style={{ height: 2, background: 'linear-gradient(90deg,#a78bfa,transparent)' }} />
+      <div onClick={() => setOpen(p => !p)} style={{ padding: '14px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Zap size={15} color="#a78bfa" />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>مكملات مقترحة لهدفك</span>
+          <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa' }}>اختياري</span>
+        </div>
+        {open ? <ChevronUp size={14} color="var(--ash)" /> : <ChevronDown size={14} color="var(--ash)" />}
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }} style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '0 18px 18px', direction: 'rtl', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {supps.map((s, i) => (
+                <div key={i} style={{ padding: '12px 14px', background: s.important ? 'rgba(167,139,250,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${s.important ? 'rgba(167,139,250,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)' }}>{s.name}</span>
+                    {s.important && <span style={{ fontSize: '0.55rem', fontFamily: 'var(--font-mono)', padding: '1px 6px', borderRadius: 3, background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa' }}>مهم</span>}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: '#a78bfa', marginBottom: 4 }}>{s.dose}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>{s.reason}</div>
+                </div>
+              ))}
+              <p style={{ fontSize: '0.7rem', color: 'var(--ash)', lineHeight: 1.6, marginTop: 4 }}>
+                ⚠️ المكملات مش إلزامية — الأكل الطبيعي هو الأساس. استشر دكتور قبل ما تاخد أي مكمل لو عندك أي حالة صحية.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Water Intake Card ─────────────────────────────────────
+function WaterCard({ weight }) {
+  const liters = ((weight * 33) / 1000).toFixed(1);
+  const glasses = Math.round((weight * 33) / 250);
+  return (
+    <div style={{ marginBottom: 16, padding: '16px 18px', background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: 'var(--radius-md)', direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Droplets size={16} color="#38bdf8" />
+        </div>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', marginBottom: 2 }}>احتياجك اليومي من المياه</div>
+          <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>وزن ({weight}kg) × 33ml</div>
+        </div>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#38bdf8', lineHeight: 1 }}>{liters}L</div>
+        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>≈ {glasses} كوب</div>
+      </div>
+    </div>
+  );
+}
+
+// ── فورم البيانات ─────────────────────────────────────────
 function UserDataForm({ onCalculate }) {
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [age, setAge] = useState('');
-  const [gender, setGender] = useState('male');
+  const [weight, setWeight]   = useState('');
+  const [height, setHeight]   = useState('');
+  const [age,    setAge]      = useState('');
+  const [gender, setGender]   = useState('male');
   const [activity, setActivity] = useState('moderate');
-  const [error, setError] = useState('');
+  const [error,  setError]    = useState('');
 
   const inputStyle = {
-    width: '100%',
-    padding: '10px 12px',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 'var(--radius-sm)',
-    color: 'var(--chalk)',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '0.9rem',
-    outline: 'none',
-    boxSizing: 'border-box',
-    direction: 'ltr',
-    textAlign: 'center',
+    width: '100%', padding: '10px 12px',
+    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 'var(--radius-sm)', color: 'var(--chalk)',
+    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', outline: 'none',
+    boxSizing: 'border-box', direction: 'ltr', textAlign: 'center',
   };
-
   const labelStyle = {
-    display: 'block',
-    fontSize: '0.62rem',
-    fontFamily: 'var(--font-mono)',
-    color: 'var(--ash-light)',
-    letterSpacing: '0.08em',
-    marginBottom: 6,
+    display: 'block', fontSize: '0.62rem', fontFamily: 'var(--font-mono)',
+    color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 6,
   };
-
   const activities = [
-    { id: 'sedentary', label: 'مش بتتحرك', desc: 'مكتب طول اليوم' },
-    { id: 'light', label: 'خفيف', desc: '1-3 أيام أسبوعياً' },
-    { id: 'moderate', label: 'متوسط', desc: '3-5 أيام أسبوعياً' },
-    { id: 'active', label: 'نشيط', desc: '6-7 أيام أسبوعياً' },
-    { id: 'veryActive', label: 'نشيط جداً', desc: 'رياضيين أو شغل جسدي' },
+    { id: 'sedentary',  label: 'مش بتتحرك', desc: 'مكتب طول اليوم' },
+    { id: 'light',      label: 'خفيف',       desc: '1-3 أيام أسبوعياً' },
+    { id: 'moderate',   label: 'متوسط',      desc: '3-5 أيام أسبوعياً' },
+    { id: 'active',     label: 'نشيط',       desc: '6-7 أيام أسبوعياً' },
+    { id: 'veryActive', label: 'نشيط جداً',  desc: 'رياضيين أو شغل جسدي' },
   ];
 
   const handleCalc = () => {
-    const w = parseFloat(weight);
-    const h = parseFloat(height);
-    const a = parseFloat(age);
+    const w = parseFloat(weight), h = parseFloat(height), a = parseFloat(age);
     if (!w || !h || !a || w < 30 || w > 250 || h < 100 || h > 250 || a < 10 || a > 100) {
       setError('اكتب بيانات صح: وزن (30-250كج)، طول (100-250سم)، سن (10-100)');
       return;
@@ -403,77 +496,57 @@ function UserDataForm({ onCalculate }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '28px 24px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}
     >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--fire),transparent)' }} />
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
         <Calculator size={18} color="var(--fire)" />
         <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>احسب نظامك</span>
       </div>
-
-      {/* الجنس */}
       <div style={{ marginBottom: 16 }}>
         <span style={labelStyle}>الجنس</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {[{ id: 'male', label: '👨 ذكر' }, { id: 'female', label: '👩 أنثى' }].map(g => (
             <button key={g.id} onClick={() => setGender(g.id)}
-              style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,107,43,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gender === g.id ? 'rgba(255,107,43,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--fire)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}
-            >
+              style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,107,43,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gender === g.id ? 'rgba(255,107,43,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--fire)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}>
               {g.label}
             </button>
           ))}
         </div>
       </div>
-
-      {/* الوزن / الطول / السن */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
         {[
           { label: 'الوزن (كجم)', val: weight, set: setWeight, ph: '75' },
-          { label: 'الطول (سم)', val: height, set: setHeight, ph: '175' },
-          { label: 'السن', val: age, set: setAge, ph: '25' },
+          { label: 'الطول (سم)',  val: height, set: setHeight, ph: '175' },
+          { label: 'السن',         val: age,    set: setAge,    ph: '25' },
         ].map(({ label, val, set, ph }) => (
           <div key={label}>
             <span style={labelStyle}>{label}</span>
-            <input
-              type="number"
-              value={val}
-              onChange={e => set(e.target.value)}
-              placeholder={ph}
-              style={inputStyle}
-            />
+            <input type="number" value={val} onChange={e => set(e.target.value)} placeholder={ph} style={inputStyle} />
           </div>
         ))}
       </div>
-
-      {/* مستوى النشاط */}
       <div style={{ marginBottom: 20 }}>
         <span style={labelStyle}>مستوى النشاط</span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {activities.map(a => (
             <button key={a.id} onClick={() => setActivity(a.id)}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,107,43,0.1)' : 'rgba(255,255,255,0.02)', border: `1px solid ${activity === a.id ? 'rgba(255,107,43,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}
-            >
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,107,43,0.1)' : 'rgba(255,255,255,0.02)', border: `1px solid ${activity === a.id ? 'rgba(255,107,43,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: activity === a.id ? 'var(--fire)' : 'var(--chalk)' }}>{a.label}</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>{a.desc}</span>
             </button>
           ))}
         </div>
       </div>
-
       {error && (
         <div style={{ padding: '10px 14px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 'var(--radius-sm)', color: '#f87171', fontSize: '0.78rem', fontFamily: 'var(--font-body)', marginBottom: 14, direction: 'rtl' }}>
           ⚠️ {error}
         </div>
       )}
-
       <button
         onClick={handleCalc}
-        style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg,var(--fire),#ff8c42)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer', transition: 'opacity 200ms' }}
-        onMouseOver={e => e.currentTarget.style.opacity = '0.85'}
-        onMouseOut={e => e.currentTarget.style.opacity = '1'}
+        style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg,var(--fire),#ff8c42)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer' }}
       >
         احسب TDEE وأنا الخطة 🔥
       </button>
@@ -486,24 +559,17 @@ export default function NutritionPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [isPremium, setIsPremium] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  // بيانات المستخدم المحسوبة
-  const [tdee, setTdee] = useState(null);
-  const [plans, setPlans] = useState(null);
+  const [checking,  setChecking]  = useState(true);
+  const [tdee,      setTdee]      = useState(null);
+  const [plans,     setPlans]     = useState(null);
   const [activePlan, setActivePlan] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [userData,  setUserData]  = useState(null);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { router.push('/login'); return; }
-
     const checkPremium = async () => {
-      const { data } = await supabase
-        .from('nutrition_premium')
-        .select('id')
-        .eq('email', user.email)
-        .single();
+      const { data } = await supabase.from('nutrition_premium').select('id').eq('email', user.email).single();
       setIsPremium(!!data);
       setChecking(false);
     };
@@ -512,16 +578,11 @@ export default function NutritionPage() {
 
   const handleCalculate = useCallback(({ weight, height, age, gender, activity }) => {
     const calculatedTdee = calcTDEE({ weight, height, age, gender, activity });
-    const generatedPlans = generatePlans(calculatedTdee);
     setTdee(calculatedTdee);
-    setPlans(generatedPlans);
+    setPlans(generatePlans(calculatedTdee));
     setActivePlan('maintain');
     setUserData({ weight, height, age, gender, activity });
-
-    // scroll للخطط
-    setTimeout(() => {
-      document.getElementById('plans-section')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    setTimeout(() => document.getElementById('plans-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
   }, []);
 
   if (authLoading || checking) {
@@ -533,18 +594,9 @@ export default function NutritionPage() {
     );
   }
 
-  if (!isPremium) {
-    return (
-      <>
-        <Head><title>الأنظمة الغذائية — GYMZ</title></Head>
-        <PremiumGate user={user} />
-      </>
-    );
-  }
+  if (!isPremium) return <><Head><title>الأنظمة الغذائية — GYMZ</title></Head><PremiumGate user={user} /></>;
 
   const plan = plans && activePlan ? plans[activePlan] : null;
-
-  // goal badge
   const goalBadge = plan
     ? plan.goalType === 'cut'
       ? { label: 'تنشيف', color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
@@ -557,9 +609,7 @@ export default function NutritionPage() {
     <>
       <Head><title>الأنظمة الغذائية — GYMZ</title></Head>
       <div style={{ minHeight: '100vh', paddingTop: 88, paddingBottom: 60, position: 'relative', direction: 'rtl' }}>
-        {/* bg glow */}
         <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(255,107,43,0.07) 0%,transparent 60%)' }} />
-
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
 
           {/* header */}
@@ -573,32 +623,29 @@ export default function NutritionPage() {
             </p>
           </motion.div>
 
-          {/* فورم الحساب */}
           <UserDataForm onCalculate={handleCalculate} />
 
-          {/* النتايج */}
           {plans && activePlan && (
             <div id="plans-section">
 
+              {/* ✅ Water Intake */}
+              {userData && <WaterCard weight={userData.weight} />}
+
               {/* TDEE badge */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'rgba(255,107,43,0.06)', border: '1px solid rgba(255,107,43,0.2)', borderRadius: 'var(--radius-md)', marginBottom: 20 }}
               >
                 <div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.1em', marginBottom: 4 }}>TDEE — حرقك اليومي</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--fire)', lineHeight: 1 }}>{tdee} <span style={{ fontSize: '0.8rem', color: 'var(--ash-light)' }}>سعرة/يوم</span></div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '10px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginBottom: 4 }}>إعادة الحساب؟</div>
-                  <button
-                    onClick={() => { setPlans(null); setTdee(null); setActivePlan(null); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}
-                  >
-                    <RefreshCw size={11} /> غيّر
-                  </button>
-                </div>
+                <button
+                  onClick={() => { setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}
+                >
+                  <RefreshCw size={11} /> غيّر
+                </button>
               </motion.div>
 
               {/* plan selector */}
@@ -623,7 +670,6 @@ export default function NutritionPage() {
                   style={{ marginBottom: 24, padding: '18px 20px', background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', position: 'relative', overflow: 'hidden' }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${plan.color},transparent)` }} />
-
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -643,12 +689,11 @@ export default function NutritionPage() {
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>سعرة/يوم</div>
                     </div>
                   </div>
-
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
                     {[
                       { label: 'بروتين', val: plan.macros.protein, color: '#f87171', icon: '🥩' },
-                      { label: 'كارب', val: plan.macros.carbs, color: '#facc15', icon: '🍚' },
-                      { label: 'دهون', val: plan.macros.fat, color: '#4ade80', icon: '🥑' },
+                      { label: 'كارب',   val: plan.macros.carbs,   color: '#facc15', icon: '🍚' },
+                      { label: 'دهون',   val: plan.macros.fat,     color: '#4ade80', icon: '🥑' },
                     ].map(({ label, val, color, icon }) => (
                       <div key={label} style={{ textAlign: 'center', padding: '10px 6px', background: `${color}0a`, border: `1px solid ${color}18`, borderRadius: 8 }}>
                         <div style={{ fontSize: '1rem', marginBottom: 2 }}>{icon}</div>
@@ -659,6 +704,9 @@ export default function NutritionPage() {
                   </div>
                 </motion.div>
               </AnimatePresence>
+
+              {/* ✅ مكملات مقترحة */}
+              <SupplementsCard goalType={plan.goalType} />
 
               {/* meals */}
               <div style={{ marginBottom: 8, fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -672,13 +720,11 @@ export default function NutritionPage() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* tip */}
               <div style={{ marginTop: 16, padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>
-                💡 <strong style={{ color: 'var(--chalk)' }}>نصيحة:</strong> الأرقام تقريبية بناءً على معادلة هاريس-بينيديكت. لو وزنك اتغير، ضغط على &quot;غيّر&quot; وحسب من جديد.
+                💡 <strong style={{ color: 'var(--chalk)' }}>نصيحة:</strong> الأرقام تقريبية بناءً على معادلة هاريس-بينيديكت. لو وزنك اتغير، اضغط &quot;غيّر&quot; وحسب من جديد.
               </div>
             </div>
           )}
-
         </div>
       </div>
     </>
