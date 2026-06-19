@@ -130,6 +130,11 @@ export default function Navbar() {
                 <Icon size={18} /> {label}
               </Link>
             ))}
+            {user?.role === 'admin' && (
+              <Link href="/admin" style={{ display:'flex', alignItems:'center', gap:12, fontFamily:'var(--font-display)', fontSize:'1.3rem', letterSpacing:'0.04em', textDecoration:'none', color: isActive('/admin') ? '#FF3B30' : 'var(--fire)' }}>
+                <ShieldAlert size={18} /> Admin
+              </Link>
+            )}
             <hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.07)' }} />
             <div style={{ display:'flex', gap:8 }}>
               <button onClick={toggleLang} style={{ background:'none', border:'1px solid rgba(255,255,255,0.15)', color:'var(--ash-light)', padding:'7px 14px', borderRadius:4, cursor:'pointer', fontFamily:'var(--font-mono)', fontSize:'0.8rem' }}>{lang === 'ar' ? 'EN' : 'عر'}</button>
