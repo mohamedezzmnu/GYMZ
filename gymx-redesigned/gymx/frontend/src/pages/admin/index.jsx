@@ -3,7 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import {
   Users, Dumbbell, LayoutGrid, ShieldAlert,
   TrendingUp, Trash2, Search, RefreshCw, Crown,
-  UserCheck, UserX, ChevronDown, Activity,
+  UserCheck, UserX, ChevronDown, Activity, Apple, Plus,
 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -87,6 +87,12 @@ export default function AdminPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
 
+  // ── nutrition premium ─────────────────────────────────────
+  const [premiumEmails, setPremiumEmails] = useState([]);
+  const [newEmail, setNewEmail] = useState('');
+  const [addingEmail, setAddingEmail] = useState(false);
+  const [removingEmail, setRemovingEmail] = useState(null);
+
   // ── guard ────────────────────────────────────────────────
   useEffect(() => {
     if (!loading) {
@@ -116,10 +122,21 @@ export default function AdminPage() {
         totalSessions: sessionsRes.count || 0,
         newToday,
       });
+
+      fetchPremiumEmails();
     } catch (e) {
       toast.error('خطأ في جلب البيانات');
     }
     setLoadingData(false);
+  }
+
+  // ── nutrition premium emails ───────────────────────────────
+  async function fetchPremiumEmails() {
+    const { data } = await supabase
+      .from('nutrition_premium')
+      .select('id, email, added_at')
+      .order('added_at', { ascending: false });
+    setPremiumEmails(data || []);
   }
 
   useEffect(() => {
@@ -127,8 +144,7 @@ export default function AdminPage() {
   }, [user]);
 
   // ── toggle role ──────────────────────────────────────────
-  async function toggleRole(uid, currentRole) {
-    if (uid === user.id) { toast.error('مش تقدر تغير role نفسك'); return; }
+  async function toggleRole(uid, currentRole) {    if (uid === user.id) { toast.error('مش تقدر تغير role نفسك'); return; }
     setTogglingId(uid);
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     const { error } = await supabase.from('users').update({ role: newRole }).eq('id', uid);
@@ -153,6 +169,37 @@ export default function AdminPage() {
       setStats(s => ({ ...s, totalUsers: s.totalUsers - 1 }));
     }
     setDeletingId(null);
+  }
+
+  // ── nutrition premium handlers ────────────────────────────
+  async function addPremiumEmail() {
+    const email = newEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      toast.error('اكتب إيميل صحيح');
+      return;
+    }
+    setAddingEmail(true);
+    const { error } = await supabase.from('nutrition_premium').insert({ email });
+    if (error) {
+      if (error.code === '23505') toast.error('الإيميل ده مضاف قبل كده');
+      else toast.error('فشلت الإضافة');
+    } else {
+      toast.success('تم تفعيل الاشتراك ✅');
+      setNewEmail('');
+      fetchPremiumEmails();
+    }
+    setAddingEmail(false);
+  }
+
+  async function removePremiumEmail(id) {
+    setRemovingEmail(id);
+    const { error } = await supabase.from('nutrition_premium').delete().eq('id', id);
+    if (error) toast.error('فشل الحذف');
+    else {
+      toast.success('تم إلغاء الاشتراك');
+      setPremiumEmails(prev => prev.filter(p => p.id !== id));
+    }
+    setRemovingEmail(null);
   }
 
   // ── filter ───────────────────────────────────────────────
@@ -210,6 +257,87 @@ export default function AdminPage() {
           <StatBox icon={Dumbbell}    label="جلسات التدريب"        value={loadingData ? '—' : stats.totalSessions}  accent="#4ade80" delay={0.1} />
           <StatBox icon={TrendingUp}  label="مسجلين اليوم"         value={loadingData ? '—' : stats.newToday}       accent="#facc15" delay={0.15} />
         </div>
+
+        {/* ── Nutrition Premium ── */}
+        <Reveal delay={0.15}>
+          <GlassCard accent="#FF9F0A" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <Apple size={16} color="#FF9F0A" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.08em' }}>
+                اشتراكات التغذية ({premiumEmails.length})
+              </span>
+            </div>
+
+            {/* add email */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+              <input
+                type="email"
+                placeholder="example@gmail.com"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !addingEmail && addPremiumEmail()}
+                style={{
+                  flex: 1, minWidth: 220, padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                  borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                  fontSize: '0.78rem', outline: 'none', direction: 'ltr', textAlign: 'right',
+                }}
+              />
+              <motion.button
+                onClick={addPremiumEmail}
+                disabled={addingEmail}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px',
+                  background: 'rgba(255,159,10,0.12)', border: '1px solid rgba(255,159,10,0.35)',
+                  borderRadius: 8, color: '#FF9F0A', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                  cursor: addingEmail ? 'not-allowed' : 'pointer', opacity: addingEmail ? 0.5 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {addingEmail ? <RefreshCw size={13} /> : <Plus size={13} />}
+                تفعيل اشتراك
+              </motion.button>
+            </div>
+
+            {/* list */}
+            {premiumEmails.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                مفيش مشتركين لسه
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {premiumEmails.map(p => (
+                  <div key={p.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', background: 'rgba(255,159,10,0.06)',
+                    border: '1px solid rgba(255,159,10,0.15)', borderRadius: 8,
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--chalk)', direction: 'ltr', textAlign: 'right' }}>{p.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', marginTop: 2 }}>
+                        {new Date(p.added_at).toLocaleDateString('ar-EG')}
+                      </div>
+                    </div>
+                    <motion.button
+                      onClick={() => removePremiumEmail(p.id)}
+                      whileTap={{ scale: 0.9 }}
+                      disabled={removingEmail === p.id}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28, background: 'rgba(248,113,113,0.08)',
+                        border: '1px solid rgba(248,113,113,0.25)', borderRadius: 6,
+                        cursor: 'pointer', color: '#f87171',
+                      }}
+                    >
+                      {removingEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
+                    </motion.button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
 
         {/* ── Users Table ── */}
         <Reveal delay={0.2}>
