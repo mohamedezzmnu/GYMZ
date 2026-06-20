@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 
 // Three.js needs a real window/canvas, so it's loaded client-side only.
-const ParticleAthlete = dynamic(() => import('../components/layout/three/ParticleAthlete'), { ssr: false });
+const ParticleAthlete = dynamic(() => import('../components/three/ParticleAthlete'), { ssr: false });
 
 // ── helpers ───────────────────────────────────────────────
 function Reveal({ children, delay = 0, style = {} }) {
@@ -57,7 +57,7 @@ function ServiceCard({ icon: Icon, title, desc, accent, delay, ar, linkHref }) {
         <div style={{ width: 50, height: 50, borderRadius: 14, background: accent + '18', border: `1px solid ${accent}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
           <Icon size={22} color={accent} />
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', letterSpacing: '0.03em', color: 'var(--chalk)', marginBottom: 12 }}>{title}</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.01em', color: 'var(--chalk)', marginBottom: 12 }}>{title}</div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.87rem', color: 'var(--ash-light)', lineHeight: 1.75, flex: 1 }}>{desc}</div>
         <Link href={linkHref || '/programs'} style={{ textDecoration: 'none' }}>
           <motion.div
@@ -77,9 +77,9 @@ function Step({ num, title, desc, delay, ar }) {
   return (
     <Reveal delay={delay}>
       <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', direction: ar ? 'rtl' : 'ltr' }}>
-        <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--accent)' }}>{num}</div>
+        <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-numeral)', fontSize: '1.1rem', color: 'var(--accent)' }}>{num}</div>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: 'var(--chalk)', marginBottom: 6 }}>{title}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--chalk)', marginBottom: 6 }}>{title}</div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.83rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>{desc}</div>
         </div>
       </div>
@@ -108,10 +108,10 @@ function ProgramCard({ title, days, level, goal, delay, lang }) {
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: accent, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
               {levelLabel} · {goalLabel}
             </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 16, textTransform: 'uppercase' }}>{title}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.6rem', letterSpacing: '-0.01em', color: 'var(--chalk)', marginBottom: 16 }}>{title}</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--accent)' }}>{days}</span>
+                <span style={{ fontFamily: 'var(--font-numeral)', fontSize: '2.5rem', color: 'var(--accent)' }}>{days}</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', marginRight: 4, marginLeft: 4 }}>
                   {ar ? 'يوم/أسبوع' : 'days/wk'}
                 </span>
@@ -148,27 +148,27 @@ export default function HomePage() {
       desc: 'خطط تدريب مصممة خصيصاً لمستواك وهدفك — تخسيس أو ضخامة أو قوة. كل برنامج بجدول أسبوعي واضح.',
     },
     {
-      icon: Apple, accent: '#FF9F0A', linkHref: '/nutrition',
+      icon: Apple, accent: '#FF8A3D', linkHref: '/nutrition',
       title: 'تغذية وسعرات دقيقة',
       desc: 'أنظمة غذائية مصرية جاهزة بأكل بتعرفه — فراخ، أرز، قريش، بيض. اختار هدفك وبدّل الوجبات زي ما تحب.',
     },
     {
-      icon: Activity, accent: '#30D158', linkHref: '/dashboard',
+      icon: Activity, accent: '#FFB020', linkHref: '/dashboard',
       title: 'تتبع التقدم',
       desc: 'سجّل وزنك وقياساتك وتابع تطورك أسبوع بأسبوع. شوف النتيجة الحقيقية بالأرقام.',
     },
     {
-      icon: Calculator, accent: '#64D2FF', linkHref: '/bmi',
+      icon: Calculator, accent: '#FF5E3A', linkHref: '/bmi',
       title: 'حاسبات ذكية',
       desc: 'BMI، TDEE، ومعدل الحرق — كل الأدوات اللي محتاجها في مكان واحد بدون تعقيد.',
     },
     {
-      icon: Target, accent: '#BF5AF2', linkHref: '/shapes',
+      icon: Target, accent: '#E8472B', linkHref: '/shapes',
       title: 'تحليل شكل الجسم',
       desc: 'اعرف نوع جسمك واتعلم أفضل أسلوب تدريب وتغذية يناسب تركيبتك الطبيعية.',
     },
     {
-      icon: ShieldCheck, accent: '#FF375F', linkHref: '/register',
+      icon: ShieldCheck, accent: '#FF7A1A', linkHref: '/register',
       title: 'مجاني 100%',
       desc: 'مفيش اشتراكات ومفيش رسوم مخفية. سجّل حسابك دلوقتي وابدأ رحلتك فوراً.',
     },
@@ -179,27 +179,27 @@ export default function HomePage() {
       desc: 'Programs built for your level and goal — fat loss, muscle gain, or strength. Clear weekly schedules included.',
     },
     {
-      icon: Apple, accent: '#FF9F0A', linkHref: '/nutrition',
+      icon: Apple, accent: '#FF8A3D', linkHref: '/nutrition',
       title: 'Nutrition & Meal Plans',
       desc: 'Ready-made Egyptian meal plans — chicken, rice, eggs, cottage cheese. Pick your goal and swap meals freely.',
     },
     {
-      icon: Activity, accent: '#30D158', linkHref: '/dashboard',
+      icon: Activity, accent: '#FFB020', linkHref: '/dashboard',
       title: 'Progress Tracking',
       desc: 'Log your weight and measurements, track your weekly progress. See real results in real numbers.',
     },
     {
-      icon: Calculator, accent: '#64D2FF', linkHref: '/bmi',
+      icon: Calculator, accent: '#FF5E3A', linkHref: '/bmi',
       title: 'Smart Calculators',
       desc: 'BMI, TDEE, and burn rate — all the tools you need in one place, no complexity.',
     },
     {
-      icon: Target, accent: '#BF5AF2', linkHref: '/shapes',
+      icon: Target, accent: '#E8472B', linkHref: '/shapes',
       title: 'Body Type Analysis',
       desc: 'Discover your body type and learn the best training and nutrition approach for your natural build.',
     },
     {
-      icon: ShieldCheck, accent: '#FF375F', linkHref: '/register',
+      icon: ShieldCheck, accent: '#FF7A1A', linkHref: '/register',
       title: '100% Free',
       desc: 'No subscriptions, no hidden fees. Create your account now and start your journey immediately.',
     },
@@ -278,7 +278,7 @@ export default function HomePage() {
         </motion.div>
 
         {/* Big BG letter */}
-        <motion.div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '3vw', fontFamily: 'var(--font-display)', fontSize: 'clamp(300px, 42vw, 650px)', color: 'rgba(255,59,48,0.04)', userSelect: 'none', pointerEvents: 'none', zIndex: 1, y: heroY }} aria-hidden>G</motion.div>
+        <motion.div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '3vw', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(300px, 42vw, 650px)', color: 'rgba(255,59,48,0.04)', userSelect: 'none', pointerEvents: 'none', zIndex: 1, y: heroY }} aria-hidden>G</motion.div>
 
         {/* Hero Content */}
         <motion.div style={{ position: 'relative', zIndex: 2, maxWidth: 860, y: heroY, opacity: heroOpacity, direction: ar ? 'rtl' : 'ltr' }}>
@@ -294,16 +294,16 @@ export default function HomePage() {
 
           {/* Headline */}
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '0.03em', color: 'var(--chalk)', lineHeight: 0.95, marginBottom: 0 }}>
-            {ar ? 'ابنِ' : 'BUILD'}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', lineHeight: 0.95, marginBottom: 0 }}>
+            {ar ? 'ابنِ' : 'Build'}
           </motion.h1>
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '0.03em', lineHeight: 0.95, marginBottom: 0, background: 'linear-gradient(90deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 40px rgba(255,43,48,0.35))' }}>
-            {ar ? 'جسمك' : 'YOUR BODY'}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '-0.01em', lineHeight: 0.95, marginBottom: 0, background: 'linear-gradient(90deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 40px rgba(255,43,48,0.35))' }}>
+            {ar ? 'جسمك' : 'Your Body'}
           </motion.h1>
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.26, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '0.03em', color: 'var(--chalk)', lineHeight: 0.95, marginBottom: 36 }}>
-            {ar ? 'بخطة مخصصة' : 'YOUR PLAN'}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', lineHeight: 0.95, marginBottom: 36 }}>
+            {ar ? 'بخطة مخصصة' : 'Your Plan'}
           </motion.h1>
 
           {/* Subtext */}
@@ -353,7 +353,7 @@ export default function HomePage() {
             ].map(({ num, label }, i) => (
               <Reveal key={i} delay={i * 0.08}>
                 <div style={{ textAlign: 'center', padding: '32px 16px', direction: ar ? 'rtl' : 'ltr' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 5vw, 3.8rem)', color: '#FF3B30', lineHeight: 1, textShadow: '0 0 30px rgba(255,59,48,0.4)' }}>{num}</div>
+                  <div style={{ fontFamily: 'var(--font-numeral)', fontSize: 'clamp(2.5rem, 5vw, 3.8rem)', lineHeight: 1, background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 18px rgba(255,43,48,0.25))' }}>{num}</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.63rem', letterSpacing: '0.08em', color: 'var(--ash-light)', marginTop: 10, textTransform: 'uppercase' }}>{label}</div>
                 </div>
               </Reveal>
@@ -370,8 +370,8 @@ export default function HomePage() {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#FF3B30', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>
                 {ar ? '— كل اللي محتاجه في مكان واحد' : '— Everything you need, in one place'}
               </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '0.04em', color: 'var(--chalk)', lineHeight: 1.1 }}>
-                {ar ? 'خدمات ' : 'What '}<span style={{ color: '#FF3B30', textShadow: '0 0 40px rgba(255,59,48,0.35)' }}>GYMZ</span>{ar ? '' : ' Offers'}
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', lineHeight: 1.1 }}>
+                {ar ? 'خدمات ' : 'What '}<span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 24px rgba(255,43,48,0.3))' }}>GYMZ</span>{ar ? '' : ' Offers'}
               </h2>
             </div>
           </Reveal>
@@ -390,8 +390,8 @@ export default function HomePage() {
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#FF3B30', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>
                   {ar ? '— ازاي تبدأ' : '— How it works'}
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '0.04em', color: 'var(--chalk)', lineHeight: 1.1, marginBottom: 48 }}>
-                  {ar ? <>٣ خطوات<br /><span style={{ color: '#FF3B30' }}>وتبدأ</span></> : <>3 Steps to<br /><span style={{ color: '#FF3B30' }}>Get Started</span></>}
+                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', lineHeight: 1.1, marginBottom: 48 }}>
+                  {ar ? <>٣ خطوات<br /><span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>وتبدأ</span></> : <>3 Steps to<br /><span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>Get Started</span></>}
                 </h2>
               </Reveal>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
@@ -429,8 +429,8 @@ export default function HomePage() {
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#FF3B30', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14 }}>
                   {ar ? '— برامج مختارة' : '— Featured Programs'}
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--chalk)', lineHeight: 1.1 }}>
-                  {ar ? <>مبنية على<br /><span style={{ color: '#FF3B30' }}>نتائج حقيقية</span></> : <>Built for<br /><span style={{ color: '#FF3B30' }}>Real Results</span></>}
+                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', lineHeight: 1.1 }}>
+                  {ar ? <>مبنية على<br /><span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>نتائج حقيقية</span></> : <>Built for<br /><span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>Real Results</span></>}
                 </h2>
               </div>
               <Link href="/programs" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -452,8 +452,8 @@ export default function HomePage() {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.1em', marginBottom: 14 }}>
                 {ar ? '— استهدف أي عضلة' : '— Target any muscle'}
               </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--chalk)', lineHeight: 1.1 }}>
-                {ar ? <>كل<br /><span style={{ color: '#FF3B30' }}>المجموعات العضلية</span></> : <>Every<br /><span style={{ color: '#FF3B30' }}>Muscle Group</span></>}
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', lineHeight: 1.1 }}>
+                {ar ? <>كل<br /><span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>المجموعات العضلية</span></> : <>Every<br /><span style={{ background: 'linear-gradient(135deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>Muscle Group</span></>}
               </h2>
             </div>
           </Reveal>
@@ -462,7 +462,7 @@ export default function HomePage() {
               <Reveal key={muscleEn} delay={i * 0.05}>
                 <Link href={`/exercises?muscle_group=${muscleEn}`} style={{ textDecoration: 'none' }}>
                   <motion.div whileHover={{ backgroundColor: 'rgba(255,59,48,0.1)', borderColor: 'rgba(255,59,48,0.4)', color: '#FF3B30', y: -2 }}
-                    style={{ padding: '20px 16px', background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-display)', fontSize: '1.05rem', letterSpacing: '0.04em', color: 'var(--chalk)', transition: 'all 200ms ease', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', direction: ar ? 'rtl' : 'ltr' }}>
+                    style={{ padding: '20px 16px', background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.01em', color: 'var(--chalk)', transition: 'all 200ms ease', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', direction: ar ? 'rtl' : 'ltr' }}>
                     {ar ? muscles.ar[i] : muscleEn}
                     <ArrowIcon size={14} style={{ color: '#FF3B30', opacity: 0.5 }} />
                   </motion.div>
@@ -481,7 +481,7 @@ export default function HomePage() {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.1em', marginBottom: 20 }}>
                 {ar ? '— مفيش أعذار. مفيش غداً.' : '— No excuses. No tomorrow.'}
               </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 36 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '-0.01em', color: 'var(--chalk)', marginBottom: 36 }}>
                 {ar ? 'جاهز تبدأ؟' : 'Ready to Start?'}
               </h2>
               <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>

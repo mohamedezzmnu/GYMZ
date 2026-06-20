@@ -64,7 +64,7 @@ export default function Navbar() {
         <Link href="/" style={{ textDecoration: 'none' }}>
           <motion.div
             whileHover={{ scale: 1.04 }}
-            style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.08em', color: 'var(--chalk)', display: 'flex', alignItems: 'center', gap: 0 }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '0.01em', color: 'var(--chalk)', display: 'flex', alignItems: 'center', gap: 0 }}
           >
             GYM<span style={{ color: '#FF3B30' }}>Z</span>
           </motion.div>
