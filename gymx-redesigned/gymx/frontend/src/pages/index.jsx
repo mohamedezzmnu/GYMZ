@@ -7,8 +7,12 @@ import {
   CheckCircle2, Star, Play, Flame, Apple, ChevronRight,
 } from 'lucide-react';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
+
+// Three.js needs a real window/canvas, so it's loaded client-side only.
+const ParticleAthlete = dynamic(() => import('../components/layout/three/ParticleAthlete'), { ssr: false });
 
 // ── helpers ───────────────────────────────────────────────
 function Reveal({ children, delay = 0, style = {} }) {
@@ -249,17 +253,21 @@ export default function HomePage() {
       {/* ══ HERO ══════════════════════════════════════════ */}
       <section ref={heroRef} style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 24px', overflow: 'hidden' }}>
 
-        {/* Background image overlay */}
+        {/* Background image overlay — kept very faint now that the particle athlete is the focal element */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 0,
           background: 'url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&q=80") center/cover no-repeat',
-          filter: 'brightness(0.18) saturate(1.2)',
+          filter: 'brightness(0.08) saturate(1.1)',
         }} />
+
+        {/* Giant floating 3D particle athlete + glowing dumbbells (Three.js, client-only) */}
+        <ParticleAthlete style={{ zIndex: 1, opacity: 0.9 }} />
 
         {/* Red glow overlay */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1,
           background: 'radial-gradient(ellipse 70% 60% at 20% 60%, rgba(255,59,48,0.18) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 80% 20%, rgba(255,59,48,0.08) 0%, transparent 60%)',
+          pointerEvents: 'none',
         }} />
 
         {/* Vertical lines */}
@@ -290,7 +298,7 @@ export default function HomePage() {
             {ar ? 'ابنِ' : 'BUILD'}
           </motion.h1>
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '0.03em', color: '#FF3B30', lineHeight: 0.95, textShadow: '0 0 60px rgba(255,59,48,0.45)', marginBottom: 0 }}>
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.2rem, 9vw, 7.5rem)', letterSpacing: '0.03em', lineHeight: 0.95, marginBottom: 0, background: 'linear-gradient(90deg, #FF7A1A, #FF2B30)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 40px rgba(255,43,48,0.35))' }}>
             {ar ? 'جسمك' : 'YOUR BODY'}
           </motion.h1>
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.26, ease: [0.25, 0.46, 0.45, 0.94] }}
