@@ -255,18 +255,19 @@ export default function HomePage() {
         {/* Animated monochrome background — no external video dependency */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 0,
-          background: 'radial-gradient(ellipse 70% 60% at 80% 30%, rgba(255,255,255,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 15% 80%, rgba(255,255,255,0.05) 0%, transparent 65%), #000',
-          backgroundSize: '200% 200%',
-          animation: 'heroGradientShift 14s ease-in-out infinite',
+          background: 'radial-gradient(ellipse 65% 55% at 78% 28%, rgba(255,255,255,0.16) 0%, transparent 60%), radial-gradient(ellipse 55% 50% at 12% 85%, rgba(255,255,255,0.10) 0%, transparent 65%), #000',
+          backgroundSize: '180% 180%',
+          animation: 'heroGradientShift 10s ease-in-out infinite',
         }} />
 
-        {/* Faint moving grid for texture */}
+        {/* Moving grid for texture */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 0,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
-          backgroundSize: '64px 64px',
-          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 0%, transparent 75%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 0%, transparent 75%)',
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.09) 1px, transparent 1px)',
+          backgroundSize: '56px 56px',
+          maskImage: 'radial-gradient(ellipse 90% 90% at 50% 35%, #000 0%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 90% 90% at 50% 35%, #000 0%, transparent 80%)',
+          animation: 'heroGridDrift 22s linear infinite',
           pointerEvents: 'none',
         }} />
 
@@ -274,6 +275,10 @@ export default function HomePage() {
           @keyframes heroGradientShift {
             0%, 100% { background-position: 0% 0%; }
             50% { background-position: 100% 100%; }
+          }
+          @keyframes heroGridDrift {
+            from { background-position: 0 0; }
+            to { background-position: 56px 56px; }
           }
         `}</style>
 
