@@ -133,16 +133,72 @@ CREATE TABLE program_exercises (
 CREATE INDEX idx_program_exercises_day ON program_exercises(program_day_id);
 
 -- =============================================
+-- USER ONBOARDING (quiz answers + goal weight)
+-- =============================================
+CREATE TABLE user_onboarding (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  goal VARCHAR(50),
+  level VARCHAR(20),
+  days_per_week INTEGER,
+  recommended_program VARCHAR(200),
+  goal_weight NUMERIC(5,2),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =============================================
+-- WORKOUT SESSIONS (per-day session log)
+-- =============================================
+CREATE TABLE workout_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  program_title VARCHAR(200),
+  day_label VARCHAR(100),
+  session_day VARCHAR(50),
+  done BOOLEAN DEFAULT false,
+  duration_min INTEGER,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_workout_sessions_user ON workout_sessions(user_id);
+CREATE INDEX idx_workout_sessions_created ON workout_sessions(created_at);
+
+-- =============================================
+-- WEIGHT LOG (body weight tracking)
+-- =============================================
+CREATE TABLE weight_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  weight NUMERIC(5,2) NOT NULL,
+  logged_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_weight_log_user ON weight_log(user_id);
+
+-- =============================================
+-- NUTRITION PREMIUM (waitlist / access list)
+-- =============================================
+CREATE TABLE nutrition_premium (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =============================================
 -- USER PROGRAMS (Enrollments)
 -- =============================================
 CREATE TABLE user_programs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id),
+  program_title VARCHAR(200) NOT NULL,
+  program_title_ar VARCHAR(200),
+  days_per_week INTEGER,
+  level VARCHAR(20),
+  progress INTEGER DEFAULT 0,
   started_at TIMESTAMP DEFAULT NOW(),
   completed_at TIMESTAMP,
   is_active BOOLEAN DEFAULT true,
-  UNIQUE(user_id, program_id)
+  UNIQUE(user_id, program_title)
 );
 
 -- =============================================
