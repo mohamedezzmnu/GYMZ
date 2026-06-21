@@ -14,20 +14,20 @@ function PremiumGate({ user }) {
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
+        style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--fire),transparent)' }} />
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,107,43,0.1)', border: '1px solid rgba(255,107,43,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 26 }}>🔒</div>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 26 }}>🔒</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 8 }}>للمشتركين فقط</h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 24 }}>
           الأنظمة الغذائية متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش واتفتحلك فوراً.
         </p>
-        <div style={{ padding: '16px', background: 'rgba(255,59,48,0.07)', border: '1px solid rgba(255,59,48,0.2)', borderRadius: 'var(--radius-sm)', marginBottom: 16 }}>
-          <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 8 }}>ابعت على فودافون كاش</div>
+        <div style={{ padding: '16px', background: 'rgba(255,77,46,0.07)', border: '1px solid rgba(255,77,46,0.2)', borderRadius: 'var(--radius-sm)', marginBottom: 16 }}>
+          <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8 }}>ابعت على فودافون كاش</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--chalk)', letterSpacing: '0.06em', direction: 'ltr' }}>01097931713</div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--fire)', lineHeight: 1 }}>29</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--accent)', lineHeight: 1 }}>29</div>
               <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>جنيه</div>
             </div>
           </div>
@@ -248,7 +248,7 @@ function MealCard({ meal, planColor, mealIndex }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: mealIndex * 0.07 }}
-      style={{ background: cardBg, backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: `1px solid ${cardBorderColor}`, borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 12 }}
+      style={{ background: cardBg, border: `1px solid ${cardBorderColor}`, borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 12 }}
     >
       {/* ✅ شريط علوي ملون لوجبات التمرين */}
       {(meal.preWorkout || meal.postWorkout) && (
@@ -366,7 +366,7 @@ function MealCard({ meal, planColor, mealIndex }) {
 function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, currentIndex, onSelect }) {
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 6 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: `${color}09`, border: `1px solid ${color}25`, borderRadius: 'var(--radius-sm)' }}>
         <span style={{ fontSize: '0.82rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{item.name}</span>
         <button
@@ -398,7 +398,7 @@ function SupplementsCard({ goalType }) {
   const supps = SUPPLEMENTS[goalType] || SUPPLEMENTS.maintain;
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ marginBottom: 16, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+    <div style={{ marginBottom: 16, background: 'var(--glass-bg)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
       <div style={{ height: 2, background: 'linear-gradient(90deg,#a78bfa,transparent)' }} />
       <div onClick={() => setOpen(p => !p)} style={{ padding: '14px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -474,7 +474,7 @@ function UserDataForm({ onCalculate }) {
   };
   const labelStyle = {
     display: 'block', fontSize: '0.62rem', fontFamily: 'var(--font-mono)',
-    color: 'var(--ash-light)', letterSpacing: '0.08em', marginBottom: 6,
+    color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 6,
   };
   const activities = [
     { id: 'sedentary',  label: 'مش بتتحرك', desc: 'مكتب طول اليوم' },
@@ -497,11 +497,11 @@ function UserDataForm({ onCalculate }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-      style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '28px 24px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}
+      style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '28px 24px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}
     >
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--fire),transparent)' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <Calculator size={18} color="var(--fire)" />
+        <Calculator size={18} color="var(--accent)" />
         <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>احسب نظامك</span>
       </div>
       <div style={{ marginBottom: 16 }}>
@@ -509,7 +509,7 @@ function UserDataForm({ onCalculate }) {
         <div style={{ display: 'flex', gap: 8 }}>
           {[{ id: 'male', label: '👨 ذكر' }, { id: 'female', label: '👩 أنثى' }].map(g => (
             <button key={g.id} onClick={() => setGender(g.id)}
-              style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,107,43,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gender === g.id ? 'rgba(255,107,43,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--fire)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}>
+              style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,77,46,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gender === g.id ? 'rgba(255,77,46,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--accent)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}>
               {g.label}
             </button>
           ))}
@@ -532,8 +532,8 @@ function UserDataForm({ onCalculate }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {activities.map(a => (
             <button key={a.id} onClick={() => setActivity(a.id)}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,107,43,0.1)' : 'rgba(255,255,255,0.02)', border: `1px solid ${activity === a.id ? 'rgba(255,107,43,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: activity === a.id ? 'var(--fire)' : 'var(--chalk)' }}>{a.label}</span>
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,77,46,0.1)' : 'rgba(255,255,255,0.02)', border: `1px solid ${activity === a.id ? 'rgba(255,77,46,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: activity === a.id ? 'var(--accent)' : 'var(--chalk)' }}>{a.label}</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>{a.desc}</span>
             </button>
           ))}
@@ -546,7 +546,7 @@ function UserDataForm({ onCalculate }) {
       )}
       <button
         onClick={handleCalc}
-        style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg,var(--fire),#ff8c42)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer' }}
+        style={{ width: '100%', padding: '14px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer' }}
       >
         احسب TDEE وأنا الخطة 🔥
       </button>
@@ -588,7 +588,7 @@ export default function NutritionPage() {
   if (authLoading || checking) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader size={28} color="var(--fire)" style={{ animation: 'spin 1s linear infinite' }} />
+        <Loader size={28} color="var(--accent)" style={{ animation: 'spin 1s linear infinite' }} />
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -609,14 +609,14 @@ export default function NutritionPage() {
     <>
       <Head><title>الأنظمة الغذائية — GYMZ</title></Head>
       <div style={{ minHeight: '100vh', paddingTop: 88, paddingBottom: 60, position: 'relative', direction: 'rtl' }}>
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(255,107,43,0.07) 0%,transparent 60%)' }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(255,77,46,0.07) 0%,transparent 60%)' }} />
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
 
           {/* header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} style={{ marginBottom: 32 }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--fire)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}>— أنظمة غذائية مصرية</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash)', marginBottom: 8 }}>أنظمة غذائية مصرية</div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem,5vw,3.5rem)', letterSpacing: '0.04em', lineHeight: 1 }}>
-              تغذية<br /><span style={{ color: 'var(--fire)' }}>على قد إيدك</span>
+              تغذية<br /><span style={{ color: 'var(--accent)' }}>على قد إيدك</span>
             </h1>
             <p style={{ color: 'var(--ash-light)', marginTop: 12, fontSize: '0.875rem', lineHeight: 1.7 }}>
               حط بياناتك، هنحسبلك الـ TDEE الخاص بيك ونديك النظام المناسب لهدفك.
@@ -634,11 +634,11 @@ export default function NutritionPage() {
               {/* TDEE badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'rgba(255,107,43,0.06)', border: '1px solid rgba(255,107,43,0.2)', borderRadius: 'var(--radius-md)', marginBottom: 20 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'rgba(255,77,46,0.06)', border: '1px solid rgba(255,77,46,0.2)', borderRadius: 'var(--radius-md)', marginBottom: 20 }}
               >
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.1em', marginBottom: 4 }}>TDEE — حرقك اليومي</div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--fire)', lineHeight: 1 }}>{tdee} <span style={{ fontSize: '0.8rem', color: 'var(--ash-light)' }}>سعرة/يوم</span></div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 4 }}>TDEE — حرقك اليومي</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--accent)', lineHeight: 1 }}>{tdee} <span style={{ fontSize: '0.8rem', color: 'var(--ash-light)' }}>سعرة/يوم</span></div>
                 </div>
                 <button
                   onClick={() => { setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); }}
@@ -667,7 +667,7 @@ export default function NutritionPage() {
               <AnimatePresence mode="wait">
                 <motion.div key={activePlan}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ marginBottom: 24, padding: '18px 20px', background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', position: 'relative', overflow: 'hidden' }}
+                  style={{ marginBottom: 24, padding: '18px 20px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', position: 'relative', overflow: 'hidden' }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${plan.color},transparent)` }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -709,7 +709,7 @@ export default function NutritionPage() {
               <SupplementsCard goalType={plan.goalType} />
 
               {/* meals */}
-              <div style={{ marginBottom: 8, fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <div style={{ marginBottom: 8, fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.02em', }}>
                 الوجبات — اضغط على الوجبة للتفاصيل والبدائل
               </div>
               <AnimatePresence mode="wait">

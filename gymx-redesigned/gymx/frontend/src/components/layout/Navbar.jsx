@@ -52,41 +52,38 @@ export default function Navbar() {
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
           padding: '0 24px', height: 64,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: scrolled ? 'rgba(8,8,16,0.82)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(20px) saturate(160%)' : 'none',
-          WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(160%)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.07)' : '1px solid transparent',
-          boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.3)' : 'none',
-          transition: 'all 300ms cubic-bezier(0.4,0,0.2,1)',
+          background: scrolled ? 'var(--obsidian)' : 'transparent',
+          borderBottom: scrolled ? '1px solid var(--glass-border)' : '1px solid transparent',
+          transition: 'background 180ms cubic-bezier(0.16,1,0.3,1), border-color 180ms cubic-bezier(0.16,1,0.3,1)',
         }}
       >
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <motion.div
-            whileHover={{ scale: 1.04 }}
-            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '0.01em', color: 'var(--chalk)', display: 'flex', alignItems: 'center', gap: 0 }}
+          <div
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.15rem', letterSpacing: '-0.02em', color: 'var(--chalk)', display: 'flex', alignItems: 'center', gap: 6 }}
           >
-            GYM<span style={{ color: '#FF3B30' }}>Z</span>
-          </motion.div>
+            GYMZ
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
+          </div>
         </Link>
 
         {/* Desktop Links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }} className="desktop-nav">
           {navLinks.map(({ href, label }) => (
             <Link key={href} href={href} style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.09em',
-              textTransform: 'uppercase', textDecoration: 'none', transition: 'color 150ms ease',
-              color: isActive(href) ? '#FF3B30' : 'var(--ash-light)',
+              fontFamily: 'var(--font-body)', fontSize: '0.86rem', fontWeight: 500,
+              textDecoration: 'none', transition: 'color 120ms ease',
+              color: isActive(href) ? 'var(--chalk)' : 'var(--ash-light)',
             }}>
               {label}
             </Link>
           ))}
 
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={toggleLang} style={{ background:'none', border:'1px solid rgba(255,255,255,0.15)', color:'var(--ash-light)', padding:'4px 10px', borderRadius:4, cursor:'pointer', fontFamily:'var(--font-mono)', fontSize:'0.72rem', transition:'all 150ms' }}>
+            <button onClick={toggleLang} style={{ background:'none', border:'1px solid var(--glass-border)', color:'var(--ash-light)', padding:'4px 10px', borderRadius:6, cursor:'pointer', fontFamily:'var(--font-body)', fontSize:'0.78rem', fontWeight: 500, transition:'border-color 120ms, color 120ms' }}>
               {lang === 'ar' ? 'EN' : 'عر'}
             </button>
-            <button onClick={toggleTheme} style={{ background:'none', border:'1px solid rgba(255,255,255,0.15)', color:'var(--ash-light)', padding:'4px 10px', borderRadius:4, cursor:'pointer', fontSize:'0.85rem' }}>
+            <button onClick={toggleTheme} style={{ background:'none', border:'1px solid var(--glass-border)', color:'var(--ash-light)', padding:'4px 10px', borderRadius:6, cursor:'pointer', fontSize:'0.85rem' }}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
           </div>
@@ -94,9 +91,9 @@ export default function Navbar() {
           {user ? (
             <div style={{ display:'flex', alignItems:'center', gap:14 }}>
               {user.role === 'admin' && (
-                <Link href="/admin" className="btn btn-outline" style={{ padding:'7px 14px', fontSize:'0.68rem' }}>Admin</Link>
+                <Link href="/admin" className="btn btn-outline" style={{ padding:'7px 14px', fontSize:'0.78rem' }}>Admin</Link>
               )}
-              <button onClick={logout} style={{ display:'flex', alignItems:'center', gap:5, background:'none', border:'none', color:'var(--ash-light)', cursor:'pointer', fontFamily:'var(--font-mono)', fontSize:'0.7rem', letterSpacing:'0.09em', textTransform:'uppercase', transition:'color 150ms' }}
+              <button onClick={logout} style={{ display:'flex', alignItems:'center', gap:5, background:'none', border:'none', color:'var(--ash-light)', cursor:'pointer', fontFamily:'var(--font-body)', fontSize:'0.84rem', fontWeight: 500, transition:'color 120ms' }}
                 onMouseEnter={e => e.currentTarget.style.color='var(--chalk)'}
                 onMouseLeave={e => e.currentTarget.style.color='var(--ash-light)'}>
                 <LogOut size={13} /> {lang === 'ar' ? 'خروج' : 'Logout'}
@@ -124,26 +121,27 @@ export default function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }}
-            style={{ position:'fixed', top:64, left:0, right:0, zIndex:99, background:'rgba(8,8,16,0.95)', backdropFilter:'blur(24px) saturate(160%)', WebkitBackdropFilter:'blur(24px) saturate(160%)', borderBottom:'1px solid rgba(255,255,255,0.07)', padding:'20px 24px', display:'flex', flexDirection:'column', gap:16 }}
+            initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-6 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            style={{ position:'fixed', top:64, left:0, right:0, zIndex:99, background:'var(--obsidian)', borderBottom:'1px solid var(--glass-border)', padding:'20px 24px', display:'flex', flexDirection:'column', gap:16 }}
           >
             {navLinks.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:12, fontFamily:'var(--font-display)', fontSize:'1.3rem', letterSpacing:'0.04em', textDecoration:'none', color: isActive(href) ? '#FF3B30' : 'var(--chalk)' }}>
+              <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:12, fontFamily:'var(--font-body)', fontWeight: 600, fontSize:'1.05rem', textDecoration:'none', color: isActive(href) ? 'var(--accent)' : 'var(--chalk)' }}>
                 <Icon size={18} /> {label}
               </Link>
             ))}
             {user?.role === 'admin' && (
-              <Link href="/admin" style={{ display:'flex', alignItems:'center', gap:12, fontFamily:'var(--font-display)', fontSize:'1.3rem', letterSpacing:'0.04em', textDecoration:'none', color: isActive('/admin') ? '#FF3B30' : 'var(--fire)' }}>
+              <Link href="/admin" style={{ display:'flex', alignItems:'center', gap:12, fontFamily:'var(--font-body)', fontWeight: 600, fontSize:'1.05rem', textDecoration:'none', color: isActive('/admin') ? 'var(--accent)' : 'var(--ash-light)' }}>
                 <ShieldAlert size={18} /> Admin
               </Link>
             )}
-            <hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.07)' }} />
+            <hr style={{ border:'none', borderTop:'1px solid var(--glass-border)' }} />
             <div style={{ display:'flex', gap:8 }}>
-              <button onClick={toggleLang} style={{ background:'none', border:'1px solid rgba(255,255,255,0.15)', color:'var(--ash-light)', padding:'7px 14px', borderRadius:4, cursor:'pointer', fontFamily:'var(--font-mono)', fontSize:'0.8rem' }}>{lang === 'ar' ? 'EN' : 'عر'}</button>
-              <button onClick={toggleTheme} style={{ background:'none', border:'1px solid rgba(255,255,255,0.15)', color:'var(--ash-light)', padding:'7px 14px', borderRadius:4, cursor:'pointer', fontSize:'0.9rem' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
+              <button onClick={toggleLang} style={{ background:'none', border:'1px solid var(--glass-border)', color:'var(--ash-light)', padding:'7px 14px', borderRadius:6, cursor:'pointer', fontFamily:'var(--font-body)', fontSize:'0.85rem' }}>{lang === 'ar' ? 'EN' : 'عر'}</button>
+              <button onClick={toggleTheme} style={{ background:'none', border:'1px solid var(--glass-border)', color:'var(--ash-light)', padding:'7px 14px', borderRadius:6, cursor:'pointer', fontSize:'0.9rem' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
             </div>
             {user ? (
-              <button onClick={logout} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', color:'var(--ash-light)', cursor:'pointer', fontFamily:'var(--font-display)', fontSize:'1.2rem', letterSpacing:'0.04em' }}>
+              <button onClick={logout} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', color:'var(--ash-light)', cursor:'pointer', fontFamily:'var(--font-body)', fontWeight: 600, fontSize:'1rem' }}>
                 <LogOut size={18} /> {lang === 'ar' ? 'خروج' : 'Logout'}
               </button>
             ) : (
@@ -159,8 +157,8 @@ export default function Navbar() {
       {/* ── BOTTOM NAV (Mobile Only) ── */}
       <nav className="bottom-nav" style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:100,
-        background:'rgba(8,8,16,0.92)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
-        borderTop:'1px solid rgba(255,255,255,0.08)',
+        background:'var(--obsidian)',
+        borderTop:'1px solid var(--glass-border)',
         display:'flex', alignItems:'center', justifyContent:'space-around',
         padding:'8px 0 env(safe-area-inset-bottom,8px)',
         display:'none',
@@ -168,9 +166,9 @@ export default function Navbar() {
         {bottomLinks.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
-            <Link key={href} href={href} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, textDecoration:'none', padding:'4px 12px', color: active ? '#FF3B30' : 'var(--ash)' }}>
+            <Link key={href} href={href} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, textDecoration:'none', padding:'4px 12px', color: active ? 'var(--accent)' : 'var(--ash)' }}>
               <Icon size={20} strokeWidth={active ? 2.2 : 1.6} />
-              <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.52rem', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</span>
+              <span style={{ fontFamily:'var(--font-body)', fontSize:'0.65rem', fontWeight: 500 }}>{label}</span>
             </Link>
           );
         })}

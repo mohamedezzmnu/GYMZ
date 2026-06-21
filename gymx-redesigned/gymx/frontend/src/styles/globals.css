@@ -1,31 +1,31 @@
 [data-theme="dark"] {
-  --bg: #0a0a0a;
-  --carbon: #111;
-  --chalk: #f5f5f5;
-  --ash: #888;
-  --iron: #2a2a2a;
-  --iron-light: #333;
+  --bg: #0B0B0C;
+  --carbon: #141415;
+  --chalk: #F2F2F0;
+  --ash: #6E6E72;
+  --iron: #1C1C1E;
+  --iron-light: #232325;
   --obsidian: #000;
 }
 
 [data-theme="light"] {
-  --bg: #f0f2f5;
+  --bg: #FAFAF9;
   --obsidian: #ffffff;
   --carbon: #ffffff;
-  --iron: #e2e6ec;
-  --iron-light: #d0d5de;
-  --iron-mid: #c8cdd8;
-  --ash: #7a8499;
-  --ash-light: #6b7280;
-  --chalk: #111827;
-  --chalk-dim: rgba(17,24,39,0.6);
+  --iron: #ECECEA;
+  --iron-light: #E2E2DF;
+  --iron-mid: #D8D8D4;
+  --ash: #84847E;
+  --ash-light: #6B6B66;
+  --chalk: #18181A;
+  --chalk-dim: rgba(24,24,26,0.6);
   --glass-bg: rgba(255,255,255,0.7);
   --glass-bg-hover: rgba(255,255,255,0.9);
   --glass-border: rgba(0,0,0,0.08);
-  --glass-border-hover: rgba(61,127,255,0.45);
-  --glass-blur: blur(20px) saturate(180%);
-  --glass-shadow: 0 4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
-  --glass-shadow-hover: 0 12px 40px rgba(61,127,255,0.15), inset 0 1px 0 rgba(255,255,255,1);
+  --glass-border-hover: rgba(0,0,0,0.14);
+  --glass-blur: none;
+  --glass-shadow: none;
+  --glass-shadow-hover: none;
 }
 
 body {
@@ -33,67 +33,66 @@ body {
   color: var(--chalk);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500&display=swap');
 
 /* =============================================
-   DESIGN TOKENS — GYMX v2 (Electric Blue + Fire Orange)
+   DESIGN TOKENS — GYMZ v3 (Calm / Impeccable / Restrained)
+   One accent. No glow. No glass. Motion only where it earns its place.
    ============================================= */
 :root {
   /* Backgrounds */
-  --obsidian: #080810;
-  --carbon: #0D0D1A;
-  --iron: #141428;
-  --iron-light: #1E1E3A;
-  --iron-mid: #252545;
+  --obsidian: #000000;
+  --carbon: #141415;
+  --iron: #1C1C1E;
+  --iron-light: #232325;
+  --iron-mid: #2A2A2C;
 
-  /* Primary accent — Fire Red */
-  --accent: #FF3B30;
-  --accent-dim: rgba(255, 59, 48, 0.12);
-  --accent-glow: rgba(255, 59, 48, 0.30);
-  --accent-bright: #FF6B60;
+  /* Single accent — used sparingly */
+  --accent: #FF4D2E;
+  --accent-dim: rgba(255, 77, 46, 0.10);
+  --accent-glow: rgba(255, 77, 46, 0.18);
+  --accent-bright: #FF6A4D;
 
-  /* Legacy volt kept for compatibility */
-  --volt: #FF3B30;
-  --volt-dim: rgba(255, 59, 48, 0.12);
-  --volt-glow: rgba(255, 59, 48, 0.30);
-  --volt-bright: #FF6B60;
-
-  /* Secondary accent — Fire Orange */
-  --fire: #FF6B2B;
-  --fire-dim: rgba(255, 107, 43, 0.12);
-  --fire-glow: rgba(255, 107, 43, 0.28);
+  /* Legacy aliases kept for compatibility — all map to the one accent now */
+  --volt: var(--accent);
+  --volt-dim: var(--accent-dim);
+  --volt-glow: var(--accent-glow);
+  --volt-bright: var(--accent-bright);
+  --fire: var(--accent);
+  --fire-dim: var(--accent-dim);
+  --fire-glow: var(--accent-glow);
 
   /* Text */
-  --ash: #5A5A7A;
-  --ash-light: #8888AA;
-  --chalk: #E8E8F0;
-  --chalk-dim: rgba(232, 232, 240, 0.55);
+  --ash: #6E6E72;
+  --ash-light: #9A9A9D;
+  --chalk: #F2F2F0;
+  --chalk-dim: rgba(242, 242, 240, 0.55);
 
-  /* Liquid Glass */
-  --glass-bg: rgba(255, 255, 255, 0.055);
-  --glass-bg-hover: rgba(255, 255, 255, 0.09);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-border-hover: rgba(61, 127, 255, 0.45);
-  --glass-blur: blur(20px) saturate(180%);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.08);
-  --glass-shadow-hover: 0 16px 48px rgba(61, 127, 255, 0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+  /* Surfaces — flat, no blur, no glow */
+  --glass-bg: var(--carbon);
+  --glass-bg-hover: var(--iron-light);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-border-hover: rgba(255, 255, 255, 0.14);
+  --glass-blur: none;
+  --glass-shadow: none;
+  --glass-shadow-hover: none;
 
-  /* Fonts */
-  --font-display: 'Syne', sans-serif;
-  --font-numeral: 'Bebas Neue', sans-serif;
+  /* Fonts — one quiet display face, one body face, one mono for data */
+  --font-display: 'Inter', sans-serif;
+  --font-numeral: 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
 
   /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
-  --radius-xl: 30px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions — fast, purposeful, under 300ms per Emil Kowalski's motion principles */
+  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* =============================================
@@ -121,93 +120,77 @@ body {
 }
 
 /* =============================================
-   LIQUID GLASS UTILITY CLASSES
+   SURFACE UTILITY CLASSES — flat, no blur, no glow
    ============================================= */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
 }
 
 .glass:hover {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border-hover);
-  box-shadow: var(--glass-shadow-hover);
 }
 
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow);
-  transition: all var(--transition-base);
+  transition: background var(--transition-base), border-color var(--transition-base);
   overflow: hidden;
 }
 
 .glass-card:hover {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border-hover);
-  box-shadow: var(--glass-shadow-hover);
-  transform: translateY(-4px);
 }
 
 .glass-panel {
-  background: linear-gradient(135deg, rgba(61,127,255,0.07) 0%, rgba(255,107,43,0.04) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: var(--carbon);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
-}
-
-/* Inner highlight line (top edge shimmer) */
-.glass::before,
-.glass-card::before,
-.glass-panel::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  pointer-events: none;
 }
 
 /* =============================================
-   TYPOGRAPHY
+   TYPOGRAPHY — quiet, sentence case, no shouting
    ============================================= */
 .display-xl {
   font-family: var(--font-display);
-  font-size: clamp(4rem, 12vw, 10rem);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-weight: 600;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
 }
 
 .display-lg {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 5rem);
-  line-height: 0.95;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-weight: 600;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
 }
 
 .display-md {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.display-sm {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
 }
 
 .mono {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ash-light);
 }
 
 /* =============================================
@@ -216,26 +199,26 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--carbon); }
 ::-webkit-scrollbar-thumb { background: var(--iron-light); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+::-webkit-scrollbar-thumb:hover { background: var(--ash); }
 
 /* =============================================
    SELECTION
    ============================================= */
 ::selection {
   background: var(--accent);
-  color: var(--obsidian);
+  color: #fff;
 }
 
 /* =============================================
    UTILITY
    ============================================= */
-.volt { color: var(--volt); }
-.fire { color: var(--fire); }
+.volt { color: var(--accent); }
+.fire { color: var(--accent); }
 .ash { color: var(--ash); }
 .chalk { color: var(--chalk); }
 
-.volt-bg { background-color: var(--volt); color: #fff; }
-.fire-bg { background-color: var(--fire); color: #fff; }
+.volt-bg { background-color: var(--accent); color: #fff; }
+.fire-bg { background-color: var(--accent); color: #fff; }
 .carbon-bg { background-color: var(--carbon); }
 .iron-bg { background-color: var(--iron); }
 
@@ -249,48 +232,39 @@ body {
   padding: 12px 24px;
   border: none;
   border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.92rem;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
   position: relative;
   overflow: hidden;
 }
 
-/* Glass primary button */
+/* Primary button — solid, no gradient, no colored shadow */
 .btn-primary {
-  background: linear-gradient(135deg, #FF3B30 0%, #FF6B60 100%);
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 4px 20px rgba(255,59,48,0.35);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(255,59,48,0.45);
-  filter: brightness(1.1);
+  background: var(--accent-bright);
 }
 
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:active { transform: scale(0.98); }
 
-/* Glass outline button */
+/* Outline button */
 .btn-outline {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: transparent;
   color: var(--chalk);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
 }
 
 .btn-outline:hover {
-  border-color: var(--accent);
-  color: var(--accent-bright);
+  border-color: var(--ash-light);
   background: var(--glass-bg-hover);
-  box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .btn-ghost {
@@ -301,16 +275,14 @@ body {
 
 .btn-ghost:hover { color: var(--chalk); }
 
-/* Fire CTA button */
+/* Secondary accent CTA — same single accent, flat */
 .btn-fire {
-  background: linear-gradient(135deg, var(--fire) 0%, #FF9A5C 100%);
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 4px 20px var(--fire-glow);
 }
 
 .btn-fire:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px var(--fire-glow);
+  background: var(--accent-bright);
 }
 
 /* =============================================
@@ -318,30 +290,24 @@ body {
    ============================================= */
 .card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: all var(--transition-base);
+  transition: background var(--transition-base), border-color var(--transition-base);
   position: relative;
 }
 
 .card:hover {
   border-color: var(--glass-border-hover);
-  transform: translateY(-4px);
-  box-shadow: var(--glass-shadow-hover);
   background: var(--glass-bg-hover);
 }
 
 .card-volt:hover {
-  border-color: rgba(61, 127, 255, 0.5);
-  box-shadow: 0 16px 48px var(--volt-glow);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .card-fire:hover {
-  border-color: rgba(255, 107, 43, 0.5);
-  box-shadow: 0 16px 48px var(--fire-glow);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 /* =============================================
@@ -353,31 +319,29 @@ body {
   border-radius: 20px;
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   border: 1px solid transparent;
-  backdrop-filter: blur(8px);
 }
 
 .badge-beginner {
-  background: rgba(34, 197, 94, 0.12);
+  background: rgba(74, 222, 128, 0.10);
   color: #4ade80;
-  border-color: rgba(34, 197, 94, 0.2);
+  border-color: rgba(74, 222, 128, 0.18);
 }
 .badge-intermediate {
-  background: rgba(234, 179, 8, 0.12);
+  background: rgba(250, 204, 21, 0.10);
   color: #facc15;
-  border-color: rgba(234, 179, 8, 0.2);
+  border-color: rgba(250, 204, 21, 0.18);
 }
 .badge-advanced {
-  background: rgba(255, 107, 43, 0.12);
-  color: var(--fire);
-  border-color: rgba(255, 107, 43, 0.2);
+  background: var(--accent-dim);
+  color: var(--accent-bright);
+  border-color: rgba(255, 77, 46, 0.18);
 }
 .badge-volt {
-  background: var(--volt-dim);
-  color: var(--volt-bright);
-  border-color: rgba(61, 127, 255, 0.2);
+  background: var(--accent-dim);
+  color: var(--accent-bright);
+  border-color: rgba(255, 77, 46, 0.18);
 }
 
 /* =============================================
@@ -386,22 +350,19 @@ body {
 .input {
   width: 100%;
   padding: 13px 16px;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--carbon);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--chalk);
   font-family: var(--font-body);
   font-size: 0.9rem;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
   outline: none;
 }
 
 .input:focus {
-  border-color: var(--volt);
-  background: rgba(61, 127, 255, 0.06);
-  box-shadow: 0 0 0 3px var(--volt-dim);
+  border-color: var(--accent);
+  background: var(--iron);
 }
 
 .input::placeholder { color: var(--ash); }
@@ -410,8 +371,7 @@ body {
   display: block;
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--ash-light);
   margin-bottom: 6px;
 }
@@ -427,9 +387,8 @@ body {
 
 .divider-volt {
   height: 1px;
-  background: linear-gradient(90deg, var(--volt), var(--fire), transparent);
+  background: var(--iron-light);
   border: none;
-  opacity: 0.4;
 }
 
 /* =============================================
@@ -480,35 +439,8 @@ body {
    FOCUS VISIBLE
    ============================================= */
 :focus-visible {
-  outline: 2px solid var(--volt);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
-}
-
-/* =============================================
-   GLOBAL AMBIENT GLOW (background blobs)
-   ============================================= */
-body::before {
-  content: '';
-  position: fixed;
-  top: -20%;
-  left: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(255,59,48,0.05) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  bottom: -10%;
-  right: -10%;
-  width: 40vw;
-  height: 40vw;
-  background: radial-gradient(circle, rgba(255,59,48,0.04) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* =============================================
@@ -518,11 +450,4 @@ body::after {
   body {
     padding-bottom: 70px;
   }
-}
-
-/* =============================================
-   REDUCED GLOW on cards
-   ============================================= */
-.glass-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }

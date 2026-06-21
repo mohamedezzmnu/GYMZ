@@ -214,7 +214,7 @@ export default function OnboardingPage() {
     <>
       <Head><title>{lang === 'ar' ? 'ابدأ رحلتك' : 'Start Your Journey'} — GYMZ</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px 40px', position: 'relative' }}>
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 50% at 50% 30%, rgba(61,127,255,0.08) 0%, transparent 60%)' }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255,77,46,0.08) 0%, transparent 60%)' }} />
 
         <div style={{ width: '100%', maxWidth: 560, position: 'relative', zIndex: 1 }}>
 
@@ -229,10 +229,10 @@ export default function OnboardingPage() {
                 {/* Progress */}
                 <div style={{ marginBottom: 32 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.1em' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.02em' }}>
                       {txt.step} {step + 1} {txt.of} {steps.length}
                     </span>
-                    <button onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.8rem', cursor: 'pointer' }}>
+                    <button onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.8rem', cursor: 'pointer' }}>
                       {txt.skip} ←
                     </button>
                   </div>
@@ -240,7 +240,7 @@ export default function OnboardingPage() {
                     <motion.div
                       animate={{ width: `${((step + 1) / steps.length) * 100}%` }}
                       transition={{ duration: 0.4 }}
-                      style={{ height: '100%', borderRadius: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire))', boxShadow: '0 0 8px rgba(61,127,255,0.5)' }}
+                      style={{ height: '100%', borderRadius: 2, background: 'var(--accent)', boxShadow: 'none' }}
                     />
                   </div>
                 </div>
@@ -250,7 +250,7 @@ export default function OnboardingPage() {
                   <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '0.04em', marginBottom: 10 }}>
                     {steps[step].question}
                   </h1>
-                  <p style={{ color: 'var(--ash-light)', fontSize: '0.9rem', fontFamily: 'sans-serif' }}>
+                  <p style={{ color: 'var(--ash-light)', fontSize: '0.9rem', fontFamily: 'var(--font-body)' }}>
                     {steps[step].subtitle}
                   </p>
                 </div>
@@ -264,13 +264,13 @@ export default function OnboardingPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.07 }}
                       onClick={() => select(opt.id)}
-                      whileHover={{ borderColor: 'rgba(61,127,255,0.5)', background: 'rgba(61,127,255,0.06)' }}
+                      whileHover={{ borderColor: 'rgba(255,77,46,0.5)', background: 'rgba(255,77,46,0.06)' }}
                       whileTap={{ scale: 0.98 }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 16,
                         padding: '16px 20px', borderRadius: 14, cursor: 'pointer', width: '100%',
-                        background: answers[steps[step].id] === opt.id ? 'rgba(61,127,255,0.1)' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${answers[steps[step].id] === opt.id ? 'rgba(61,127,255,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                        background: answers[steps[step].id] === opt.id ? 'rgba(255,77,46,0.1)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${answers[steps[step].id] === opt.id ? 'rgba(255,77,46,0.4)' : 'rgba(255,255,255,0.08)'}`,
                         direction: lang === 'ar' ? 'rtl' : 'ltr',
                         transition: 'all 200ms',
                       }}
@@ -278,7 +278,7 @@ export default function OnboardingPage() {
                       <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>{opt.icon}</span>
                       <div style={{ flex: 1, textAlign: lang === 'ar' ? 'right' : 'left' }}>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)', letterSpacing: '0.03em' }}>{opt.label}</div>
-                        <div style={{ fontFamily: 'sans-serif', fontSize: '0.8rem', color: 'var(--ash-light)', marginTop: 2 }}>{opt.desc}</div>
+                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', marginTop: 2 }}>{opt.desc}</div>
                       </div>
                       <span style={{ color: 'var(--ash)', fontSize: '1rem', flexShrink: 0 }}>{lang === 'ar' ? '←' : '→'}</span>
                     </motion.button>
@@ -289,7 +289,7 @@ export default function OnboardingPage() {
                 {step > 0 && (
                   <button onClick={() => setStep(step - 1)} style={{
                     marginTop: 20, background: 'none', border: 'none',
-                    color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.85rem',
+                    color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
                     cursor: 'pointer', display: 'block', width: '100%', textAlign: 'center',
                   }}>
                     {lang === 'ar' ? '→' : '←'} {txt.back}
@@ -303,23 +303,23 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
               style={{
-                background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(61,127,255,0.3)', borderRadius: 20,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,77,46,0.3)', borderRadius: 20,
                 padding: '40px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden',
               }}
             >
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire), transparent)' }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)' }} />
 
               <div style={{ fontSize: '3rem', marginBottom: 16 }}>🎯</div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.1em', marginBottom: 8 }}>{txt.result}</p>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--volt)', letterSpacing: '0.05em', marginBottom: 20 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8 }}>{txt.result}</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--accent)', letterSpacing: '0.05em', marginBottom: 20 }}>
                 {getProgram().name}
               </h2>
 
               {/* تفاصيل البرنامج */}
-              <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(61,127,255,0.06)', border: '1px solid rgba(61,127,255,0.15)', marginBottom: 16, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.08em', marginBottom: 6 }}>{txt.reason}</p>
-                <p style={{ fontFamily: 'sans-serif', fontSize: '0.9rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>
+              <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(255,77,46,0.06)', border: '1px solid rgba(255,77,46,0.15)', marginBottom: 16, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 6 }}>{txt.reason}</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>
                   💡 {getProgram().reason}
                 </p>
               </div>
@@ -340,11 +340,11 @@ export default function OnboardingPage() {
                 whileTap={{ scale: 0.97 }}
                 style={{
                   width: '100%', padding: '14px',
-                  background: 'linear-gradient(135deg, var(--volt), rgba(61,127,255,0.8))',
+                  background: 'var(--accent)',
                   border: 'none', borderRadius: 12,
                   color: '#fff', fontFamily: 'var(--font-display)',
-                  fontSize: '1.2rem', letterSpacing: '0.1em', cursor: 'pointer',
-                  boxShadow: '0 4px 20px rgba(61,127,255,0.35)',
+                  fontSize: '1.2rem', letterSpacing: '0.02em', cursor: 'pointer',
+                  boxShadow: 'none',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
@@ -354,7 +354,7 @@ export default function OnboardingPage() {
               {/* زرار إعادة الاختيار */}
               <button
                 onClick={() => { setDone(false); setStep(0); setAnswers({}); }}
-                style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'sans-serif', fontSize: '0.82rem', cursor: 'pointer', width: '100%', textAlign: 'center' }}
+                style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', cursor: 'pointer', width: '100%', textAlign: 'center' }}
               >
                 {lang === 'ar' ? '↺ اختار برنامج تاني' : '↺ Choose a different program'}
               </button>

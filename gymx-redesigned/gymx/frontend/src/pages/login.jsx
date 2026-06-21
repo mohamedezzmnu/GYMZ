@@ -23,76 +23,55 @@ function AuthLayout({ children, title, subtitle }) {
         padding: '40px 24px',
         position: 'relative',
       }}>
-        {/* Background ambient glows */}
+        {/* Background ambient glow — one quiet source */}
         <div style={{
           position: 'fixed', inset: 0,
-          background: 'radial-gradient(ellipse 50% 50% at 30% 40%, rgba(61,127,255,0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 70% 70%, rgba(255,107,43,0.07) 0%, transparent 60%)',
+          background: 'radial-gradient(ellipse 50% 50% at 30% 40%, rgba(255,77,46,0.06) 0%, transparent 60%)',
           pointerEvents: 'none', zIndex: 0,
         }} />
 
-        {/* Background X */}
-        <div style={{
-          position: 'fixed', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-display)',
-          fontSize: 'min(80vw, 80vh)',
-          color: 'rgba(61,127,255,0.025)',
-          userSelect: 'none', pointerEvents: 'none', zIndex: 0,
-        }} aria-hidden>
-          X
-        </div>
-
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}
         >
           {/* Logo */}
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '2rem',
-            letterSpacing: '0.1em',
-            marginBottom: 40,
+            fontWeight: 600,
+            fontSize: '1.3rem',
+            letterSpacing: '-0.02em',
+            marginBottom: 32,
             textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
           }}>
-            GYM<span style={{ color: 'var(--volt)', textShadow: '0 0 20px rgba(61,127,255,0.6)' }}>X</span>
+            GYMX
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
           </div>
 
-          {/* Glass Card */}
+          {/* Card */}
           <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            backdropFilter: 'blur(28px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+            background: 'var(--carbon)',
             border: '1px solid var(--glass-border)',
             borderRadius: 'var(--radius-lg)',
-            padding: '40px 32px',
-            boxShadow: '0 16px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
+            padding: '36px 32px',
             position: 'relative',
             overflow: 'hidden',
           }}>
-            {/* Top shimmer */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
-            }} />
-            {/* Blue accent line */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-              background: 'linear-gradient(90deg, var(--volt), var(--fire), transparent)',
-              opacity: 0.7,
-            }} />
-
             <h1 style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '2rem',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
+              fontWeight: 600,
+              fontSize: '1.6rem',
+              letterSpacing: '-0.025em',
               marginBottom: 8,
             }}>
               {title}
             </h1>
-            <p style={{ color: 'var(--ash-light)', fontSize: '0.875rem', marginBottom: 32 }}>
+            <p style={{ color: 'var(--ash-light)', fontSize: '0.875rem', marginBottom: 28 }}>
               {subtitle}
             </p>
 
@@ -179,7 +158,7 @@ export function LoginPage() {
 
         <p style={{ textAlign: 'center', color: 'var(--ash)', fontSize: '0.875rem' }}>
           No account?{' '}
-          <Link href="/register" style={{ color: 'var(--volt)', textDecoration: 'none' }}>
+          <Link href="/register" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
             Join GYMX
           </Link>
         </p>
@@ -231,7 +210,7 @@ export function RegisterPage() {
 
   const strength = passStrength();
   const strengthLabel = ['Weak', 'Fair', 'Good', 'Strong'][strength - 1] || '';
-  const strengthColor = ['#f87171', '#facc15', '#4ade80', 'var(--volt)'][strength - 1] || '';
+  const strengthColor = ['#f87171', '#facc15', '#4ade80', 'var(--accent)'][strength - 1] || '';
 
   return (
     <AuthLayout title="Join GYMX" subtitle="Create your account and start training today.">
@@ -303,7 +282,7 @@ export function RegisterPage() {
 
         <p style={{ textAlign: 'center', color: 'var(--ash)', fontSize: '0.875rem' }}>
           Have an account?{' '}
-          <Link href="/login" style={{ color: 'var(--volt)', textDecoration: 'none' }}>
+          <Link href="/login" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
             Login
           </Link>
         </p>

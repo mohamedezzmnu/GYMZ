@@ -78,13 +78,11 @@ function GlassCard({ children, style = {}, accent }) {
   return (
     <div style={{
       background: 'rgba(255,255,255,0.04)',
-      backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${accent ? accent + '30' : 'rgba(255,255,255,0.08)'}`,
       borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
       position: 'relative', overflow: 'hidden',
       ...style,
     }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)' }} />
       {children}
     </div>
   );
@@ -159,7 +157,7 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
               <motion.div
                 animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.4 }}
-                style={{ height: '100%', borderRadius: 2, background: pct === 100 ? '#4ade80' : '#FF3B30' }}
+                style={{ height: '100%', borderRadius: 2, background: pct === 100 ? '#4ade80' : 'var(--accent)' }}
               />
             </div>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>
@@ -200,9 +198,9 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
                 style={{
                   width: '100%', marginTop: 12, padding: '13px',
                   borderRadius: 10, border: 'none', cursor: doneCount === 0 ? 'not-allowed' : 'pointer',
-                  background: doneCount === 0 ? 'rgba(255,255,255,0.05)' : pct === 100 ? 'rgba(74,222,128,0.15)' : 'rgba(255,59,48,0.15)',
-                  color: doneCount === 0 ? 'var(--ash)' : pct === 100 ? '#4ade80' : '#FF3B30',
-                  border: `1px solid ${doneCount === 0 ? 'rgba(255,255,255,0.06)' : pct === 100 ? 'rgba(74,222,128,0.3)' : 'rgba(255,59,48,0.3)'}`,
+                  background: doneCount === 0 ? 'rgba(255,255,255,0.05)' : pct === 100 ? 'rgba(74,222,128,0.15)' : 'rgba(255,77,46,0.15)',
+                  color: doneCount === 0 ? 'var(--ash)' : pct === 100 ? '#4ade80' : 'var(--accent)',
+                  border: `1px solid ${doneCount === 0 ? 'rgba(255,255,255,0.06)' : pct === 100 ? 'rgba(74,222,128,0.3)' : 'rgba(255,77,46,0.3)'}`,
                   fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.05em',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   transition: 'all 0.2s',
@@ -329,7 +327,7 @@ export default function WorkoutPage() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-          <Dumbbell size={30} color="#FF3B30" />
+          <Dumbbell size={30} color="var(--accent)" />
         </motion.div>
       </div>
     );
@@ -340,7 +338,7 @@ export default function WorkoutPage() {
       <Head><title>سجل الجلسة — GYMZ</title></Head>
 
       {/* خلفية */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,59,48,0.07) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(74,222,128,0.04) 0%,transparent 60%)' }} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,77,46,0.07) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(74,222,128,0.04) 0%,transparent 60%)' }} />
 
       <div style={{ minHeight: '100vh', paddingTop: 72, paddingBottom: 100, position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 20px' }}>
@@ -348,11 +346,11 @@ export default function WorkoutPage() {
           {/* ── HEADER ── */}
           <Reveal>
             <div style={{ marginBottom: 24, direction: 'rtl' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,59,48,0.7)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,77,46,0.7)', letterSpacing: '0.02em', marginBottom: 6 }}>
                 — جلسة اليوم
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,2.8rem)', letterSpacing: '0.03em', color: 'var(--chalk)', lineHeight: 1, marginBottom: 6 }}>
-                وقت الجيم <span style={{ color: '#FF3B30' }}>💪</span>
+                وقت الجيم <span style={{ color: 'var(--accent)' }}>💪</span>
               </h1>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ash-light)' }}>
                 {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -364,14 +362,14 @@ export default function WorkoutPage() {
           <Reveal delay={0.05}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
               {[
-                { icon: Flame,    label: 'النهارده',   value: todaySessions.length, color: '#FF3B30' },
+                { icon: Flame,    label: 'النهارده',   value: todaySessions.length, color: 'var(--accent)' },
                 { icon: Calendar, label: 'الشهر',       value: sessions.filter(s => new Date(s.created_at).getMonth() === new Date().getMonth()).length, color: '#FF9F0A' },
                 { icon: Scale,    label: 'الوزن',       value: currentWeight ? `${currentWeight}kg` : '—', color: '#4ade80' },
               ].map(({ icon: Icon, label, value, color }) => (
                 <GlassCard key={label} style={{ padding: '14px 16px', textAlign: 'center' }}>
                   <Icon size={18} color={color} style={{ marginBottom: 6 }} />
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--chalk)', lineHeight: 1 }}>{value}</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--ash)', letterSpacing: '0.07em', textTransform: 'uppercase', marginTop: 4 }}>{label}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--ash)', letterSpacing: '0.07em', marginTop: 4 }}>{label}</div>
                 </GlassCard>
               ))}
             </div>
@@ -451,7 +449,7 @@ export default function WorkoutPage() {
           {userPrograms.length > 0 && (
             <Reveal delay={0.12}>
               <div style={{ marginBottom: 16, direction: 'rtl' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 10 }}>
                   برنامجك
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -462,9 +460,9 @@ export default function WorkoutPage() {
                       onClick={() => { setActiveProgram(i); setOpenDay(null); }}
                       style={{
                         padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        background: activeProgram === i ? 'rgba(255,59,48,0.15)' : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${activeProgram === i ? 'rgba(255,59,48,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                        color: activeProgram === i ? '#FF3B30' : 'var(--ash-light)',
+                        background: activeProgram === i ? 'rgba(255,77,46,0.15)' : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${activeProgram === i ? 'rgba(255,77,46,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                        color: activeProgram === i ? 'var(--accent)' : 'var(--ash-light)',
                         fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.03em',
                         transition: 'all 0.2s',
                       }}
@@ -480,7 +478,7 @@ export default function WorkoutPage() {
           {/* ── أيام البرنامج ── */}
           <Reveal delay={0.15}>
             <div style={{ marginBottom: 8, direction: 'rtl' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 12 }}>
                 {programDays ? 'اختار يوم تمرينك' : 'سجل جلسة سريعة'}
               </div>
             </div>
@@ -511,7 +509,7 @@ export default function WorkoutPage() {
                     <Link href="/programs" style={{ textDecoration: 'none' }}>
                       <motion.div
                         whileHover={{ x: -4 }}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#FF3B30', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.08em', cursor: 'pointer' }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.02em', cursor: 'pointer' }}
                       >
                         اختار برنامج <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} />
                       </motion.div>
@@ -522,8 +520,8 @@ export default function WorkoutPage() {
                       onClick={() => saveSession(activeProgramName || 'جلسة', true)}
                       disabled={!!savingDay}
                       style={{
-                        padding: '11px 20px', borderRadius: 10, border: '1px solid rgba(255,59,48,0.3)',
-                        background: 'rgba(255,59,48,0.1)', color: '#FF3B30',
+                        padding: '11px 20px', borderRadius: 10, border: '1px solid rgba(255,77,46,0.3)',
+                        background: 'rgba(255,77,46,0.1)', color: 'var(--accent)',
                         fontFamily: 'var(--font-display)', fontSize: '0.9rem', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: 8,
                       }}
@@ -541,7 +539,7 @@ export default function WorkoutPage() {
           {sessions.length > 0 && (
             <Reveal delay={0.2}>
               <div style={{ marginTop: 28, direction: 'rtl' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 12 }}>
                   آخر الجلسات
                 </div>
                 {sessions.slice(0, 5).map((s, i) => (
@@ -557,7 +555,7 @@ export default function WorkoutPage() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {s.program_title && (
-                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,59,48,0.08)', border: '1px solid rgba(255,59,48,0.2)', color: '#FF3B30', letterSpacing: '0.05em' }}>
+                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,77,46,0.08)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent)', letterSpacing: '0.05em' }}>
                             {s.program_title}
                           </span>
                         )}

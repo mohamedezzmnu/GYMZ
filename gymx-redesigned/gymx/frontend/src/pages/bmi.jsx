@@ -41,29 +41,27 @@ export default function BMIPage() {
     width: '100%', background: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
     padding: '13px 16px', color: 'var(--chalk)',
-    fontFamily: 'sans-serif', fontSize: '1rem', outline: 'none',
+    fontFamily: 'var(--font-body)', fontSize: '1rem', outline: 'none',
     boxSizing: 'border-box',
   };
   const lbl = {
     display: 'block', fontSize: '0.7rem', fontFamily: 'var(--font-mono)',
-    color: 'var(--ash-light)', letterSpacing: '0.08em',
-    textTransform: 'uppercase', marginBottom: 8,
+    color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8,
   };
 
   return (
     <>
       <Head><title>حاسبة الـ BMI — GYMZ</title></Head>
       <div style={{ minHeight: '100vh', paddingTop: 80, paddingBottom: 60, position: 'relative' }}>
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 50% 40% at 30% 30%, rgba(61,127,255,0.08) 0%, transparent 60%)' }} />
         <div style={{ maxWidth: 560, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
 
           <Reveal>
             <div style={{ marginBottom: 40 }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--volt)', letterSpacing: '0.15em', marginBottom: 12 }}>— BMI CALCULATOR</div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', letterSpacing: '0.05em', marginBottom: 12 }}>
-                احسب الـ <span style={{ color: 'var(--volt)' }}>BMI</span> بتاعك
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--ash)', marginBottom: 12 }}>BMI calculator</div>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2.2rem', letterSpacing: '-0.025em', marginBottom: 12 }}>
+                احسب الـ <span style={{ color: 'var(--accent)' }}>BMI</span> بتاعك
               </h1>
-              <p style={{ color: 'var(--ash-light)', fontSize: '0.9rem', lineHeight: 1.7, direction: 'rtl', fontFamily: 'sans-serif' }}>
+              <p style={{ color: 'var(--ash-light)', fontSize: '0.9rem', lineHeight: 1.7, direction: 'rtl', fontFamily: 'var(--font-body)' }}>
                 اعرف وزنك المثالي وإيه البرنامج الأنسب ليك دلوقتي.
               </p>
             </div>
@@ -72,12 +70,10 @@ export default function BMIPage() {
           {!result ? (
             <Reveal delay={0.1}>
               <div style={{
-                background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20,
+                background: 'var(--carbon)',
+                border: '1px solid var(--glass-border)', borderRadius: 16,
                 padding: '32px', position: 'relative', overflow: 'hidden',
               }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire), transparent)' }} />
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
                   {/* الوزن */}
@@ -85,8 +81,8 @@ export default function BMIPage() {
                     <label style={lbl}>الوزن (كيلو)</label>
                     <input style={inp} type="number" placeholder="مثال: 75"
                       value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(61,127,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(61,127,255,0.1)'; }}
-                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--accent)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
                     />
                   </div>
 
@@ -95,8 +91,8 @@ export default function BMIPage() {
                     <label style={lbl}>الطول (سم)</label>
                     <input style={inp} type="number" placeholder="مثال: 175"
                       value={form.height} onChange={e => setForm({ ...form, height: e.target.value })}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(61,127,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(61,127,255,0.1)'; }}
-                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--accent)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
                     />
                   </div>
 
@@ -107,11 +103,11 @@ export default function BMIPage() {
                       {[{ val: 'male', label: 'ذكر' }, { val: 'female', label: 'أنثى' }].map(g => (
                         <button key={g.val} onClick={() => setForm({ ...form, gender: g.val })} style={{
                           flex: 1, padding: '12px', borderRadius: 10, cursor: 'pointer',
-                          fontFamily: 'sans-serif', fontSize: '0.9rem',
-                          background: form.gender === g.val ? 'rgba(61,127,255,0.12)' : 'rgba(255,255,255,0.03)',
-                          border: `1px solid ${form.gender === g.val ? 'rgba(61,127,255,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                          color: form.gender === g.val ? 'var(--volt)' : 'var(--ash-light)',
-                          transition: 'all 200ms',
+                          fontFamily: 'var(--font-body)', fontSize: '0.9rem',
+                          background: form.gender === g.val ? 'var(--accent-dim)' : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${form.gender === g.val ? 'var(--accent)' : 'rgba(255,255,255,0.08)'}`,
+                          color: form.gender === g.val ? 'var(--accent-bright)' : 'var(--ash-light)',
+                          transition: 'border-color 120ms, background 120ms',
                         }}>{g.label}</button>
                       ))}
                     </div>
@@ -120,14 +116,14 @@ export default function BMIPage() {
                   {/* زرار الحساب */}
                   <motion.button
                     onClick={calculate}
-                    whileTap={{ scale: 0.97 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.1 }}
                     style={{
                       width: '100%', padding: '14px', marginTop: 8,
-                      background: 'linear-gradient(135deg, var(--volt), rgba(61,127,255,0.8))',
+                      background: 'var(--accent)',
                       border: 'none', borderRadius: 10,
-                      color: '#fff', fontFamily: 'var(--font-display)',
-                      fontSize: '1.2rem', letterSpacing: '0.1em', cursor: 'pointer',
-                      boxShadow: '0 4px 20px rgba(61,127,255,0.35)',
+                      color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 600,
+                      fontSize: '1rem', cursor: 'pointer',
                     }}
                   >
                     احسب دلوقتي
@@ -138,15 +134,14 @@ export default function BMIPage() {
           ) : (
             <Reveal delay={0.1}>
               <div style={{
-                background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)',
-                border: `1px solid ${result.color}44`, borderRadius: 20,
+                background: 'var(--carbon)',
+                border: `1px solid ${result.color}33`, borderRadius: 16,
                 padding: '36px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden',
               }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${result.color}, transparent)` }} />
 
                 {/* الـ BMI */}
                 <div style={{ marginBottom: 24 }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash-light)', letterSpacing: '0.1em', marginBottom: 8 }}>BMI بتاعك</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8 }}>BMI بتاعك</p>
                   <motion.div
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -158,7 +153,7 @@ export default function BMIPage() {
                   <div style={{
                     display: 'inline-block', padding: '6px 18px', borderRadius: 20,
                     background: result.color + '18', border: `1px solid ${result.color}44`,
-                    color: result.color, fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.1em',
+                    color: result.color, fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.02em',
                   }}>
                     {result.label}
                   </div>
@@ -170,14 +165,14 @@ export default function BMIPage() {
                   background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
                   marginBottom: 24, direction: 'rtl',
                 }}>
-                  <p style={{ fontFamily: 'sans-serif', fontSize: '0.9rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>
                     💡 {result.tip}
                   </p>
                 </div>
 
                 {/* البرنامج المقترح */}
                 <div style={{ marginBottom: 28 }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.1em', marginBottom: 10 }}>البرنامج المقترح ليك</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 10 }}>البرنامج المقترح ليك</p>
                   <Link href="/programs" style={{
                     display: 'inline-flex', alignItems: 'center', gap: 8,
                     padding: '12px 24px',
@@ -185,7 +180,7 @@ export default function BMIPage() {
                     border: `1px solid ${result.color}33`,
                     borderRadius: 10, textDecoration: 'none',
                     color: result.color, fontFamily: 'var(--font-display)',
-                    fontSize: '1rem', letterSpacing: '0.08em',
+                    fontSize: '1rem', letterSpacing: '0.02em',
                     transition: 'all 200ms',
                   }}>
                     {result.program} ←
@@ -223,7 +218,7 @@ export default function BMIPage() {
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 10, color: 'var(--ash-light)',
-                    fontFamily: 'sans-serif', fontSize: '0.9rem', cursor: 'pointer',
+                    fontFamily: 'var(--font-body)', fontSize: '0.9rem', cursor: 'pointer',
                   }}
                 >
                   ↩ احسب تاني

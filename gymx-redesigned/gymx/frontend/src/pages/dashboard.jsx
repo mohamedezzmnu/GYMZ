@@ -25,24 +25,22 @@ function Reveal({ children, delay = 0 }) {
 function GlassCard({ children, style = {}, accentColor }) {
   return (
     <motion.div
-      whileHover={{ borderColor: accentColor ? `${accentColor}44` : 'rgba(255,59,48,0.25)', y: -2 }}
+      whileHover={{ borderColor: accentColor ? `${accentColor}44` : 'rgba(255,77,46,0.25)', y: -2 }}
       transition={{ duration: 0.2 }}
       style={{
         background: 'rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         position: 'relative', overflow: 'hidden',
         ...style,
       }}
     >
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)' }} />
       {children}
     </motion.div>
   );
 }
 
-function StatBox({ icon: Icon, label, value, sub, accent = '#FF3B30', delay = 0 }) {
+function StatBox({ icon: Icon, label, value, sub, accent = 'var(--accent)', delay = 0 }) {
   return (
     <Reveal delay={delay}>
       <GlassCard accentColor={accent} style={{ padding: '20px 22px' }}>
@@ -53,7 +51,7 @@ function StatBox({ icon: Icon, label, value, sub, accent = '#FF3B30', delay = 0 
           {sub && <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'#4ade80', padding:'2px 7px', borderRadius:4, background:'rgba(74,222,128,0.1)', border:'1px solid rgba(74,222,128,0.2)' }}>{sub}</span>}
         </div>
         <div style={{ fontFamily:'var(--font-display)', fontSize:'2rem', letterSpacing:'0.02em', color:'var(--chalk)', lineHeight:1 }}>{value}</div>
-        <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em', textTransform:'uppercase', marginTop:6 }}>{label}</div>
+        <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em', marginTop:6 }}>{label}</div>
       </GlassCard>
     </Reveal>
   );
@@ -79,16 +77,16 @@ function WeightChart({ data }) {
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:80, overflow:'visible' }}>
         <defs>
           <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#FF3B30" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#FF3B30" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={areaPath} fill="url(#wg)" />
-        <path d={path} fill="none" stroke="#FF3B30" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={path} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {weights.map((w, i) => {
           const x = (i / (weights.length - 1)) * W;
           const y = H - ((w - min) / (max - min)) * H;
-          return <circle key={i} cx={x} cy={y} r="3" fill="#FF3B30" />;
+          return <circle key={i} cx={x} cy={y} r="3" fill="var(--accent)" />;
         })}
       </svg>
     </div>
@@ -168,18 +166,18 @@ export default function DashboardPage() {
     <>
       <Head><title>داشبورد — GYMZ</title></Head>
       <div style={{ minHeight:'100vh', paddingTop:72, paddingBottom:80, position:'relative' }}>
-        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, rgba(255,59,48,0.06) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(255,59,48,0.04) 0%,transparent 60%)' }} />
+        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, rgba(255,77,46,0.06) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(255,77,46,0.04) 0%,transparent 60%)' }} />
 
         <div style={{ maxWidth:960, margin:'0 auto', padding:'0 20px', position:'relative', zIndex:1 }}>
 
           {/* ── GREETING ── */}
           <Reveal>
             <div style={{ marginBottom:24, direction:'rtl' }}>
-              <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.62rem', color:'rgba(255,59,48,0.7)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6 }}>
+              <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.62rem', color:'rgba(255,77,46,0.7)', letterSpacing: '0.02em', marginBottom:6 }}>
                 — أهلاً بك
               </div>
               <h1 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2rem,5vw,3rem)', letterSpacing:'0.03em', color:'var(--chalk)', lineHeight:1 }}>
-                {user.email?.split('@')[0] || 'بطل'} <span style={{ color:'#FF3B30' }}>💪</span>
+                {user.email?.split('@')[0] || 'بطل'} <span style={{ color:'var(--accent)' }}>💪</span>
               </h1>
             </div>
           </Reveal>
@@ -189,16 +187,16 @@ export default function DashboardPage() {
             <GlassCard style={{ padding:'18px 22px', marginBottom:20 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
                 <span style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', letterSpacing:'0.05em' }}>أيام الأسبوع</span>
-                <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.6rem', color:'rgba(255,59,48,0.7)', letterSpacing:'0.08em' }}>{streak} أيام متتالية 🔥</span>
+                <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.6rem', color:'rgba(255,77,46,0.7)', letterSpacing: '0.02em' }}>{streak} أيام متتالية 🔥</span>
               </div>
               <div style={{ display:'flex', gap:8, justifyContent:'space-between' }}>
                 {weekDays.map((d, i) => (
                   <div key={i} style={{ textAlign:'center', flex:1 }}>
-                    <div style={{ width:'100%', aspectRatio:'1', borderRadius:8, border:`1px solid ${d.today ? '#FF3B30' : d.done ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)'}`, background: d.today ? 'rgba(255,59,48,0.15)' : d.done ? 'rgba(74,222,128,0.08)' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:5 }}>
+                    <div style={{ width:'100%', aspectRatio:'1', borderRadius:8, border:`1px solid ${d.today ? 'var(--accent)' : d.done ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)'}`, background: d.today ? 'rgba(255,77,46,0.15)' : d.done ? 'rgba(74,222,128,0.08)' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:5 }}>
                       {d.done && !d.today && <span style={{ fontSize:'0.6rem', color:'#4ade80' }}>✓</span>}
-                      {d.today && <span style={{ fontSize:'0.6rem', color:'#FF3B30' }}>●</span>}
+                      {d.today && <span style={{ fontSize:'0.6rem', color:'var(--accent)' }}>●</span>}
                     </div>
-                    <span style={{ fontSize:'0.5rem', fontFamily:'var(--font-mono)', color: d.today ? '#FF3B30' : d.done ? '#4ade80' : 'var(--ash)', letterSpacing:'0.04em' }}>
+                    <span style={{ fontSize:'0.5rem', fontFamily:'var(--font-mono)', color: d.today ? 'var(--accent)' : d.done ? '#4ade80' : 'var(--ash)', letterSpacing:'0.04em' }}>
                       {d.label.slice(0,3)}
                     </span>
                   </div>
@@ -209,7 +207,7 @@ export default function DashboardPage() {
 
           {/* ── STATS GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
-            <StatBox icon={Flame}    label="الاستمرارية"     value={`${streak}d`}          sub="+1 اليوم" accent="#FF3B30"  delay={0.05} />
+            <StatBox icon={Flame}    label="الاستمرارية"     value={`${streak}d`}          sub="+1 اليوم" accent="var(--accent)"  delay={0.05} />
             <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FF9F0A"  delay={0.1}  />
             <StatBox icon={Scale}    label="الوزن الحالي"    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
             <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#64D2FF"  delay={0.2}  />
@@ -221,11 +219,11 @@ export default function DashboardPage() {
               <GlassCard style={{ padding:'18px 22px', marginBottom:20 }}>
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', direction:'rtl' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <div style={{ width:36, height:36, borderRadius:10, background:'rgba(255,59,48,0.12)', border:'1px solid rgba(255,59,48,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      <Dumbbell size={16} color="#FF3B30" />
+                    <div style={{ width:36, height:36, borderRadius:10, background:'rgba(255,77,46,0.12)', border:'1px solid rgba(255,77,46,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <Dumbbell size={16} color="var(--accent)" />
                     </div>
                     <div>
-                      <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.58rem', color:'var(--ash)', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:3 }}>آخر تمرين</div>
+                      <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.58rem', color:'var(--ash)', letterSpacing: '0.02em', marginBottom:3 }}>آخر تمرين</div>
                       <div style={{ fontFamily:'var(--font-display)', fontSize:'1rem', color:'var(--chalk)' }}>{lastSession.name || lastSession.program_name || 'جلسة تمرين'}</div>
                     </div>
                   </div>
@@ -244,7 +242,7 @@ export default function DashboardPage() {
             <Reveal delay={0.1}>
               <GlassCard style={{ padding:'24px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                  <Scale size={15} color="#FF3B30" />
+                  <Scale size={15} color="var(--accent)" />
                   <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>سجل الوزن</h2>
                 </div>
 
@@ -256,7 +254,7 @@ export default function DashboardPage() {
                     style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'var(--chalk)', fontFamily:'var(--font-body)', fontSize:'0.875rem', outline:'none', direction:'rtl' }}
                   />
                   <motion.button onClick={logWeight} disabled={loadingWeight} whileTap={{ scale:0.95 }}
-                    style={{ padding:'9px 14px', background:'linear-gradient(135deg,#FF3B30,#FF6B60)', border:'none', borderRadius:8, color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:'0.8rem', fontFamily:'var(--font-mono)' }}>
+                    style={{ padding:'9px 14px', background:'var(--accent)', border:'none', borderRadius:8, color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:'0.8rem', fontFamily:'var(--font-mono)' }}>
                     <Plus size={14} /> سجل
                   </motion.button>
                 </div>
@@ -268,12 +266,12 @@ export default function DashboardPage() {
                 {currentWeight !== '—' && (
                   <div style={{ marginBottom:14 }}>
                     <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', textTransform:'uppercase', letterSpacing:'0.07em' }}>تقدم نحو الهدف</span>
-                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'#FF3B30' }}>{progressPct}%</span>
+                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em' }}>تقدم نحو الهدف</span>
+                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--accent)' }}>{progressPct}%</span>
                     </div>
                     <div style={{ height:4, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
                       <motion.div initial={{ width:0 }} animate={{ width:`${Math.max(progressPct,0)}%` }} transition={{ duration:1, delay:0.3 }}
-                        style={{ height:'100%', borderRadius:2, background:'linear-gradient(90deg,#FF3B30,#FF6B60)' }} />
+                        style={{ height:'100%', borderRadius:2, background:'var(--accent)' }} />
                     </div>
                   </div>
                 )}
@@ -301,28 +299,28 @@ export default function DashboardPage() {
                 <GlassCard style={{ padding:'24px' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <BarChart2 size={15} color="#FF3B30" />
+                      <BarChart2 size={15} color="var(--accent)" />
                       <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>برامجي</h2>
                     </div>
-                    <Link href="/programs" style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'#FF3B30', textDecoration:'none', display:'flex', alignItems:'center', gap:3 }}>
+                    <Link href="/programs" style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--accent)', textDecoration:'none', display:'flex', alignItems:'center', gap:3 }}>
                       كل البرامج <ChevronRight size={11} />
                     </Link>
                   </div>
 
                   {programs.length === 0 ? (
-                    <Link href="/programs" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'14px', background:'rgba(255,59,48,0.06)', border:'1px dashed rgba(255,59,48,0.2)', borderRadius:10, color:'#FF3B30', fontSize:'0.8rem', textDecoration:'none' }}>
+                    <Link href="/programs" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'14px', background:'rgba(255,77,46,0.06)', border:'1px dashed rgba(255,77,46,0.2)', borderRadius:10, color:'var(--accent)', fontSize:'0.8rem', textDecoration:'none' }}>
                       <Zap size={13} /> انضم لأول برنامج
                     </Link>
                   ) : programs.slice(0, 2).map((p, i) => (
                     <div key={i} style={{ padding:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, marginBottom:8 }}>
                       <div style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', marginBottom:10, direction:'rtl' }}>{p.program_name || 'برنامج'}</div>
                       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', textTransform:'uppercase', letterSpacing:'0.07em' }}>التقدم</span>
-                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'#FF3B30' }}>{p.progress || 20}%</span>
+                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em' }}>التقدم</span>
+                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--accent)' }}>{p.progress || 20}%</span>
                       </div>
                       <div style={{ height:4, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
                         <motion.div initial={{ width:0 }} animate={{ width:`${p.progress || 20}%` }} transition={{ duration:0.8, delay:0.3 }}
-                          style={{ height:'100%', borderRadius:2, background:'linear-gradient(90deg,#FF3B30,#FF9F0A)' }} />
+                          style={{ height:'100%', borderRadius:2, background:'var(--accent)' }} />
                       </div>
                     </div>
                   ))}
@@ -362,7 +360,7 @@ export default function DashboardPage() {
                   <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1rem', letterSpacing:'0.05em', marginBottom:14 }}>روابط سريعة</h2>
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                     {[
-                      { href:'/exercises', label:'التمارين', icon:'🏋️', color:'#FF3B30' },
+                      { href:'/exercises', label:'التمارين', icon:'🏋️', color:'var(--accent)' },
                       { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FF9F0A' },
                       { href:'/tools',     label:'الحاسبات', icon:'🧮', color:'#4ade80' },
                       { href:'/bmi',       label:'BMI',      icon:'📊', color:'#64D2FF' },

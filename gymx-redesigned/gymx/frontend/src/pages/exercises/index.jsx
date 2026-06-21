@@ -10,7 +10,7 @@ const EQUIPMENT_TYPES = ['Barbell','Dumbbells','Cable Machine','Bodyweight','Mac
 const DIFF_COLOR = {
   beginner:     { bg:'rgba(74,222,128,0.12)',  border:'rgba(74,222,128,0.3)',  text:'#4ade80',  label:'مبتدئ' },
   intermediate: { bg:'rgba(250,204,21,0.12)',  border:'rgba(250,204,21,0.3)',  text:'#facc15',  label:'متوسط' },
-  advanced:     { bg:'rgba(255,59,48,0.12)',   border:'rgba(255,59,48,0.3)',   text:'#FF3B30',  label:'متقدم' },
+  advanced:     { bg:'rgba(255,77,46,0.12)',   border:'rgba(255,77,46,0.3)',   text:'var(--accent)',  label:'متقدم' },
 };
 
 const MUSCLE_AR = {
@@ -116,7 +116,6 @@ function ExerciseModal({ exercise, onClose }) {
         style={{
           position:'fixed', inset:0, zIndex:999,
           background:'rgba(0,0,0,0.85)',
-          backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)',
           display:'flex', alignItems:'center', justifyContent:'center',
           padding:'20px',
         }}
@@ -159,7 +158,7 @@ function ExerciseModal({ exercise, onClose }) {
             {/* badge المستوى */}
             <span style={{
               position:'absolute', top:14, left:14,
-              fontSize:'0.6rem', fontFamily:'var(--font-mono)', textTransform:'uppercase',
+              fontSize:'0.6rem', fontFamily:'var(--font-mono)',
               padding:'4px 10px', borderRadius:20,
               background:diff.bg, border:'1px solid '+diff.border, color:diff.text,
             }}>
@@ -170,12 +169,12 @@ function ExerciseModal({ exercise, onClose }) {
           {/* محتوى */}
           <div style={{ padding:'24px 28px 32px' }}>
             {/* عضلة */}
-            <div style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'#FF3B30', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8 }}>
+            <div style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--accent)', letterSpacing: '0.02em', marginBottom:8 }}>
               {MUSCLE_AR[exercise.muscle_group]} — {EQUIP_ICON[exercise.equipment]} {EQUIP_AR[exercise.equipment]}
             </div>
 
             {/* اسم */}
-            <div style={{ fontFamily:'var(--font-display)', fontSize:'1.6rem', letterSpacing:'0.04em', textTransform:'uppercase', color:'var(--chalk)', lineHeight:1.1, marginBottom:6 }}>
+            <div style={{ fontFamily:'var(--font-display)', fontSize:'1.6rem', letterSpacing:'0.04em', color:'var(--chalk)', lineHeight:1.1, marginBottom:6 }}>
               {exercise.name}
             </div>
             <div style={{ fontSize:'1rem', color:'rgba(255,255,255,0.45)', marginBottom:24, direction:'rtl', fontFamily:'var(--font-body)' }}>
@@ -187,14 +186,14 @@ function ExerciseModal({ exercise, onClose }) {
 
             {/* نصيحة */}
             <div style={{ marginBottom:8 }}>
-              <div style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'rgba(255,59,48,0.7)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:12 }}>
+              <div style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'rgba(255,77,46,0.7)', letterSpacing: '0.02em', marginBottom:12 }}>
                 💡 نصيحة الأداء
               </div>
               <div style={{
                 fontSize:'0.92rem', color:'rgba(255,255,255,0.75)',
                 lineHeight:1.85, direction:'rtl', fontFamily:'var(--font-body)',
-                background:'rgba(255,59,48,0.05)',
-                border:'1px solid rgba(255,59,48,0.12)',
+                background:'rgba(255,77,46,0.05)',
+                border:'1px solid rgba(255,77,46,0.12)',
                 borderRadius:10, padding:'16px 18px',
               }}>
                 {exercise.tips}
@@ -220,11 +219,10 @@ function ExerciseCard({ exercise, index, onOpen }) {
       transition={{ duration: 0.45, delay: (index % 6) * 0.06 }}
     >
       <motion.div
-        whileHover={{ y: -5, borderColor: 'rgba(255,59,48,0.35)', boxShadow: '0 16px 40px rgba(255,59,48,0.12)' }}
+        whileHover={{ borderColor: 'var(--glass-border-hover)' }}
         style={{
           position:'relative', overflow:'hidden',
           background:'rgba(255,255,255,0.04)',
-          backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)',
           border:'1px solid rgba(255,255,255,0.08)',
           borderRadius:16, transition:'all 300ms ease',
           height:'100%', display:'flex', flexDirection:'column',
@@ -241,7 +239,7 @@ function ExerciseCard({ exercise, index, onOpen }) {
             onError={e => { e.currentTarget.style.display='none'; }}
           />
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(8,8,16,0.85) 100%)' }} />
-          <span style={{ position:'absolute', top:12, right:12, fontSize:'0.6rem', fontFamily:'var(--font-mono)', textTransform:'uppercase', padding:'3px 9px', borderRadius:20, background:diff.bg, border:'1px solid '+diff.border, color:diff.text, backdropFilter:'blur(8px)' }}>
+          <span style={{ position:'absolute', top:12, right:12, fontSize:'0.6rem', fontFamily:'var(--font-mono)', padding:'3px 9px', borderRadius:20, background:diff.bg, border:'1px solid '+diff.border, color:diff.text, }}>
             {diff.label}
           </span>
           <span style={{ position:'absolute', bottom:10, left:12, fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'rgba(255,255,255,0.7)', display:'flex', alignItems:'center', gap:5 }}>
@@ -253,13 +251,13 @@ function ExerciseCard({ exercise, index, onOpen }) {
         <div style={{ padding:'18px 18px 20px', flex:1, display:'flex', flexDirection:'column' }}>
           {/* عضلة */}
           <div style={{ marginBottom:8 }}>
-            <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'rgba(255,59,48,0.8)', textTransform:'uppercase', letterSpacing:'0.08em' }}>
+            <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'rgba(255,77,46,0.8)', letterSpacing: '0.02em' }}>
               {MUSCLE_AR[exercise.muscle_group] || exercise.muscle_group}
             </span>
           </div>
 
           {/* اسم */}
-          <div style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.04em', textTransform:'uppercase', color:'var(--chalk)', lineHeight:1.2, marginBottom:4 }}>
+          <div style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.04em', color:'var(--chalk)', lineHeight:1.2, marginBottom:4 }}>
             {exercise.name}
           </div>
           <div style={{ fontSize:'0.85rem', color:'rgba(255,255,255,0.5)', marginBottom:12, direction:'rtl', fontFamily:'var(--font-body)' }}>
@@ -278,11 +276,11 @@ function ExerciseCard({ exercise, index, onOpen }) {
 
           {/* زرار */}
           <motion.button
-            whileHover={{ backgroundColor:'rgba(255,59,48,0.15)', borderColor:'rgba(255,59,48,0.5)' }}
+            whileHover={{ backgroundColor:'rgba(255,77,46,0.15)', borderColor:'rgba(255,77,46,0.5)' }}
             onClick={() => onOpen(exercise)}
-            style={{ width:'100%', padding:'10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, color:'var(--chalk)', fontFamily:'var(--font-mono)', fontSize:'0.68rem', letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6, transition:'all 200ms' }}
+            style={{ width:'100%', padding:'10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, color:'var(--chalk)', fontFamily:'var(--font-mono)', fontSize:'0.68rem', letterSpacing: '0.02em', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6, transition:'all 200ms' }}
           >
-            عرض التفاصيل <ChevronRight size={13} color="#FF3B30" />
+            عرض التفاصيل <ChevronRight size={13} color="var(--accent)" />
           </motion.button>
         </div>
       </motion.div>
@@ -328,16 +326,16 @@ export default function ExercisesPage() {
       <section style={{ padding:'50px 0 32px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
         <div className="container">
           <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}>
-            <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.65rem', color:'#FF3B30', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:12 }}>— مكتبة التمارين</div>
+            <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.65rem', color:'var(--ash)', marginBottom:12 }}>مكتبة التمارين</div>
             <h1 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2.5rem,6vw,4.5rem)', letterSpacing:'0.03em', lineHeight:0.95, marginBottom:0 }}>
-              كل<br /><span style={{ color:'#FF3B30' }}>التمارين</span>
+              كل<br /><span style={{ color:'var(--accent)' }}>التمارين</span>
             </h1>
           </motion.div>
         </div>
       </section>
 
       {/* Filters */}
-      <section style={{ padding:'16px 0', borderBottom:'1px solid rgba(255,255,255,0.06)', position:'sticky', top:64, zIndex:50, background:'rgba(8,8,16,0.9)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)' }}>
+      <section style={{ padding:'16px 0', borderBottom:'1px solid rgba(255,255,255,0.06)', position:'sticky', top:64, zIndex:50, background:'rgba(8,8,16,0.9)', }}>
         <div className="container">
           <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
             <div style={{ position:'relative', flex:'1 1 200px' }}>
@@ -370,7 +368,7 @@ export default function ExercisesPage() {
       {/* Grid */}
       <section style={{ padding:'32px 0 80px' }}>
         <div className="container">
-          <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.63rem', color:'rgba(255,255,255,0.3)', marginBottom:20, letterSpacing:'0.08em' }}>
+          <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.63rem', color:'rgba(255,255,255,0.3)', marginBottom:20, letterSpacing: '0.02em' }}>
             {filtered.length} تمرين
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:16 }}>
@@ -380,7 +378,7 @@ export default function ExercisesPage() {
           </div>
           {filtered.length === 0 && (
             <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ textAlign:'center', padding:'80px 0' }}>
-              <div style={{ fontFamily:'var(--font-display)', fontSize:'4rem', color:'rgba(255,59,48,0.15)', marginBottom:16 }}>X</div>
+              <div style={{ fontFamily:'var(--font-display)', fontSize:'4rem', color:'rgba(255,77,46,0.15)', marginBottom:16 }}>X</div>
               <div style={{ fontFamily:'var(--font-display)', fontSize:'1.5rem', marginBottom:8 }}>مفيش نتائج</div>
               <div style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.85rem' }}>جرب فلتر تاني</div>
             </motion.div>

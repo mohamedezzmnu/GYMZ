@@ -69,7 +69,7 @@ function TDEECalc() {
         {result && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16, display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
             {[
-              { label:'المحافظة', value: result.maintenance, color:'var(--volt)', icon:'⚖️' },
+              { label:'المحافظة', value: result.maintenance, color:'var(--accent)', icon:'⚖️' },
               { label:'التنشيف', value: result.cut,          color:'#f87171',       icon:'🔥' },
               { label:'التضخيم', value: result.bulk,         color:'#4ade80',       icon:'💪' },
             ].map(({ label, value, color, icon }) => (
@@ -128,9 +128,9 @@ function OneRMCalc() {
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16 }}>
-            <div style={{ textAlign:'center', padding:'16px', background:'rgba(61,127,255,0.08)', border:'1px solid rgba(61,127,255,0.25)', borderRadius:'var(--radius-sm)', marginBottom:12 }}>
+            <div style={{ textAlign:'center', padding:'16px', background:'rgba(255,77,46,0.08)', border:'1px solid rgba(255,77,46,0.25)', borderRadius:'var(--radius-sm)', marginBottom:12 }}>
               <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginBottom:4 }}>أقصى وزن (1RM)</div>
-              <div style={{ fontFamily:'var(--font-display)', fontSize:'2.5rem', color:'var(--volt)' }}>{result.max} <span style={{ fontSize:'1rem' }}>kg</span></div>
+              <div style={{ fontFamily:'var(--font-display)', fontSize:'2.5rem', color:'var(--accent)' }}>{result.max} <span style={{ fontSize:'1rem' }}>kg</span></div>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8 }}>
               {[
@@ -144,7 +144,7 @@ function OneRMCalc() {
                     <div style={{ fontFamily:'var(--font-display)', fontSize:'1.1rem', color:'var(--chalk)' }}>{v} kg</div>
                     <div style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash)', marginTop:2 }}>{r}</div>
                   </div>
-                  <span style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--volt)', padding:'3px 7px', borderRadius:4, background:'rgba(61,127,255,0.1)', border:'1px solid rgba(61,127,255,0.2)' }}>{pct}</span>
+                  <span style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--accent)', padding:'3px 7px', borderRadius:4, background:'rgba(255,77,46,0.1)', border:'1px solid rgba(255,77,46,0.2)' }}>{pct}</span>
                 </div>
               ))}
             </div>
@@ -231,11 +231,11 @@ function MacroCalc() {
 }
 
 // ── shared styles ──────────────────────────────────────────
-const labelStyle = { display:'block', fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+const labelStyle = { display:'block', fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing: '0.02em', marginBottom:6 };
 const inputStyle = { width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'var(--radius-sm)', padding:'10px 12px', color:'var(--chalk)', fontFamily:'var(--font-body)', fontSize:'0.875rem', outline:'none', direction:'rtl' };
-const calcBtn = { width:'100%', padding:'12px', background:'linear-gradient(135deg,var(--volt),rgba(61,127,255,0.7))', border:'none', borderRadius:'var(--radius-sm)', color:'#fff', fontFamily:'var(--font-display)', fontSize:'1rem', letterSpacing:'0.08em', cursor:'pointer' };
-const toggleStyle = { padding:'9px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'var(--radius-sm)', color:'var(--ash-light)', cursor:'pointer', fontFamily:'var(--font-body)', fontSize:'0.8rem', transition:'all 150ms' };
-const toggleActive = { background:'rgba(61,127,255,0.12)', border:'1px solid rgba(61,127,255,0.35)', color:'var(--chalk)' };
+const calcBtn = { width:'100%', padding:'13px', background:'var(--accent)', border:'none', borderRadius:'var(--radius-sm)', color:'#fff', fontFamily:'var(--font-body)', fontWeight: 600, fontSize:'0.92rem', cursor:'pointer' };
+const toggleStyle = { padding:'9px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'var(--radius-sm)', color:'var(--ash-light)', cursor:'pointer', fontFamily:'var(--font-body)', fontSize:'0.8rem', transition:'border-color 120ms, background 120ms' };
+const toggleActive = { background:'var(--accent-dim)', border:'1px solid rgba(255,77,46,0.35)', color:'var(--chalk)' };
 
 // ── TABS ──────────────────────────────────────────────────
 const TABS = [
@@ -252,27 +252,26 @@ export default function ToolsPage() {
     <>
       <Head><title>Tools — GYMZ</title></Head>
       <div style={{ minHeight:'100vh', paddingTop:88, paddingBottom:60, position:'relative' }}>
-        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(61,127,255,0.07) 0%,transparent 60%)' }} />
         <div style={{ maxWidth:680, margin:'0 auto', padding:'0 20px', position:'relative', zIndex:1 }}>
 
           {/* header */}
-          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.55 }} style={{ marginBottom:32 }}>
-            <div className="mono" style={{ color:'var(--volt)', marginBottom:8 }}>— Fitness Tools</div>
-            <h1 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2.2rem,5vw,3.5rem)', letterSpacing:'0.04em', lineHeight:1 }}>
-              الحاسبات<br /><span style={{ color:'var(--volt)' }}>الرياضية</span>
+          <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.3 }} style={{ marginBottom:32 }}>
+            <div className="mono" style={{ color:'var(--ash)', marginBottom:8 }}>Fitness tools</div>
+            <h1 style={{ fontFamily:'var(--font-display)', fontWeight: 600, fontSize:'clamp(2rem,4.5vw,3rem)', letterSpacing:'-0.03em', lineHeight:1.05 }}>
+              الحاسبات <span style={{ color:'var(--accent)' }}>الرياضية</span>
             </h1>
-            <p style={{ color:'var(--ash-light)', marginTop:12, fontSize:'0.875rem', direction:'rtl' }}>
+            <p style={{ color:'var(--ash-light)', marginTop:12, fontSize:'0.9rem', direction:'rtl' }}>
               احسب سعراتك، أقصى وزن، وماكروزك — كل حاجة في مكان واحد.
             </p>
           </motion.div>
 
           {/* tabs */}
-          <div style={{ display:'flex', gap:8, marginBottom:24, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'var(--radius-md)', padding:6 }}>
+          <div style={{ display:'flex', gap:6, marginBottom:24, background:'var(--carbon)', border:'1px solid var(--glass-border)', borderRadius:'var(--radius-md)', padding:6 }}>
             {TABS.map(({ id, label, icon: Icon, desc }) => (
-              <button key={id} onClick={() => setActiveTab(id)} style={{ flex:1, padding:'10px 8px', background: activeTab === id ? 'rgba(61,127,255,0.15)' : 'transparent', border: activeTab === id ? '1px solid rgba(61,127,255,0.3)' : '1px solid transparent', borderRadius:'var(--radius-sm)', cursor:'pointer', transition:'all 200ms', display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-                <Icon size={16} color={activeTab === id ? 'var(--volt)' : 'var(--ash)'} />
-                <span style={{ fontFamily:'var(--font-display)', fontSize:'0.9rem', letterSpacing:'0.05em', color: activeTab === id ? 'var(--chalk)' : 'var(--ash)' }}>{label}</span>
-                <span style={{ fontSize:'0.55rem', fontFamily:'var(--font-mono)', color:'var(--ash)', letterSpacing:'0.04em', display:'none' }} className="tab-desc">{desc}</span>
+              <button key={id} onClick={() => setActiveTab(id)} style={{ flex:1, padding:'10px 8px', background: activeTab === id ? 'var(--iron)' : 'transparent', border: 'none', borderRadius:'var(--radius-sm)', cursor:'pointer', transition:'background 120ms', display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+                <Icon size={16} color={activeTab === id ? 'var(--accent)' : 'var(--ash)'} />
+                <span style={{ fontFamily:'var(--font-body)', fontWeight: 600, fontSize:'0.85rem', color: activeTab === id ? 'var(--chalk)' : 'var(--ash)' }}>{label}</span>
+                <span style={{ fontSize:'0.55rem', fontFamily:'var(--font-mono)', color:'var(--ash)', display:'none' }} className="tab-desc">{desc}</span>
               </button>
             ))}
           </div>
@@ -280,16 +279,15 @@ export default function ToolsPage() {
           {/* active calc */}
           <AnimatePresence mode="wait">
             <motion.div key={activeTab}
-              initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.25 }}
-              style={{ background:'var(--glass-bg)', backdropFilter:'var(--glass-blur)', WebkitBackdropFilter:'var(--glass-blur)', border:'1px solid var(--glass-border)', borderRadius:'var(--radius-lg)', padding:'28px', boxShadow:'var(--glass-shadow)', position:'relative', overflow:'hidden' }}>
-              <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:'linear-gradient(90deg,var(--volt),var(--fire),transparent)', borderRadius:'var(--radius-lg) var(--radius-lg) 0 0' }} />
+              initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }} transition={{ duration:0.18 }}
+              style={{ background:'var(--carbon)', border:'1px solid var(--glass-border)', borderRadius:'var(--radius-lg)', padding:'28px', position:'relative', overflow:'hidden' }}>
               <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:22 }}>
-                {(() => { const t = TABS.find(x => x.id === activeTab); const Icon = t.icon; return <Icon size={18} color="var(--volt)" />; })()}
+                {(() => { const t = TABS.find(x => x.id === activeTab); const Icon = t.icon; return <Icon size={18} color="var(--accent)" />; })()}
                 <div>
-                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.3rem', letterSpacing:'0.05em' }}>
+                  <h2 style={{ fontFamily:'var(--font-display)', fontWeight: 600, fontSize:'1.2rem', letterSpacing:'-0.015em' }}>
                     {TABS.find(t => t.id === activeTab)?.label} Calculator
                   </h2>
-                  <p style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginTop:1 }}>
+                  <p style={{ fontSize:'0.75rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginTop:1 }}>
                     {TABS.find(t => t.id === activeTab)?.desc}
                   </p>
                 </div>

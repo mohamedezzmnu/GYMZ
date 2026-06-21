@@ -63,25 +63,24 @@ function ShapeCard({ shape, index }) {
       transition={{ duration: 0.5, delay: (index % 6) * 0.07 }}
     >
       <motion.div
-        whileHover={{ y: -6, borderColor: 'rgba(61,127,255,0.45)', boxShadow: '0 16px 48px rgba(61,127,255,0.18)' }}
-        style={{ position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, transition: 'all 300ms ease', height: '100%' }}
+        whileHover={{ borderColor: 'var(--glass-border-hover)' }}
+        style={{ position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, transition: 'all 300ms ease', height: '100%' }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)' }} />
-        <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', background: 'rgba(61,127,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', background: 'rgba(255,77,46,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {!imgError && shape.imageUrl ? (
             <img src={shape.imageUrl} alt={shape.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'rgba(61,127,255,0.3)' }}>IMG</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'rgba(255,77,46,0.3)' }}>IMG</div>
           )}
         </div>
         <div style={{ padding: 16 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--chalk)', lineHeight: 1.2, marginBottom: 4 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--chalk)', lineHeight: 1.2, marginBottom: 4 }}>
             {shape.name}
           </div>
-          <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', direction: 'rtl', fontFamily: 'sans-serif', marginBottom: 12 }}>
+          <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', direction: 'rtl', fontFamily: 'var(--font-body)', marginBottom: 12 }}>
             {shape.name_ar}
           </div>
-          <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6, background: cat.bg, border: '1px solid ' + cat.border, color: cat.text }}>
+          <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 6, background: cat.bg, border: '1px solid ' + cat.border, color: cat.text }}>
             {shape.category}
           </span>
         </div>
@@ -110,13 +109,13 @@ export default function ShapesPage() {
       <section style={{ padding: '60px 0 40px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <div className="mono" style={{ color: 'var(--volt)', marginBottom: 12 }}>— Exercise Shapes</div>
-            <h1 className="display-lg" style={{ marginBottom: 0 }}>Perfect<br /><span style={{ color: 'var(--volt)' }}>Form</span></h1>
+            <div className="mono" style={{ color: 'var(--ash)', marginBottom: 12 }}>Exercise shapes</div>
+            <h1 className="display-lg" style={{ marginBottom: 0 }}>Perfect<br /><span style={{ color: 'var(--accent)' }}>Form</span></h1>
           </motion.div>
         </div>
       </section>
 
-      <section style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 64, zIndex: 50, background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
+      <section style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 64, zIndex: 50, background: 'rgba(8,8,16,0.85)', }}>
         <div className="container">
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: '1 1 220px' }}>
@@ -143,7 +142,7 @@ export default function ShapesPage() {
             </div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '80px 0' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', color: 'rgba(61,127,255,0.15)', marginBottom: 16 }}>X</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', color: 'rgba(255,77,46,0.15)', marginBottom: 16 }}>X</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', marginBottom: 8 }}>No shapes found</div>
               <div style={{ color: 'rgba(255,255,255,0.4)' }}>Try different filters</div>
             </motion.div>

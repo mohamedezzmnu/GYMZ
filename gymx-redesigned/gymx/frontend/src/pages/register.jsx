@@ -19,71 +19,53 @@ function AuthLayout({ children, title, subtitle }) {
         padding: '40px 24px',
         position: 'relative',
       }}>
-        {/* Ambient glows */}
+        {/* Ambient glow — one quiet source */}
         <div style={{
           position: 'fixed', inset: 0,
-          background: 'radial-gradient(ellipse 50% 50% at 30% 40%, rgba(61,127,255,0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 70% 70%, rgba(255,107,43,0.07) 0%, transparent 60%)',
+          background: 'radial-gradient(ellipse 50% 50% at 30% 40%, rgba(255,77,46,0.06) 0%, transparent 60%)',
           pointerEvents: 'none', zIndex: 0,
         }} />
-        {/* Background Z */}
-        <div style={{
-          position: 'fixed', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-display)',
-          fontSize: 'min(80vw, 80vh)',
-          color: 'rgba(61,127,255,0.025)',
-          userSelect: 'none', pointerEvents: 'none', zIndex: 0,
-        }} aria-hidden>Z</div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}
         >
           {/* Logo */}
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '2rem',
-            letterSpacing: '0.1em',
-            marginBottom: 40,
+            fontWeight: 600,
+            fontSize: '1.3rem',
+            letterSpacing: '-0.02em',
+            marginBottom: 32,
             textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
           }}>
-            GYM<span style={{ color: 'var(--volt)', textShadow: '0 0 20px rgba(61,127,255,0.6)' }}>Z</span>
+            GYMZ
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
           </div>
 
-          {/* Glass Card */}
+          {/* Card */}
           <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            backdropFilter: 'blur(28px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+            background: 'var(--carbon)',
             border: '1px solid var(--glass-border)',
             borderRadius: 'var(--radius-lg)',
-            padding: '40px 32px',
-            boxShadow: '0 16px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
+            padding: '36px 32px',
             position: 'relative',
             overflow: 'hidden',
           }}>
-            {/* Top shimmer */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
-            }} />
-            {/* Accent line */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-              background: 'linear-gradient(90deg, var(--volt), var(--fire), transparent)',
-              opacity: 0.7,
-            }} />
-
             <h1 style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '2rem',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
+              fontWeight: 600,
+              fontSize: '1.6rem',
+              letterSpacing: '-0.025em',
               marginBottom: 8,
             }}>{title}</h1>
-            <p style={{ color: 'var(--ash-light)', fontSize: '0.875rem', marginBottom: 32 }}>
+            <p style={{ color: 'var(--ash-light)', fontSize: '0.875rem', marginBottom: 28 }}>
               {subtitle}
             </p>
 
@@ -115,7 +97,7 @@ export default function RegisterPage() {
 
   const strength = passStrength();
   const strengthLabel = ['', 'ضعيف', 'مقبول', 'جيد', 'قوي'][strength];
-  const strengthColor = ['', '#f87171', '#facc15', '#4ade80', 'var(--volt)'][strength];
+  const strengthColor = ['', '#f87171', '#facc15', '#4ade80', 'var(--accent)'][strength];
 
   const handleSubmit = async () => {
     if (!form.name.trim()) { toast.error('اكتب اسمك'); return; }
@@ -152,9 +134,8 @@ export default function RegisterPage() {
     display: 'block',
     fontSize: '0.75rem',
     fontFamily: 'var(--font-mono)',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.02em',
     color: 'var(--ash-light)',
-    textTransform: 'uppercase',
     marginBottom: 8,
   };
 
@@ -171,7 +152,7 @@ export default function RegisterPage() {
             placeholder="اسمك الكامل"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            onFocus={(e) => { e.target.style.borderColor = 'rgba(61,127,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(61,127,255,0.1)'; }}
+            onFocus={(e) => { e.target.style.borderColor = 'rgba(255,77,46,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(255,77,46,0.1)'; }}
             onBlur={(e) => { e.target.style.borderColor = 'var(--glass-border)'; e.target.style.boxShadow = 'none'; }}
           />
         </div>
@@ -185,7 +166,7 @@ export default function RegisterPage() {
             placeholder="your@email.com"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            onFocus={(e) => { e.target.style.borderColor = 'rgba(61,127,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(61,127,255,0.1)'; }}
+            onFocus={(e) => { e.target.style.borderColor = 'rgba(255,77,46,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(255,77,46,0.1)'; }}
             onBlur={(e) => { e.target.style.borderColor = 'var(--glass-border)'; e.target.style.boxShadow = 'none'; }}
           />
         </div>
@@ -200,7 +181,7 @@ export default function RegisterPage() {
               placeholder="8 حروف على الأقل"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              onFocus={(e) => { e.target.style.borderColor = 'rgba(61,127,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(61,127,255,0.1)'; }}
+              onFocus={(e) => { e.target.style.borderColor = 'rgba(255,77,46,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(255,77,46,0.1)'; }}
               onBlur={(e) => { e.target.style.borderColor = 'var(--glass-border)'; e.target.style.boxShadow = 'none'; }}
             />
             <button
@@ -283,20 +264,20 @@ export default function RegisterPage() {
             marginTop: 8,
             padding: '14px',
             background: loading
-              ? 'rgba(61,127,255,0.3)'
-              : 'linear-gradient(135deg, var(--volt), rgba(61,127,255,0.8))',
+              ? 'rgba(255,77,46,0.3)'
+              : 'var(--accent)',
             border: 'none',
             borderRadius: 'var(--radius-sm)',
             color: '#fff',
             fontFamily: 'var(--font-display)',
             fontSize: '1.1rem',
-            letterSpacing: '0.1em',
+            letterSpacing: '0.02em',
             cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            boxShadow: loading ? 'none' : '0 4px 20px rgba(61,127,255,0.35)',
+            boxShadow: 'none',
             transition: 'all 200ms',
           }}
         >
@@ -305,7 +286,7 @@ export default function RegisterPage() {
 
         <p style={{ textAlign: 'center', color: 'var(--ash)', fontSize: '0.875rem' }}>
           عندك حساب؟{' '}
-          <Link href="/login" style={{ color: 'var(--volt)', textDecoration: 'none', fontWeight: 500 }}>
+          <Link href="/login" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 500 }}>
             سجل دخول
           </Link>
         </p>

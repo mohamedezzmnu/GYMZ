@@ -31,8 +31,6 @@ function GlassCard({ children, style = {}, hover = true }) {
     <motion.div
       style={{
         background: 'var(--glass-bg)',
-        backdropFilter: 'var(--glass-blur)',
-        WebkitBackdropFilter: 'var(--glass-blur)',
         border: '1px solid var(--glass-border)',
         borderRadius: 'var(--radius-md)',
         boxShadow: 'var(--glass-shadow)',
@@ -41,30 +39,25 @@ function GlassCard({ children, style = {}, hover = true }) {
         ...style,
       }}
       whileHover={hover ? {
-        borderColor: 'rgba(61,127,255,0.3)',
+        borderColor: 'rgba(255,77,46,0.3)',
         boxShadow: 'var(--glass-shadow-hover)',
         y: -2,
       } : {}}
       transition={{ duration: 0.2 }}
     >
-      {/* top shimmer */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-      }} />
       {children}
     </motion.div>
   );
 }
 
 // ── stat card ────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, accent = 'var(--volt)', delay }) {
+function StatCard({ icon: Icon, label, value, accent = 'var(--accent)', delay }) {
   return (
     <Reveal delay={delay}>
       <GlassCard style={{ padding: '20px 22px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div>
-            <p style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>
+            <p style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8 }}>
               {label}
             </p>
             <p style={{ fontSize: '1.8rem', fontFamily: 'var(--font-display)', letterSpacing: '0.02em', color: 'var(--chalk)' }}>
@@ -118,14 +111,14 @@ function ChangePasswordModal({ onClose }) {
   };
   const lbl = {
     display: 'block', fontSize: '0.7rem', fontFamily: 'var(--font-mono)',
-    color: 'var(--ash-light)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6,
+    color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 6,
   };
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200,
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
-      background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+      background: 'rgba(0,0,0,0.6)',
     }} onClick={onClose}>
       <motion.div
         initial={{ opacity: 0, scale: 0.92 }}
@@ -142,11 +135,11 @@ function ChangePasswordModal({ onClose }) {
           position: 'relative',
         }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire), transparent)', borderRadius: '22px 22px 0 0' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)', borderRadius: '22px 22px 0 0' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(61,127,255,0.12)', border: '1px solid rgba(61,127,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Lock size={16} color="var(--volt)" />
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,77,46,0.12)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Lock size={16} color="var(--accent)" />
           </div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.05em' }}>تغيير الباسورد</h3>
         </div>
@@ -186,9 +179,9 @@ function ChangePasswordModal({ onClose }) {
             }}>إلغاء</button>
             <motion.button onClick={handleSave} disabled={loading} whileTap={{ scale: 0.97 }} style={{
               flex: 2, padding: '11px',
-              background: 'linear-gradient(135deg, var(--volt), rgba(61,127,255,0.8))',
+              background: 'var(--accent)',
               border: 'none', borderRadius: 'var(--radius-sm)',
-              color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.08em',
+              color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.02em',
               cursor: loading ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
@@ -257,10 +250,10 @@ export default function ProfilePage() {
         </p>
         <Link href="/login" style={{
           padding: '12px 28px',
-          background: 'linear-gradient(135deg, var(--volt), rgba(61,127,255,0.8))',
+          background: 'var(--accent)',
           border: 'none', borderRadius: 'var(--radius-sm)',
           color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem',
-          textDecoration: 'none', letterSpacing: '0.1em',
+          textDecoration: 'none', letterSpacing: '0.02em',
         }}>تسجيل الدخول</Link>
       </div>
     );
@@ -279,7 +272,7 @@ export default function ProfilePage() {
         {/* Ambient */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 60% 40% at 20% 20%, rgba(61,127,255,0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(255,107,43,0.05) 0%, transparent 60%)',
+          background: 'radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,77,46,0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(255,77,46,0.05) 0%, transparent 60%)',
         }} />
 
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
@@ -288,16 +281,16 @@ export default function ProfilePage() {
           <Reveal>
             <GlassCard hover={false} style={{ padding: '32px', marginBottom: 24 }}>
               {/* volt accent top */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire), transparent)' }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)' }} />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
                 {/* Avatar */}
                 <div style={{
                   width: 72, height: 72, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--volt), rgba(255,107,43,0.8))',
+                  background: 'var(--accent)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: '#fff',
-                  boxShadow: '0 0 0 3px rgba(61,127,255,0.2), 0 8px 24px rgba(61,127,255,0.3)',
+                  boxShadow: '0 0 0 3px rgba(255,77,46,0.15)',
                   flexShrink: 0,
                 }}>
                   {initials}
@@ -310,10 +303,10 @@ export default function ProfilePage() {
                       {user.name}
                     </h1>
                     <span style={{
-                      fontSize: '0.65rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em',
+                      fontSize: '0.65rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em',
                       padding: '3px 8px', borderRadius: 4,
-                      background: 'rgba(61,127,255,0.12)', border: '1px solid rgba(61,127,255,0.3)',
-                      color: 'var(--volt)',
+                      background: 'rgba(255,77,46,0.12)', border: '1px solid rgba(255,77,46,0.3)',
+                      color: 'var(--accent)',
                     }}>MEMBER</span>
                   </div>
                   <p style={{ color: 'var(--ash-light)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -343,10 +336,10 @@ export default function ProfilePage() {
 
           {/* ── STATS ROW ────────────────────────── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
-            <StatCard icon={Dumbbell}   label="الجلسات"       value={realStats.sessions}  accent="var(--volt)"  delay={0.05} />
+            <StatCard icon={Dumbbell}   label="الجلسات"       value={realStats.sessions}  accent="var(--accent)"  delay={0.05} />
             <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"      delay={0.1}  />
             <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق', muscle: '💪 ضخامة', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="#facc15" delay={0.15} />
-            <StatCard icon={Zap}        label="البرنامج المقترح" value={onboarding?.recommended_program || '—'} accent="var(--fire)" delay={0.2} />
+            <StatCard icon={Zap}        label="البرنامج المقترح" value={onboarding?.recommended_program || '—'} accent="var(--accent)" delay={0.2} />
           </div>
 
           {/* ── BOTTOM GRID ──────────────────────── */}
@@ -361,7 +354,7 @@ export default function ProfilePage() {
                   </h2>
                   <Link href="/programs" style={{
                     fontSize: '0.7rem', fontFamily: 'var(--font-mono)',
-                    color: 'var(--volt)', textDecoration: 'none', letterSpacing: '0.05em',
+                    color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.05em',
                     display: 'flex', alignItems: 'center', gap: 4,
                   }}>
                     كل البرامج <ChevronRight size={12} />
@@ -374,7 +367,7 @@ export default function ProfilePage() {
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)', marginBottom: 8 }}>
                         {onboarding ? `البرنامج المقترح ليك: ${onboarding.recommended_program}` : 'لسه ما اخترتش برنامج'}
                       </p>
-                      <Link href={onboarding ? `/programs?program=${encodeURIComponent(onboarding.recommended_program)}` : '/onboarding'} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--volt)', textDecoration: 'none' }}>
+                      <Link href={onboarding ? `/programs?program=${encodeURIComponent(onboarding.recommended_program)}` : '/onboarding'} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--accent)', textDecoration: 'none' }}>
                         {onboarding ? 'ابدأ البرنامج ←' : 'اختار برنامجك ←'}
                       </Link>
                     </div>
@@ -397,9 +390,9 @@ export default function ProfilePage() {
                         <span style={{
                           fontSize: '0.6rem', fontFamily: 'var(--font-mono)',
                           padding: '3px 7px', borderRadius: 4,
-                          background: 'rgba(61,127,255,0.1)',
-                          border: '1px solid rgba(61,127,255,0.25)',
-                          color: 'var(--volt)',
+                          background: 'rgba(255,77,46,0.1)',
+                          border: '1px solid rgba(255,77,46,0.25)',
+                          color: 'var(--accent)',
                         }}>{prog.level || 'active'}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -408,7 +401,7 @@ export default function ProfilePage() {
                             initial={{ width: 0 }}
                             animate={{ width: `${prog.progress || 0}%` }}
                             transition={{ duration: 0.8, delay: 0.3 }}
-                            style={{ height: '100%', borderRadius: 2, background: 'linear-gradient(90deg, var(--volt), var(--fire))' }}
+                            style={{ height: '100%', borderRadius: 2, background: 'var(--accent)' }}
                           />
                         </div>
                         <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', minWidth: 28 }}>
@@ -421,10 +414,10 @@ export default function ProfilePage() {
                   <Link href="/programs" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     padding: '10px',
-                    background: 'rgba(61,127,255,0.06)',
-                    border: '1px dashed rgba(61,127,255,0.2)',
+                    background: 'rgba(255,77,46,0.06)',
+                    border: '1px dashed rgba(255,77,46,0.2)',
                     borderRadius: 'var(--radius-sm)',
-                    color: 'var(--volt)', fontSize: '0.8rem',
+                    color: 'var(--accent)', fontSize: '0.8rem',
                     textDecoration: 'none',
                   }}>
                     <Zap size={13} /> انضم لبرنامج جديد
@@ -453,7 +446,7 @@ export default function ProfilePage() {
                         padding: '10px 12px',
                         background: 'rgba(255,255,255,0.025)',
                         borderRadius: 8,
-                        borderLeft: `3px solid ${a.done ? 'var(--volt)' : 'rgba(255,255,255,0.08)'}`,
+                        borderLeft: `3px solid ${a.done ? 'var(--accent)' : 'rgba(255,255,255,0.08)'}`,
                       }}>
                         <div style={{ color: a.done ? '#4ade80' : 'var(--ash)', flexShrink: 0 }}>
                           {a.done ? <CheckCircle size={15} /> : <Clock size={15} />}
@@ -467,7 +460,7 @@ export default function ProfilePage() {
                           </p>
                         </div>
                         {!a.done && (
-                          <span style={{ fontSize: '0.6rem', color: 'var(--fire)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '0.6rem', color: 'var(--accent)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
                             معلق
                           </span>
                         )}
@@ -492,8 +485,8 @@ export default function ProfilePage() {
 ].map((ach, i) => (
                       <div key={i} style={{
                         padding: '14px 12px', borderRadius: 10, textAlign: 'center',
-                        background: ach.earned ? 'rgba(61,127,255,0.08)' : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${ach.earned ? 'rgba(61,127,255,0.25)' : 'rgba(255,255,255,0.05)'}`,
+                        background: ach.earned ? 'rgba(255,77,46,0.08)' : 'rgba(255,255,255,0.02)',
+                        border: `1px solid ${ach.earned ? 'rgba(255,77,46,0.25)' : 'rgba(255,255,255,0.05)'}`,
                         opacity: ach.earned ? 1 : 0.4,
                         transition: 'opacity 200ms',
                       }}>
@@ -515,7 +508,7 @@ export default function ProfilePage() {
                   </h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { icon: Shield, label: 'تغيير الباسورد', onClick: () => setShowPassModal(true), accent: 'var(--volt)' },
+                      { icon: Shield, label: 'تغيير الباسورد', onClick: () => setShowPassModal(true), accent: 'var(--accent)' },
                       { icon: BarChart2, label: 'إحصائياتي', onClick: () => toast('قريباً! 📊'), accent: '#facc15' },
                       { icon: Award, label: 'كل الإنجازات', onClick: () => toast('قريباً! 🏆'), accent: '#4ade80' },
                     ].map(({ icon: Icon, label, onClick, accent }) => (

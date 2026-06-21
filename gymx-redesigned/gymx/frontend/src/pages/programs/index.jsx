@@ -373,48 +373,44 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
     >
       {/* Card Header */}
       <motion.div
-        whileHover={{ borderColor: program.accentColor + '66' }}
-        style={{ position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: highlighted ? '1px solid rgba(61,127,255,0.5)' : '1px solid rgba(255,255,255,0.08)', borderRadius: open ? '16px 16px 0 0' : 16, transition: 'all 300ms ease', cursor: 'pointer', padding: '24px 28px' }}
+        whileHover={{ borderColor: 'var(--glass-border-hover)' }}
+        transition={{ duration: 0.12 }}
+        style={{ position: 'relative', overflow: 'hidden', background: 'var(--carbon)', border: highlighted ? '1px solid rgba(255,77,46,0.4)' : '1px solid var(--glass-border)', borderRadius: open ? '14px 14px 0 0' : 14, transition: 'border-color 150ms ease, background 150ms ease', cursor: 'pointer', padding: '24px 28px' }}
         onClick={() => setOpen(!open)}
       >
-        {/* shimmer */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg,transparent,${program.accentColor}44,transparent)` }} />
-        {/* glow accent */}
-        <div style={{ position: 'absolute', top: 0, right: 0, width: 120, height: 120, borderRadius: '50%', background: program.accentColor + '08', filter: 'blur(40px)', pointerEvents: 'none' }} />
-
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: '1.4rem' }}>{program.icon}</span>
-              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.15em', padding: '3px 10px', borderRadius: 6, background: 'rgba(61,127,255,0.1)', border: '1px solid rgba(61,127,255,0.2)', color: 'rgba(61,127,255,0.9)' }}>
+              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
                 {program.tag}
               </span>
-              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: program.levelColor.bg, border: '1px solid ' + program.levelColor.border, color: program.levelColor.text }}>
+              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: program.levelColor.bg, border: '1px solid ' + program.levelColor.border, color: program.levelColor.text }}>
                 {program.level}
               </span>
               {isMyProgram && (
-                <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4 }}>
                   ✅ برنامجك الحالي
                 </span>
               )}
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--chalk)', margin: '0 0 4px 0', lineHeight: 1.2 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', color: 'var(--chalk)', margin: '0 0 4px 0', lineHeight: 1.2 }}>
               {program.title}
             </h2>
-            <div style={{ fontSize: '0.8rem', color: program.accentColor, fontFamily: 'var(--font-mono)', marginBottom: 12, opacity: 0.8 }}>
+            <div style={{ fontSize: '0.8rem', color: program.accentColor, fontFamily: 'var(--font-mono)', marginBottom: 12, opacity: 0.85 }}>
               {program.subtitle}
             </div>
-            <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: '0 0 14px 0', direction: 'rtl', fontFamily: 'sans-serif', maxWidth: 600 }}>
+            <p style={{ fontSize: '0.88rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: '0 0 14px 0', direction: 'rtl', fontFamily: 'var(--font-body)', maxWidth: 600 }}>
               {program.description}
             </p>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Calendar size={13} color='rgba(255,255,255,0.4)' />
-                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>{program.days}</span>
+                <Calendar size={13} color='var(--ash)' />
+                <span style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{program.days}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Users size={13} color='rgba(255,255,255,0.4)' />
-                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'sans-serif', direction: 'rtl' }}>{program.suitable}</span>
+                <Users size={13} color='var(--ash)' />
+                <span style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)', direction: 'rtl' }}>{program.suitable}</span>
               </div>
             </div>
           </div>
@@ -459,7 +455,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25 }}
               >
-                <div style={{ fontFamily: 'sans-serif', fontSize: '0.95rem', color: program.accentColor, marginBottom: 16, direction: 'rtl', fontWeight: 'bold' }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: program.accentColor, marginBottom: 16, direction: 'rtl', fontWeight: 'bold' }}>
                   {program.days_detail[activeDay].day}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -469,8 +465,8 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'sans-serif', marginBottom: 2 }}>{ex.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'sans-serif' }}>{ex.detail}</div>
+                        <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)', marginBottom: 2 }}>{ex.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
                       </div>
                     </div>
                   ))}
@@ -507,16 +503,15 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               <motion.button
                 onClick={handleJoin}
                 disabled={joining || joined}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.98 }}
                 style={{
                   marginTop: 20, width: '100%', padding: '13px',
-                  background: joined ? 'rgba(74,222,128,0.1)' : `linear-gradient(135deg, ${program.accentColor}, rgba(61,127,255,0.7))`,
+                  background: joined ? 'rgba(74,222,128,0.1)' : 'var(--accent)',
                   border: joined ? '1px solid rgba(74,222,128,0.3)' : 'none',
                   borderRadius: 12, cursor: joined ? 'default' : 'pointer',
                   color: joined ? '#4ade80' : '#fff',
-                  fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.08em',
+                  fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.95rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  boxShadow: joined ? 'none' : `0 4px 20px ${program.accentColor}44`,
                 }}
               >
                 {joined ? <><CheckCircle2 size={16} /> منضم للبرنامج</> : joining ? 'جاري الانضمام...' : <><Zap size={15} /> ابدأ البرنامج</>}
@@ -567,10 +562,10 @@ function StructureStep({ step, index }) {
       <div style={{ flex: 1, direction: 'rtl' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: step.color, opacity: 0.8 }}>{step.step}</span>
-          <span style={{ fontFamily: 'sans-serif', fontSize: '0.95rem', color: 'var(--chalk)', fontWeight: 'bold' }}>{step.title}</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: 'var(--chalk)', fontWeight: 'bold' }}>{step.title}</span>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>— {step.subtitle}</span>
         </div>
-        <p style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: 0, fontFamily: 'sans-serif' }}>{step.desc}</p>
+        <p style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: 0, fontFamily: 'var(--font-body)' }}>{step.desc}</p>
       </div>
     </motion.div>
   );
@@ -600,12 +595,12 @@ export default function ProgramsPage() {
       <Head><title>Programs - GYMZ</title></Head>
 
       {/* Hero */}
-      <section style={{ padding: '60px 0 40px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ padding: '60px 0 40px', borderBottom: '1px solid var(--glass-border)' }}>
         <div className="container">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <div className="mono" style={{ color: 'var(--volt)', marginBottom: 12 }}>— Training Programs</div>
-            <h1 className="display-lg" style={{ marginBottom: 16 }}>اختار<br /><span style={{ color: 'var(--volt)' }}>برنامجك</span></h1>
-            <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.5)', maxWidth: 560, lineHeight: 1.8, direction: 'rtl', fontFamily: 'sans-serif' }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div className="mono" style={{ color: 'var(--ash)', marginBottom: 12 }}>Training programs</div>
+            <h1 className="display-lg" style={{ marginBottom: 16 }}>اختار <span style={{ color: 'var(--accent)' }}>برنامجك</span></h1>
+            <p style={{ fontSize: '1rem', color: 'var(--ash-light)', maxWidth: 560, lineHeight: 1.8, direction: 'rtl', fontFamily: 'var(--font-body)' }}>
               4 برامج تمرين جاهزة — كل واحد ليه أسلوبه وناسه. اختار اللي يناسب مستواك ووقتك وابدأ.
             </p>
           </motion.div>
@@ -624,9 +619,9 @@ export default function ProgramsPage() {
       {/* Day Structure */}
       <section style={{ padding: '0 0 80px' }}>
         <div className="container">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} style={{ marginBottom: 32 }}>
-            <div className="mono" style={{ color: 'var(--volt)', marginBottom: 8 }}>— هيكل أي يوم تمرين</div>
-            <h2 className="display-sm" style={{ margin: 0 }}>الترتيب<br /><span style={{ color: 'var(--volt)' }}>الصح</span></h2>
+          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3 }} style={{ marginBottom: 32 }}>
+            <div className="mono" style={{ color: 'var(--ash)', marginBottom: 8 }}>هيكل أي يوم تمرين</div>
+            <h2 className="display-sm" style={{ margin: 0 }}>الترتيب <span style={{ color: 'var(--accent)' }}>الصح</span></h2>
           </motion.div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {DAY_STRUCTURE.map((s, i) => <StructureStep key={i} step={s} index={i} />)}

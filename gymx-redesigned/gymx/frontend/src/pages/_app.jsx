@@ -14,7 +14,7 @@ export default function App({ Component, pageProps }) {
         </main>
 
         <footer style={{
-          borderTop: '1px solid var(--iron)',
+          borderTop: '1px solid var(--glass-border)',
           padding: '40px 24px',
           display: 'flex',
           alignItems: 'center',
@@ -24,12 +24,17 @@ export default function App({ Component, pageProps }) {
         }}>
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '1.4rem',
-            letterSpacing: '0.1em',
+            fontWeight: 600,
+            fontSize: '1.05rem',
+            letterSpacing: '-0.02em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
           }}>
-            GYM<span style={{ color: 'var(--volt)' }}>X</span>
+            GYMX
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.1em' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ash)' }}>
             © 2026 GYMX. جميع الحقوق محفوظة لدي MZ
           </div>
         </footer>
@@ -44,7 +49,7 @@ export default function App({ Component, pageProps }) {
               fontFamily: 'var(--font-body)',
               fontSize: '0.875rem',
             },
-            success: { iconTheme: { primary: 'var(--volt)', secondary: 'var(--obsidian)' } },
+            success: { iconTheme: { primary: 'var(--accent)', secondary: '#fff' } },
           }}
         />
       </AuthProvider>
