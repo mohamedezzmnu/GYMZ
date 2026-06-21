@@ -208,9 +208,9 @@ export default function DashboardPage() {
           {/* ── STATS GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
             <StatBox icon={Flame}    label="الاستمرارية"     value={`${streak}d`}          sub="+1 اليوم" accent="var(--accent)"  delay={0.05} />
-            <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FF9F0A"  delay={0.1}  />
+            <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FF6B00"  delay={0.1}  />
             <StatBox icon={Scale}    label="الوزن الحالي"    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
-            <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#64D2FF"  delay={0.2}  />
+            <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#0A84FF"  delay={0.2}  />
           </div>
 
           {/* ── LAST WORKOUT ── */}
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               <Reveal delay={0.2}>
                 <GlassCard style={{ padding:'24px' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-                    <Clock size={15} color="#FF9F0A" />
+                    <Clock size={15} color="#FF6B00" />
                     <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>آخر الجلسات</h2>
                   </div>
 
@@ -361,9 +361,9 @@ export default function DashboardPage() {
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                     {[
                       { href:'/exercises', label:'التمارين', icon:'🏋️', color:'var(--accent)' },
-                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FF9F0A' },
+                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FF6B00' },
                       { href:'/tools',     label:'الحاسبات', icon:'🧮', color:'#4ade80' },
-                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#64D2FF' },
+                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#0A84FF' },
                     ].map(({ href, label, icon, color }) => (
                       <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'all 150ms' }}>
                         <span>{icon}</span>

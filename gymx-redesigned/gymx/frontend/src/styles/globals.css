@@ -47,20 +47,21 @@ body {
   --iron-light: #232325;
   --iron-mid: #2A2A2C;
 
-  /* Single accent — used sparingly */
-  --accent: #FF4D2E;
-  --accent-dim: rgba(255, 77, 46, 0.10);
-  --accent-glow: rgba(255, 77, 46, 0.18);
-  --accent-bright: #FF6A4D;
+  /* Dual accent — electric blue (primary) + fire orange (energy) */
+  --accent: #0A84FF;
+  --accent-dim: rgba(10, 132, 255, 0.10);
+  --accent-glow: rgba(10, 132, 255, 0.18);
+  --accent-bright: #3FA2FF;
 
-  /* Legacy aliases kept for compatibility — all map to the one accent now */
-  --volt: var(--accent);
-  --volt-dim: var(--accent-dim);
-  --volt-glow: var(--accent-glow);
-  --volt-bright: var(--accent-bright);
-  --fire: var(--accent);
-  --fire-dim: var(--accent-dim);
-  --fire-glow: var(--accent-glow);
+  --volt: #0A84FF;
+  --volt-dim: rgba(10, 132, 255, 0.10);
+  --volt-glow: rgba(10, 132, 255, 0.18);
+  --volt-bright: #3FA2FF;
+
+  --fire: #FF6B00;
+  --fire-dim: rgba(255, 107, 0, 0.10);
+  --fire-glow: rgba(255, 107, 0, 0.18);
+  --fire-bright: #FF8A3D;
 
   /* Text */
   --ash: #6E6E72;

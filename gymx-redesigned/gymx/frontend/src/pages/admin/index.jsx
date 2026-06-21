@@ -257,9 +257,9 @@ export default function AdminPage() {
 
         {/* ── Nutrition Premium ── */}
         <Reveal delay={0.15}>
-          <GlassCard accent="#FF9F0A" style={{ padding: '24px', marginBottom: 28 }}>
+          <GlassCard accent="#FF6B00" style={{ padding: '24px', marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-              <Apple size={16} color="#FF9F0A" />
+              <Apple size={16} color="#FF6B00" />
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
                 اشتراكات التغذية ({premiumEmails.length})
               </span>
@@ -287,7 +287,7 @@ export default function AdminPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px',
                   background: 'rgba(255,159,10,0.12)', border: '1px solid rgba(255,159,10,0.35)',
-                  borderRadius: 8, color: '#FF9F0A', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                  borderRadius: 8, color: '#FF6B00', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
                   cursor: addingEmail ? 'not-allowed' : 'pointer', opacity: addingEmail ? 0.5 : 1,
                   whiteSpace: 'nowrap',
                 }}
