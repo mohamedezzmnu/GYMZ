@@ -126,8 +126,8 @@ const PROGRAMS = [
     subtitle: 'Upper / Lower',
     days: '4 أيام أسبوعياً',
     level: 'جميع المستويات',
-    levelColor: { bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.3)', text: '#60a5fa' },
-    accentColor: '#60a5fa',
+    levelColor: { bg: 'rgba(255,255,255,0.12)', border: 'rgba(255,255,255,0.3)', text: '#FFFFFF' },
+    accentColor: '#FFFFFF',
     icon: '⚖️',
     suitable: 'ممتاز لكل المستويات وللموازنة بين البناء والراحة',
     schedule: 'الإثنين، الثلاثاء، الخميس، الجمعة',
@@ -271,7 +271,7 @@ const PROGRAMS = [
 // ══════════════════════════════════════════
 const DAY_STRUCTURE = [
   { step: '01', title: 'الإحماء', subtitle: 'Warm-up', desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.', color: '#4ade80', icon: '🔥' },
-  { step: '02', title: 'التمارين الأساسية', subtitle: 'Compound Exercises', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#60a5fa', icon: '🏋️' },
+  { step: '02', title: 'التمارين الأساسية', subtitle: 'Compound Exercises', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#FFFFFF', icon: '🏋️' },
   { step: '03', title: 'التمارين المساعدة', subtitle: 'Isolation Exercises', desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.', color: '#facc15', icon: '🎯' },
   { step: '04', title: 'التبريد والإطالات', subtitle: 'Cool-down', desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.', color: '#f87171', icon: '❄️' },
 ];

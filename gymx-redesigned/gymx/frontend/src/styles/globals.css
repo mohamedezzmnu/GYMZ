@@ -34,6 +34,7 @@ body {
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://db.onlinewebfonts.com/c/8b75d9dcff6a48c35a46656192adf019?family=FSP+DEMO+-+PODIUM+Sharp+4.11');
 
 /* =============================================
    DESIGN TOKENS — GYMZ v3 (Calm / Impeccable / Restrained)
@@ -47,21 +48,21 @@ body {
   --iron-light: #232325;
   --iron-mid: #2A2A2C;
 
-  /* Dual accent — electric blue (primary) + fire orange (energy) */
-  --accent: #0A84FF;
-  --accent-dim: rgba(10, 132, 255, 0.10);
-  --accent-glow: rgba(10, 132, 255, 0.18);
-  --accent-bright: #3FA2FF;
+  /* Dual accent — monochrome (VANGUARD style): white reads as the "accent" on dark surfaces */
+  --accent: #FFFFFF;
+  --accent-dim: rgba(255, 255, 255, 0.10);
+  --accent-glow: rgba(255, 255, 255, 0.18);
+  --accent-bright: #FFFFFF;
 
-  --volt: #0A84FF;
-  --volt-dim: rgba(10, 132, 255, 0.10);
-  --volt-glow: rgba(10, 132, 255, 0.18);
-  --volt-bright: #3FA2FF;
+  --volt: #FFFFFF;
+  --volt-dim: rgba(255, 255, 255, 0.10);
+  --volt-glow: rgba(255, 255, 255, 0.18);
+  --volt-bright: #FFFFFF;
 
-  --fire: #FF6B00;
-  --fire-dim: rgba(255, 107, 0, 0.10);
-  --fire-glow: rgba(255, 107, 0, 0.18);
-  --fire-bright: #FF8A3D;
+  --fire: #000000;
+  --fire-dim: rgba(0, 0, 0, 0.10);
+  --fire-glow: rgba(0, 0, 0, 0.18);
+  --fire-bright: #1A1A1A;
 
   /* Text */
   --ash: #6E6E72;
@@ -78,9 +79,9 @@ body {
   --glass-shadow: none;
   --glass-shadow-hover: none;
 
-  /* Fonts — one quiet display face, one body face, one mono for data */
-  --font-display: 'Inter', sans-serif;
-  --font-numeral: 'Inter', sans-serif;
+  /* Fonts — PODIUM Sharp for display/headings, Inter for body, mono for data */
+  --font-display: 'FSP DEMO - PODIUM Sharp 4.11', sans-serif;
+  --font-numeral: 'FSP DEMO - PODIUM Sharp 4.11', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
 
@@ -194,6 +195,10 @@ body {
   color: var(--ash-light);
 }
 
+.font-podium {
+  font-family: 'FSP DEMO - PODIUM Sharp 4.11', sans-serif;
+}
+
 /* =============================================
    SCROLLBAR
    ============================================= */
@@ -207,7 +212,7 @@ body {
    ============================================= */
 ::selection {
   background: var(--accent);
-  color: #fff;
+  color: #000;
 }
 
 /* =============================================
@@ -218,8 +223,8 @@ body {
 .ash { color: var(--ash); }
 .chalk { color: var(--chalk); }
 
-.volt-bg { background-color: var(--accent); color: #fff; }
-.fire-bg { background-color: var(--accent); color: #fff; }
+.volt-bg { background-color: var(--accent); color: #000; }
+.fire-bg { background-color: var(--accent); color: #000; }
 .carbon-bg { background-color: var(--carbon); }
 .iron-bg { background-color: var(--iron); }
 
@@ -244,10 +249,10 @@ body {
   overflow: hidden;
 }
 
-/* Primary button — solid, no gradient, no colored shadow */
+/* Primary button — solid white on dark surfaces, no gradient, no colored shadow */
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: #000;
 }
 
 .btn-primary:hover {
@@ -276,10 +281,10 @@ body {
 
 .btn-ghost:hover { color: var(--chalk); }
 
-/* Secondary accent CTA — same single accent, flat */
+/* Secondary CTA — same monochrome treatment */
 .btn-fire {
   background: var(--accent);
-  color: #fff;
+  color: #000;
 }
 
 .btn-fire:hover {
@@ -337,12 +342,12 @@ body {
 .badge-advanced {
   background: var(--accent-dim);
   color: var(--accent-bright);
-  border-color: rgba(255, 77, 46, 0.18);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 .badge-volt {
   background: var(--accent-dim);
   color: var(--accent-bright);
-  border-color: rgba(255, 77, 46, 0.18);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* =============================================
@@ -424,6 +429,60 @@ body {
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* =============================================
+   ENTRANCE ANIMATIONS (VANGUARD-style fade-up system)
+   ============================================= */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fade-up 0.8s ease-out forwards;
+}
+.animate-fade-up-delay-1 {
+  opacity: 0;
+  animation: fade-up 0.8s ease-out forwards;
+  animation-delay: 0.2s;
+}
+.animate-fade-up-delay-2 {
+  opacity: 0;
+  animation: fade-up 0.8s ease-out forwards;
+  animation-delay: 0.4s;
+}
+.animate-fade-up-delay-3 {
+  opacity: 0;
+  animation: fade-up 0.8s ease-out forwards;
+  animation-delay: 0.6s;
+}
+.animate-fade-up-delay-4 {
+  opacity: 0;
+  animation: fade-up 0.8s ease-out forwards;
+  animation-delay: 0.8s;
+}
+.animate-fade-in {
+  opacity: 0;
+  animation: fade-in 1s ease-out forwards;
+}
+.animate-fade-in-delay {
+  opacity: 0;
+  animation: fade-in 1s ease-out forwards;
+  animation-delay: 0.3s;
+}
+.animate-scale-in {
+  opacity: 0;
+  animation: scale-in 0.6s ease-out forwards;
 }
 
 /* =============================================

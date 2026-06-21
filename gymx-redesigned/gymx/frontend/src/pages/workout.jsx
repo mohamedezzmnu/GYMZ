@@ -363,7 +363,7 @@ export default function WorkoutPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
               {[
                 { icon: Flame,    label: 'النهارده',   value: todaySessions.length, color: 'var(--accent)' },
-                { icon: Calendar, label: 'الشهر',       value: sessions.filter(s => new Date(s.created_at).getMonth() === new Date().getMonth()).length, color: '#FF6B00' },
+                { icon: Calendar, label: 'الشهر',       value: sessions.filter(s => new Date(s.created_at).getMonth() === new Date().getMonth()).length, color: '#FFFFFF' },
                 { icon: Scale,    label: 'الوزن',       value: currentWeight ? `${currentWeight}kg` : '—', color: '#4ade80' },
               ].map(({ icon: Icon, label, value, color }) => (
                 <GlassCard key={label} style={{ padding: '14px 16px', textAlign: 'center' }}>
@@ -385,7 +385,7 @@ export default function WorkoutPage() {
                 <div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)' }}>سجل وزنك</div>
                   {weightDiff !== null && (
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: +weightDiff < 0 ? '#4ade80' : '#FF6B00', marginTop: 2 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: +weightDiff < 0 ? '#4ade80' : '#FFFFFF', marginTop: 2 }}>
                       {+weightDiff < 0 ? '↓' : '↑'} {Math.abs(weightDiff)} kg عن آخر مرة
                     </div>
                   )}
@@ -559,7 +559,7 @@ export default function WorkoutPage() {
                             {s.program_title}
                           </span>
                         )}
-                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : '#FF6B00' }}>
+                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : '#FFFFFF' }}>
                           {s.done ? '✓' : '~'}
                         </span>
                       </div>
