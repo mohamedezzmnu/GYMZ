@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, ChevronDown, Dumbbell, LayoutGrid, Calculator,
   Activity, Zap, User, ShieldCheck, TrendingUp, Target,
@@ -11,15 +11,21 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 
 // ── helpers ───────────────────────────────────────────────
+// Continuous scroll-linked focus: text grows + brightens as it nears the
+// center of the viewport, and dims + shrinks slightly as it moves away
+// (above or below) — re-triggers every time you scroll, not just once.
 function Reveal({ children, delay = 0, style = {} }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start 0.92', 'start 0.55', 'end 0.45', 'end 0.08'],
+  });
+  const opacity = useTransform(scrollYProgress, [0, 0.32, 0.68, 1], [0.32, 1, 1, 0.32]);
+  const scale = useTransform(scrollYProgress, [0, 0.32, 0.68, 1], [0.94, 1, 1, 0.94]);
   return (
-    <motion.div ref={ref} style={style}
-      initial={{ opacity: 0, y: 12 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
-    >{children}</motion.div>
+    <motion.div ref={ref} style={{ opacity, scale, willChange: 'opacity, transform', ...style }}>
+      {children}
+    </motion.div>
   );
 }
 
@@ -246,23 +252,30 @@ export default function HomePage() {
       {/* ══ HERO ══════════════════════════════════════════ */}
       <section ref={heroRef} style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 24px', overflow: 'hidden' }}>
 
-        {/* Fullscreen looping video background (VANGUARD style) — replace src with your own footage */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{ position: 'absolute', inset: 0, zIndex: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-        >
-          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260606_154941_df1a96e1-a06f-450c-bd02-d863414cc1a0.mp4" type="video/mp4" />
-        </video>
-
-        {/* Dark scrim for text legibility over the video */}
+        {/* Animated monochrome background — no external video dependency */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
-          background: 'rgba(0,0,0,0.55)',
+          position: 'absolute', inset: 0, zIndex: 0,
+          background: 'radial-gradient(ellipse 70% 60% at 80% 30%, rgba(255,255,255,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 15% 80%, rgba(255,255,255,0.05) 0%, transparent 65%), #000',
+          backgroundSize: '200% 200%',
+          animation: 'heroGradientShift 14s ease-in-out infinite',
+        }} />
+
+        {/* Faint moving grid for texture */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 0%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 0%, transparent 75%)',
           pointerEvents: 'none',
         }} />
+
+        <style jsx>{`
+          @keyframes heroGradientShift {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+          }
+        `}</style>
 
         {/* Hero Content */}
         <motion.div style={{ position: 'relative', zIndex: 2, maxWidth: 860, y: heroY, opacity: heroOpacity, direction: ar ? 'rtl' : 'ltr' }}>
