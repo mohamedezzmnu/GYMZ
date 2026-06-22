@@ -97,9 +97,7 @@ export function LoginPage() {
     if (!form.email || !form.password) { toast.error('Please fill all fields'); return; }
     setLoading(true);
     try {
-     await register(form.name, form.email, form.password);
-toast.success('تم إنشاء حسابك! أهلاً بيك 🎉');
-router.push('/onboarding');
+      const user = await login(form.email, form.password);
       toast.success(`Welcome back, ${user.name}!`);
       router.push(router.query.from || '/');
     } catch (err) {
@@ -181,16 +179,20 @@ export function RegisterPage() {
 
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.password) {
-      toast.error('Please fill all fields');
+      toast.error('من فضلك اكمل كل الحقول');
+      return;
+    }
+    if (form.password.length < 8) {
+      toast.error('الباسورد لازم يكون 8 حروف على الأقل');
       return;
     }
     setLoading(true);
     try {
       await register(form.name, form.email, form.password);
-      toast.success('Account created! Welcome 🎉');
+      toast.success('تم إنشاء حسابك! أهلاً بيك 🎉');
       router.push('/onboarding');
     } catch (err) {
-      toast.error(err.message || 'Registration failed');
+      toast.error(err.message || 'فشل إنشاء الحساب');
     } finally {
       setLoading(false);
     }
