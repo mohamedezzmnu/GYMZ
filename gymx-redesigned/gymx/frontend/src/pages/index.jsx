@@ -280,8 +280,136 @@ export default function HomePage() {
             from { background-position: 0 0; }
             to { background-position: 56px 56px; }
           }
+          @keyframes warriorFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          @keyframes punchLeft {
+            0%, 100% { transform: rotate(0deg) translateY(0px); }
+            40% { transform: rotate(-12deg) translateY(-18px); }
+            70% { transform: rotate(-6deg) translateY(-8px); }
+          }
+          @keyframes guardRight {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(8deg) translateY(-6px); }
+          }
+          @keyframes warriorGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+          }
+          @keyframes energyPulse {
+            0%, 100% { opacity: 0.2; }
+            40% { opacity: 0.7; }
+            60% { opacity: 0.1; }
+          }
         `}</style>
 
+        {/* Original cartoon warrior-athlete illustration — 100% hand-drawn SVG, no external IP */}
+        <div aria-hidden="true" style={{
+          position: 'absolute', zIndex: 1,
+          right: ar ? 'auto' : '-2%', left: ar ? '-2%' : 'auto',
+          bottom: 0,
+          width: 'min(580px, 52vw)',
+          height: '90vh',
+          animation: 'warriorFloat 6s ease-in-out infinite',
+          pointerEvents: 'none',
+          opacity: 0.82,
+        }}>
+          <svg viewBox="0 0 440 700" preserveAspectRatio="xMidYMax meet" style={{ width: '100%', height: '100%' }}>
+            <defs>
+              <radialGradient id="wGlow" cx="50%" cy="45%" r="50%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18"/>
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0"/>
+              </radialGradient>
+              <linearGradient id="wBody" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff"/>
+                <stop offset="100%" stopColor="#aaaaaa"/>
+              </linearGradient>
+              <linearGradient id="wShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#555"/>
+                <stop offset="100%" stopColor="#222"/>
+              </linearGradient>
+            </defs>
+
+            {/* halo glow */}
+            <ellipse cx="220" cy="340" rx="200" ry="280" fill="url(#wGlow)" style={{ animation: 'warriorGlow 5s ease-in-out infinite' }}/>
+            {/* ground shadow */}
+            <ellipse cx="220" cy="690" rx="100" ry="12" fill="#ffffff" opacity="0.07"/>
+
+            {/* LEGS */}
+            <path d="M245,370 L260,490 L272,600 L300,600 L290,488 L278,370 Z" fill="url(#wBody)"/>
+            <path d="M162,370 L148,488 L138,600 L166,600 L178,490 L195,370 Z" fill="url(#wShadow)"/>
+            <ellipse cx="271" cy="490" rx="16" ry="14" fill="#ccc"/>
+            <ellipse cx="152" cy="490" rx="14" ry="13" fill="#666"/>
+
+            {/* BOOTS */}
+            <path d="M272,590 L268,625 L240,640 L235,650 L305,650 L305,590 Z" fill="#333"/>
+            <path d="M138,590 L134,625 L106,640 L101,650 L171,650 L172,590 Z" fill="#222"/>
+            <rect x="235" y="640" width="70" height="12" rx="5" fill="#555"/>
+            <rect x="101" y="640" width="70" height="12" rx="5" fill="#444"/>
+
+            {/* TORSO */}
+            <path d="M145,165 Q220,140 295,165 L285,375 Q220,395 155,375 Z" fill="url(#wBody)"/>
+            <line x1="220" y1="255" x2="220" y2="375" stroke="#888" strokeWidth="3" opacity="0.5"/>
+            <line x1="175" y1="275" x2="265" y2="275" stroke="#888" strokeWidth="2" opacity="0.4"/>
+            <line x1="172" y1="310" x2="268" y2="310" stroke="#888" strokeWidth="2" opacity="0.4"/>
+            <line x1="170" y1="345" x2="270" y2="345" stroke="#888" strokeWidth="2" opacity="0.4"/>
+            <path d="M155,175 Q188,162 215,172 L210,230 Q185,238 158,225 Z" fill="#eee" opacity="0.6"/>
+            <path d="M285,175 Q252,162 225,172 L230,230 Q255,238 282,225 Z" fill="#eee" opacity="0.6"/>
+
+            {/* BELT */}
+            <rect x="150" y="358" width="140" height="28" rx="10" fill="#333"/>
+            <rect x="208" y="360" width="24" height="24" rx="6" fill="#888"/>
+            <rect x="213" y="365" width="14" height="14" rx="3" fill="#ccc"/>
+
+            {/* LEFT ARM — punching up, animated */}
+            <g style={{ animation: 'punchLeft 3.5s ease-in-out infinite', transformOrigin: '150px 180px' }}>
+              <path d="M150,175 L90,140" stroke="url(#wBody)" strokeWidth="42" strokeLinecap="round" fill="none"/>
+              <ellipse cx="118" cy="156" rx="26" ry="20" fill="#ddd" transform="rotate(-30,118,156)"/>
+              <path d="M90,140 L55,68" stroke="url(#wBody)" strokeWidth="34" strokeLinecap="round" fill="none"/>
+              <ellipse cx="70" cy="100" rx="20" ry="14" fill="#999" transform="rotate(-55,70,100)"/>
+              <rect x="30" y="42" width="48" height="38" rx="14" fill="url(#wBody)" transform="rotate(-15,54,61)"/>
+              <line x1="44" y1="50" x2="44" y2="72" stroke="#888" strokeWidth="2" opacity="0.6"/>
+              <line x1="54" y1="48" x2="54" y2="72" stroke="#888" strokeWidth="2" opacity="0.6"/>
+              <line x1="64" y1="48" x2="64" y2="72" stroke="#888" strokeWidth="2" opacity="0.6"/>
+              {/* energy lines from fist */}
+              <line x1="18" y1="30" x2="0" y2="18" stroke="#fff" strokeWidth="2.5" opacity="0.4" strokeLinecap="round" style={{ animation: 'energyPulse 3.5s ease-in-out infinite' }}/>
+              <line x1="28" y1="20" x2="18" y2="0" stroke="#fff" strokeWidth="2" opacity="0.3" strokeLinecap="round" style={{ animation: 'energyPulse 3.5s ease-in-out infinite 0.1s' }}/>
+              <line x1="10" y1="42" x2="-10" y2="36" stroke="#fff" strokeWidth="2" opacity="0.3" strokeLinecap="round" style={{ animation: 'energyPulse 3.5s ease-in-out infinite 0.2s' }}/>
+            </g>
+
+            {/* RIGHT ARM — guard, animated */}
+            <g style={{ animation: 'guardRight 4.2s ease-in-out infinite', transformOrigin: '290px 180px' }}>
+              <path d="M290,175 L348,210" stroke="url(#wBody)" strokeWidth="42" strokeLinecap="round" fill="none"/>
+              <ellipse cx="320" cy="193" rx="26" ry="20" fill="#ddd" transform="rotate(30,320,193)"/>
+              <path d="M348,210 L345,155" stroke="url(#wBody)" strokeWidth="34" strokeLinecap="round" fill="none"/>
+              <ellipse cx="347" cy="178" rx="20" ry="14" fill="#999" transform="rotate(5,347,178)"/>
+              <rect x="325" y="130" width="44" height="36" rx="12" fill="url(#wBody)"/>
+              <line x1="338" y1="137" x2="338" y2="158" stroke="#888" strokeWidth="2" opacity="0.6"/>
+              <line x1="348" y1="135" x2="348" y2="158" stroke="#888" strokeWidth="2" opacity="0.6"/>
+              <line x1="358" y1="135" x2="358" y2="158" stroke="#888" strokeWidth="2" opacity="0.6"/>
+            </g>
+
+            {/* NECK */}
+            <path d="M195,110 Q220,100 245,110 L248,155 Q220,162 192,155 Z" fill="url(#wBody)"/>
+
+            {/* HEAD */}
+            <ellipse cx="220" cy="68" rx="46" ry="50" fill="url(#wBody)"/>
+            <path d="M180,82 Q220,112 260,82" fill="none" stroke="#bbb" strokeWidth="3" opacity="0.5"/>
+            <ellipse cx="204" cy="58" rx="10" ry="7" fill="#111"/>
+            <ellipse cx="236" cy="58" rx="10" ry="7" fill="#111"/>
+            <ellipse cx="205" cy="57" rx="4" ry="4" fill="#fff" opacity="0.7"/>
+            <ellipse cx="237" cy="57" rx="4" ry="4" fill="#fff" opacity="0.7"/>
+            <path d="M192,48 Q204,42 216,48" fill="none" stroke="#333" strokeWidth="5" strokeLinecap="round"/>
+            <path d="M224,48 Q236,42 248,48" fill="none" stroke="#333" strokeWidth="5" strokeLinecap="round"/>
+            <path d="M213,76 L213,76 Q220,82 227,76" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round"/>
+            <path d="M205,88 Q220,84 235,88" fill="none" stroke="#555" strokeWidth="3" strokeLinecap="round"/>
+
+            {/* HEADBAND */}
+            <rect x="175" y="28" width="90" height="14" rx="7" fill="#333"/>
+            <path d="M265,35 Q280,30 290,38 Q285,46 270,42" fill="#333"/>
+          </svg>
+        </div>
         {/* Hero Content */}
         <motion.div style={{ position: 'relative', zIndex: 2, maxWidth: 860, y: heroY, opacity: heroOpacity, direction: ar ? 'rtl' : 'ltr' }}>
 
