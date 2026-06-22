@@ -126,6 +126,24 @@ function ExerciseRow({ name, checked, onToggle, delay }) {
 // ── مكون يوم تمرين ───────────────────────────────────────
 function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, savedToday }) {
   const [checked, setChecked] = useState({});
+  const [startTime, setStartTime] = useState(null);
+  const [elapsed, setElapsed]   = useState(0);
+
+  // بدأ التايمر لما اليوم يتفتح
+  useEffect(() => {
+    if (isOpen && !startTime) setStartTime(Date.now());
+    if (!isOpen) { setStartTime(null); setElapsed(0); }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !startTime) return;
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [isOpen, startTime]);
+
+  const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  const elapsedMin = Math.max(1, Math.round(elapsed / 60));
+
   const doneCount = Object.values(checked).filter(Boolean).length;
   const totalCount = exercises.length;
   const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
@@ -149,6 +167,11 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
             {savedToday && (
               <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', letterSpacing: '0.06em' }}>
                 ✓ اتسجل
+              </span>
+            )}
+            {isOpen && elapsed > 0 && (
+              <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--ash-light)', letterSpacing: '0.06em' }}>
+                ⏱ {formatTime(elapsed)}
               </span>
             )}
           </div>
@@ -193,7 +216,7 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onSave(dayLabel, Object.values(checked).filter(Boolean).length === totalCount)}
+                onClick={() => onSave(dayLabel, Object.values(checked).filter(Boolean).length === totalCount, elapsedMin)}
                 disabled={isSaving || doneCount === 0}
                 style={{
                   width: '100%', marginTop: 12, padding: '13px',
@@ -260,7 +283,7 @@ export default function WorkoutPage() {
   };
 
   // ── حفظ جلسة ─────────────────────────────────────────
-  const saveSession = async (dayLabel, done) => {
+  const saveSession = async (dayLabel, done, durationMin = 0) => {
     setSavingDay(dayLabel);
     const program = userPrograms[activeProgram];
     const programTitle = program?.program_title || 'برنامج مخصص';
@@ -272,6 +295,7 @@ export default function WorkoutPage() {
       day_label:     dayLabel,
       done:          done,
       session_day:   sessionDay,
+      duration_min:  durationMin,
       created_at:    new Date().toISOString(),
     });
 
@@ -315,10 +339,12 @@ export default function WorkoutPage() {
   // الجلسات اللي اتسجلت النهارده
   const savedTodayLabels = new Set(todaySessions.map(s => s.day_label));
 
-  // البرنامج النشط وتمريناته
+  // البرنامج النشط وتمريناته — مطابقة مرنة
   const activeProgObj = userPrograms[activeProgram];
   const activeProgramName = activeProgObj?.program_title || '';
-  const programDays = PROGRAM_EXERCISES[activeProgramName] || null;
+  const programDays = Object.entries(PROGRAM_EXERCISES).find(
+    ([key]) => activeProgramName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(activeProgramName.toLowerCase())
+  )?.[1] || null;
 
   // آخر 7 أيام للرسم
   const last7 = [...weightLog].reverse().slice(-7);
@@ -554,12 +580,12 @@ export default function WorkoutPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {s.program_title && (
-                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,77,46,0.08)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent)', letterSpacing: '0.05em' }}>
-                            {s.program_title}
+                        {s.duration_min > 0 && (
+                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+                            ⏱ {s.duration_min} دقيقة
                           </span>
                         )}
-                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : '#FFFFFF' }}>
+                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : 'var(--ash)' }}>
                           {s.done ? '✓' : '~'}
                         </span>
                       </div>
