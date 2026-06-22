@@ -111,12 +111,14 @@ function WeightEntry({ date, weight, change }) {
 export default function DashboardPage() {
   const { user } = useAuth();
   const router   = useRouter();
-  const [programs,  setPrograms]  = useState([]);
-  const [sessions,  setSessions]  = useState([]);
-  const [weightLog, setWeightLog] = useState([]);
-  const [newWeight, setNewWeight] = useState('');
+  const [programs,   setPrograms]   = useState([]);
+  const [sessions,   setSessions]   = useState([]);
+  const [weightLog,  setWeightLog]  = useState([]);
+  const [newWeight,  setNewWeight]  = useState('');
   const [loadingWeight, setLoadingWeight] = useState(false);
-  const [weekDays,  setWeekDays]  = useState([]);
+  const [weekDays,   setWeekDays]   = useState([]);
+  const [streak,     setStreak]     = useState(0);
+  const [goalWeight, setGoalWeight] = useState(null);
 
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
@@ -124,12 +126,40 @@ export default function DashboardPage() {
     supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
       if (data) setPrograms(data);
     });
+
     supabase.from('workout_sessions').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false }).limit(5)
-      .then(({ data }) => { if (data) setSessions(data); });
+      .order('created_at', { ascending: false }).limit(30)
+      .then(({ data }) => {
+        if (!data) return;
+        setSessions(data);
+
+        // ── calculate streak from real session dates ──────────────────
+        const sessionDates = [...new Set(
+          data.map(s => new Date(s.created_at).toDateString())
+        )];
+        let count = 0;
+        const today = new Date();
+        for (let i = 0; i < 60; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() - i);
+          if (sessionDates.includes(d.toDateString())) {
+            count++;
+          } else if (i > 0) {
+            break; // gap found — streak ends
+          }
+        }
+        setStreak(count);
+      });
+
     supabase.from('weight_log').select('*').eq('user_id', user.id)
       .order('logged_at', { ascending: false }).limit(10)
       .then(({ data }) => { if (data) setWeightLog(data); });
+
+    // ── fetch real goal weight from user record ──────────────────────
+    supabase.from('users').select('goal_weight').eq('id', user.id).single()
+      .then(({ data }) => {
+        if (data?.goal_weight) setGoalWeight(data.goal_weight);
+      });
 
     const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
     const today = new Date().getDay();
@@ -146,16 +176,14 @@ export default function DashboardPage() {
     setLoadingWeight(false);
   };
 
-  const streak        = 3;
   const totalSessions = sessions.length || 0;
   const currentWeight = weightLog[0]?.weight ?? '—';
   const weightChange  = weightLog.length >= 2 ? weightLog[0].weight - weightLog[1].weight : 0;
 
-  // Goal progress mock — replace with real data
-  const goalWeight    = 75;
-  const startWeight   = weightLog.length ? Math.max(...weightLog.map(w => w.weight)) : currentWeight;
-  const progressPct   = startWeight && goalWeight && currentWeight !== '—'
-    ? Math.min(100, Math.round(((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
+  // Goal progress — real data: goalWeight from profiles, startWeight = heaviest recorded
+  const startWeight = weightLog.length ? Math.max(...weightLog.map(w => w.weight)) : null;
+  const progressPct = startWeight && goalWeight && currentWeight !== '—'
+    ? Math.min(100, Math.max(0, Math.round(((startWeight - currentWeight) / (startWeight - goalWeight)) * 100)))
     : 0;
 
   const lastSession = sessions[0];
@@ -208,9 +236,9 @@ export default function DashboardPage() {
           {/* ── STATS GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
             <StatBox icon={Flame}    label="الاستمرارية"     value={`${streak}d`}          sub="+1 اليوم" accent="var(--accent)"  delay={0.05} />
-            <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FF6B00"  delay={0.1}  />
+            <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FFFFFF"  delay={0.1}  />
             <StatBox icon={Scale}    label="الوزن الحالي"    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
-            <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#0A84FF"  delay={0.2}  />
+            <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#FFFFFF"  delay={0.2}  />
           </div>
 
           {/* ── LAST WORKOUT ── */}
@@ -331,7 +359,7 @@ export default function DashboardPage() {
               <Reveal delay={0.2}>
                 <GlassCard style={{ padding:'24px' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-                    <Clock size={15} color="#FF6B00" />
+                    <Clock size={15} color="#FFFFFF" />
                     <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>آخر الجلسات</h2>
                   </div>
 
@@ -361,9 +389,9 @@ export default function DashboardPage() {
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                     {[
                       { href:'/exercises', label:'التمارين', icon:'🏋️', color:'var(--accent)' },
-                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FF6B00' },
+                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FFFFFF' },
                       { href:'/tools',     label:'الحاسبات', icon:'🧮', color:'#4ade80' },
-                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#0A84FF' },
+                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#FFFFFF' },
                     ].map(({ href, label, icon, color }) => (
                       <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'all 150ms' }}>
                         <span>{icon}</span>
