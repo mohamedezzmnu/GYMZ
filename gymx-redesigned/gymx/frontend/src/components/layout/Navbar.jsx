@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator, ShieldAlert, Home, Apple } from 'lucide-react';
+import { Menu, X, LogOut, Dumbbell, LayoutGrid, ImageIcon, User, Activity, Zap, LayoutDashboard, Calculator, ShieldAlert, Home, Apple, Timer } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLang } from '../../context/LangContext';
 
@@ -32,14 +32,14 @@ export default function Navbar() {
     { href: '/workout', label: lang === 'ar' ? 'جلستي' : 'Workout', icon: Dumbbell },
   ];
 
-  // Bottom nav — 5 أهم صفحات فقط
+  // Bottom nav — 6 أهم صفحات
   const bottomLinks = [
     { href: '/',          label: lang === 'ar' ? 'الرئيسية' : 'Home',      icon: Home },
     { href: '/programs',  label: lang === 'ar' ? 'البرامج'  : 'Programs',  icon: LayoutGrid },
     { href: '/exercises', label: lang === 'ar' ? 'تمارين'   : 'Exercises', icon: Dumbbell },
     { href: '/dashboard', label: lang === 'ar' ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
     { href: '/profile',   label: lang === 'ar' ? 'حسابي'    : 'Profile',   icon: User },
-    { href: '/workout', label: lang === 'ar' ? 'جلستي' : 'Workout', icon: Dumbbell },
+    { href: '/workout',   label: lang === 'ar' ? 'جلستي'    : 'Workout',   icon: Timer },
   ];
 
   const isActive = (href) => href === '/' ? router.pathname === '/' : router.pathname.startsWith(href);
@@ -159,7 +159,7 @@ export default function Navbar() {
         position:'fixed', bottom:0, left:0, right:0, zIndex:100,
         background:'var(--obsidian)',
         borderTop:'1px solid var(--glass-border)',
-        display:'flex', alignItems:'center', justifyContent:'space-around',
+        alignItems:'center', justifyContent:'space-around',
         padding:'8px 0 env(safe-area-inset-bottom,8px)',
         display:'none',
       }}>

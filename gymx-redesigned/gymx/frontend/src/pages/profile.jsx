@@ -281,9 +281,8 @@ export default function ProfilePage() {
     );
   }
 
-  const initials = user.name
-    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-    : 'GZ';
+  const safeName = user?.name || user?.email?.split('@')[0] || 'User';
+  const initials = safeName.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'GZ';
 
   return (
     <>
@@ -322,7 +321,7 @@ export default function ProfilePage() {
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
                     <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em' }}>
-                      {user.name}
+                      {safeName}
                     </h1>
                     <span style={{
                       fontSize: '0.65rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em',
