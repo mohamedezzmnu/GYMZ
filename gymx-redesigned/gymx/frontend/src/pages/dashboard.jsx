@@ -128,7 +128,7 @@ export default function DashboardPage() {
     });
 
     supabase.from('workout_sessions').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false }).limit(30)
+      .order('created_at', { ascending: false }).limit(90)
       .then(({ data }) => {
         if (!data) return;
         setSessions(data);
@@ -139,13 +139,13 @@ export default function DashboardPage() {
         )];
         let count = 0;
         const today = new Date();
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 90; i++) {
           const d = new Date(today);
           d.setDate(today.getDate() - i);
           if (sessionDates.includes(d.toDateString())) {
             count++;
           } else if (i > 0) {
-            break; // gap found — streak ends
+            break;
           }
         }
         setStreak(count);
@@ -176,7 +176,13 @@ export default function DashboardPage() {
     setLoadingWeight(false);
   };
 
-  const totalSessions = sessions.length || 0;
+  const thisMonth = new Date().getMonth();
+  const thisYear  = new Date().getFullYear();
+  const totalSessions = sessions.filter(s => {
+    const d = new Date(s.created_at);
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+  }).length;
+  const trainedToday  = sessions.some(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const currentWeight = weightLog[0]?.weight ?? '—';
   const weightChange  = weightLog.length >= 2 ? weightLog[0].weight - weightLog[1].weight : 0;
 
@@ -235,7 +241,7 @@ export default function DashboardPage() {
 
           {/* ── STATS GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
-            <StatBox icon={Flame}    label="الاستمرارية"     value={`${streak}d`}          sub="+1 اليوم" accent="var(--accent)"  delay={0.05} />
+            <StatBox icon={Flame}    label="الاستمرارية"     value={streak ? `${streak} يوم` : '—'} sub={trainedToday ? '+1 اليوم 🔥' : null} accent="var(--accent)"  delay={0.05} />
             <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FFFFFF"  delay={0.1}  />
             <StatBox icon={Scale}    label="الوزن الحالي"    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
             <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#FFFFFF"  delay={0.2}  />

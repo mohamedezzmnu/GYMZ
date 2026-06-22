@@ -200,9 +200,10 @@ function ChangePasswordModal({ onClose }) {
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const [enrolledPrograms, setEnrolledPrograms] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [onboarding, setOnboarding] = useState(null);
-  const [realStats, setRealStats] = useState({ sessions: 0, streak: 0, hours: 0, programs: 0 });
+  const [recentActivity, setRecentActivity]     = useState([]);
+  const [onboarding, setOnboarding]             = useState(null);
+  const [realStats, setRealStats]               = useState({ sessions: 0, streak: 0, programs: 0 });
+  const [achievements, setAchievements]         = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -215,14 +216,35 @@ export default function ProfilePage() {
       }
     });
 
-    // آخر الجلسات
+    // كل الجلسات — للإحصائيات الحقيقية
     supabase.from('workout_sessions').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false }).limit(4)
+      .order('created_at', { ascending: false })
       .then(({ data }) => {
-        if (data) {
-          setRecentActivity(data);
-          setRealStats(s => ({ ...s, sessions: data.length }));
+        if (!data) return;
+        setRecentActivity(data.slice(0, 4));
+        setRealStats(s => ({ ...s, sessions: data.length }));
+
+        // ── streak حقيقي ─────────────────────────────────────────────
+        const dates = [...new Set(data.map(s => new Date(s.created_at).toDateString()))];
+        let streak = 0;
+        const today = new Date();
+        for (let i = 0; i < 90; i++) {
+          const d = new Date(today); d.setDate(today.getDate() - i);
+          if (dates.includes(d.toDateString())) streak++;
+          else if (i > 0) break;
         }
+        setRealStats(s => ({ ...s, streak }));
+
+        // ── إنجازات حقيقية ───────────────────────────────────────────
+        const completedPrograms = data.filter(s => s.done).length;
+        setAchievements([
+          { icon: '🔥', label: 'أول تمرين',       earned: data.length >= 1 },
+          { icon: '💪', label: '7 أيام متتالية',  earned: streak >= 7 },
+          { icon: '⚡', label: '10 جلسات',         earned: data.length >= 10 },
+          { icon: '🏆', label: '30 جلسة',          earned: data.length >= 30 },
+          { icon: '🎯', label: 'أكملت جلسة كاملة', earned: completedPrograms >= 1 },
+          { icon: '🌟', label: 'محترف (50 جلسة)',  earned: data.length >= 50 },
+        ]);
       });
 
     // بيانات الـ onboarding
@@ -336,10 +358,10 @@ export default function ProfilePage() {
 
           {/* ── STATS ROW ────────────────────────── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
-            <StatCard icon={Dumbbell}   label="الجلسات"       value={realStats.sessions}  accent="var(--accent)"  delay={0.05} />
-            <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"      delay={0.1}  />
-            <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق', muscle: '💪 ضخامة', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="#facc15" delay={0.15} />
-            <StatCard icon={Zap}        label="البرنامج المقترح" value={onboarding?.recommended_program || '—'} accent="var(--accent)" delay={0.2} />
+            <StatCard icon={Dumbbell}   label="كل الجلسات"    value={realStats.sessions}  accent="var(--accent)"  delay={0.05} />
+            <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"        delay={0.1}  />
+            <StatCard icon={Flame}      label="الاستمرارية"    value={realStats.streak ? `${realStats.streak} يوم` : '—'} accent="#facc15" delay={0.15} />
+            <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق', muscle: '💪 ضخامة', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="var(--accent)" delay={0.2} />
           </div>
 
           {/* ── BOTTOM GRID ──────────────────────── */}
@@ -477,23 +499,19 @@ export default function ProfilePage() {
                     الإنجازات
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                    {[
-  { icon: "🔥", label: "أول تمرين", earned: true },
-  { icon: "💪", label: "7 أيام متتالية", earned: false },
-  { icon: "🏆", label: "أكملت برنامج", earned: false },
-  { icon: "⚡", label: "30 جلسة", earned: false },
-].map((ach, i) => (
+                    {achievements.map((ach, i) => (
                       <div key={i} style={{
                         padding: '14px 12px', borderRadius: 10, textAlign: 'center',
-                        background: ach.earned ? 'rgba(255,77,46,0.08)' : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${ach.earned ? 'rgba(255,77,46,0.25)' : 'rgba(255,255,255,0.05)'}`,
-                        opacity: ach.earned ? 1 : 0.4,
+                        background: ach.earned ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
+                        border: `1px solid ${ach.earned ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)'}`,
+                        opacity: ach.earned ? 1 : 0.35,
                         transition: 'opacity 200ms',
                       }}>
                         <div style={{ fontSize: '1.4rem', marginBottom: 6 }}>{ach.icon}</div>
                         <p style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: ach.earned ? 'var(--chalk)' : 'var(--ash)', letterSpacing: '0.05em' }}>
                           {ach.label}
                         </p>
+                        {ach.earned && <div style={{ fontSize: '0.55rem', color: '#4ade80', marginTop: 4, fontFamily: 'var(--font-mono)' }}>✓ محقق</div>}
                       </div>
                     ))}
                   </div>
