@@ -3,7 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import {
   User, Mail, Calendar, Target, Dumbbell, TrendingUp,
   Award, Clock, ChevronRight, Edit3, LogOut, Shield,
-  Zap, BarChart2, CheckCircle, Lock, Eye, EyeOff, ArrowRight,
+  Zap, BarChart2, CheckCircle, Lock, Eye, EyeOff, ArrowRight, Flame,
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -199,11 +199,13 @@ function ChangePasswordModal({ onClose }) {
 // ═══════════════════════════════════════════════════════════
 export default function ProfilePage() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [enrolledPrograms, setEnrolledPrograms] = useState([]);
   const [recentActivity, setRecentActivity]     = useState([]);
   const [onboarding, setOnboarding]             = useState(null);
   const [realStats, setRealStats]               = useState({ sessions: 0, streak: 0, programs: 0 });
   const [achievements, setAchievements]         = useState([]);
+  const [showPassModal, setShowPassModal]        = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -252,8 +254,6 @@ export default function ProfilePage() {
       .then(({ data }) => { if (data) setOnboarding(data); });
 
   }, [user]);
-  const router = useRouter();
-  const [showPassModal, setShowPassModal] = useState(false);
 
   const handleLogout = async () => {
     await logout();
