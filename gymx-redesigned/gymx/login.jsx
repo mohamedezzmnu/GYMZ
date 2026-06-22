@@ -97,7 +97,9 @@ export function LoginPage() {
     if (!form.email || !form.password) { toast.error('Please fill all fields'); return; }
     setLoading(true);
     try {
-      const user = await login(form.email, form.password);
+     await register(form.name, form.email, form.password);
+toast.success('تم إنشاء حسابك! أهلاً بيك 🎉');
+router.push('/onboarding');
       toast.success(`Welcome back, ${user.name}!`);
       router.push(router.query.from || '/');
     } catch (err) {
