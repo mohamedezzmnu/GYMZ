@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '../context/AuthContext';
 import { LangProvider } from '../context/LangContext';
@@ -7,6 +8,12 @@ import '../styles/globals.css';
 export default function App({ Component, pageProps }) {
   return (
     <LangProvider>
+      <Head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+        />
+      </Head>
       <AuthProvider>
         <Navbar />
         <main className="animate-fade-in" style={{ paddingTop: 64, minHeight: '100vh' }}>

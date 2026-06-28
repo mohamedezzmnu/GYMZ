@@ -1,4 +1,21 @@
 node_modules/
-.env
 .next/
+out/
 *.log
+npm-debug.log*
+
+# env files (.env.local was NOT excluded before — never commit real keys)
+.env
+.env*.local
+
+# next-pwa generates these at build time — don't commit them
+public/sw.js
+public/workbox-*.js
+public/sw.js.map
+public/workbox-*.js.map
+public/fallback-*.js
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
