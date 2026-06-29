@@ -68,7 +68,22 @@ export function AuthProvider({ children }) {
       options: { data: { name } },
     });
     if (error) throw new Error(error.message);
-    return { id: data.user.id, email: data.user.email, name, role: 'user' };
+
+    // لو إعدادات Supabase تطلب تأكيد الإيميل، مفيش session هنا —
+    // المستخدم لسه مش مسجل دخول فعليًا.
+    if (!data.session) {
+      return {
+        id: data.user?.id,
+        email,
+        name,
+        role: 'user',
+        needsEmailConfirmation: true,
+      };
+    }
+
+    const built = await buildUser(data.user);
+    setUser(built);
+    return { ...built, needsEmailConfirmation: false };
   };
 
   const login = async (email, password) => {

@@ -1,4 +1,4 @@
-# GYMX — Gym Training PWA
+# GYMZ — Gym Training PWA
 
 تطبيق Next.js 14 شغال كـ **PWA حقيقي** (يتثبت على الموبايل زي أي تطبيق، Android و iOS، من غير متجر تطبيقات) ومتصل بـ **Supabase** مباشرة من الـ frontend.
 

@@ -108,6 +108,11 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const user = await register(form.name.trim(), form.email.toLowerCase(), form.password);
+      if (user.needsEmailConfirmation) {
+        toast.success('تم إنشاء الحساب! تحقق من إيميلك عشان تفعّله، بعد كده سجّل دخول.');
+        router.push('/login');
+        return;
+      }
       toast.success(`أهلاً بيك في GYMZ، ${user.name}! 💪`);
       router.push('/onboarding');
     } catch (err) {

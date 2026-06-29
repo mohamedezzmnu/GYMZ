@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
 function AuthLayout({ children, title, subtitle }) {
   return (
     <>
-      <Head><title>{title} — GYMX</title></Head>
+      <Head><title>{title} — GYMZ</title></Head>
 
       <div style={{
         minHeight: '100vh',
@@ -49,7 +49,7 @@ function AuthLayout({ children, title, subtitle }) {
             justifyContent: 'center',
             gap: 6,
           }}>
-            GYMX
+            GYMZ
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
           </div>
 
@@ -94,22 +94,22 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!form.email || !form.password) { toast.error('Please fill all fields'); return; }
+    if (!form.email || !form.password) { toast.error('من فضلك اكتب الإيميل والباسورد'); return; }
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
-      toast.success(`Welcome back, ${user.name}!`);
+      toast.success(`أهلاً بيك تاني، ${user.name}! 💪`);
       router.push(router.query.from || '/');
     } catch (err) {
-      toast.error(err.message || 'Login failed');
+      toast.error(err.message || 'فشل تسجيل الدخول');
     } finally { setLoading(false); }
   };
 
   return (
-    <AuthLayout title="Welcome Back" subtitle="Enter your credentials to continue training.">
+    <AuthLayout title="أهلاً بيك تاني" subtitle="سجّل دخولك عشان تكمل رحلتك التدريبية.">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div>
-          <label className="label">Email</label>
+          <label className="label">الإيميل</label>
           <input
             className="input"
             type="email"
@@ -121,7 +121,7 @@ export function LoginPage() {
         </div>
 
         <div>
-          <label className="label">Password</label>
+          <label className="label">الباسورد</label>
           <div style={{ position: 'relative' }}>
             <input
               className="input"
@@ -153,137 +153,13 @@ export function LoginPage() {
           disabled={loading}
           whileTap={{ scale: 0.98 }}
         >
-          {loading ? 'Logging in...' : <>Login <ArrowRight size={16} /></>}
+          {loading ? 'جاري تسجيل الدخول...' : <>تسجيل الدخول <ArrowRight size={16} /></>}
         </motion.button>
 
         <p style={{ textAlign: 'center', color: 'var(--ash)', fontSize: '0.875rem' }}>
-          No account?{' '}
+          معاك حساب لسه؟{' '}
           <Link href="/register" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
-            Join GYMX
-          </Link>
-        </p>
-      </div>
-    </AuthLayout>
-  );
-}
-
-// =============================================
-// REGISTER PAGE
-// =============================================
-export function RegisterPage() {
-  const { register } = useAuth();
-  const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.password) {
-      toast.error('من فضلك اكمل كل الحقول');
-      return;
-    }
-    if (form.password.length < 8) {
-      toast.error('الباسورد لازم يكون 8 حروف على الأقل');
-      return;
-    }
-    setLoading(true);
-    try {
-      await register(form.name, form.email, form.password);
-      toast.success('تم إنشاء حسابك! أهلاً بيك 🎉');
-      router.push('/onboarding');
-    } catch (err) {
-      toast.error(err.message || 'فشل إنشاء الحساب');
-    } finally {
-      setLoading(false);
-    }
-  };
-  const passStrength = () => {
-    const p = form.password;
-    if (p.length === 0) return null;
-    let score = 0;
-    if (p.length >= 8) score++;
-    if (/[A-Z]/.test(p)) score++;
-    if (/[0-9]/.test(p)) score++;
-    if (/[^A-Za-z0-9]/.test(p)) score++;
-    return score;
-  };
-
-  const strength = passStrength();
-  const strengthLabel = ['Weak', 'Fair', 'Good', 'Strong'][strength - 1] || '';
-  const strengthColor = ['#f87171', '#facc15', '#4ade80', 'var(--accent)'][strength - 1] || '';
-
-  return (
-    <AuthLayout title="Join GYMX" subtitle="Create your account and start training today.">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <div>
-          <label className="label">Name</label>
-          <input className="input" type="text" placeholder="Your name"
-            value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        </div>
-
-        <div>
-          <label className="label">Email</label>
-          <input className="input" type="email" placeholder="your@email.com"
-            value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        </div>
-
-        <div>
-          <label className="label">Password</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              className="input"
-              type={showPass ? 'text' : 'password'}
-              placeholder="Min 8 chars, uppercase & number"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              style={{ paddingRight: 48 }}
-            />
-            <button
-              onClick={() => setShowPass(!showPass)}
-              style={{
-                position: 'absolute', right: 14, top: '50%',
-                transform: 'translateY(-50%)', background: 'none',
-                border: 'none', color: 'var(--ash)', cursor: 'pointer',
-              }}
-            >
-              {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-
-          {strength !== null && (
-            <div style={{ display: 'flex', gap: 4, marginTop: 8, alignItems: 'center' }}>
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} style={{
-                  height: 3, flex: 1, borderRadius: 2,
-                  background: i <= strength ? strengthColor : 'var(--iron-light)',
-                  transition: 'background 200ms',
-                  boxShadow: i <= strength ? `0 0 6px ${strengthColor}66` : 'none',
-                }} />
-              ))}
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.6rem',
-                color: strengthColor, marginLeft: 8, minWidth: 40,
-              }}>
-                {strengthLabel}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <motion.button
-          className="btn btn-primary"
-          style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
-          onClick={handleSubmit}
-          disabled={loading}
-          whileTap={{ scale: 0.98 }}
-        >
-          {loading ? 'Creating account...' : <>Create Account <ArrowRight size={16} /></>}
-        </motion.button>
-
-        <p style={{ textAlign: 'center', color: 'var(--ash)', fontSize: '0.875rem' }}>
-          Have an account?{' '}
-          <Link href="/login" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
-            Login
+            انضم لـ GYMZ
           </Link>
         </p>
       </div>

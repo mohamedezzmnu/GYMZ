@@ -109,7 +109,7 @@ function WeightEntry({ date, weight, change }) {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router   = useRouter();
   const [programs,   setPrograms]   = useState([]);
   const [sessions,   setSessions]   = useState([]);
@@ -121,6 +121,7 @@ export default function DashboardPage() {
   const [goalWeight, setGoalWeight] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/login'); return; }
 
     supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
@@ -164,7 +165,7 @@ export default function DashboardPage() {
     const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
     const today = new Date().getDay();
     setWeekDays(days.map((d, i) => ({ label: d, done: i < today, today: i === today })));
-  }, [user]);
+  }, [user, authLoading]);
 
   const logWeight = async () => {
     if (!newWeight || isNaN(newWeight)) return;

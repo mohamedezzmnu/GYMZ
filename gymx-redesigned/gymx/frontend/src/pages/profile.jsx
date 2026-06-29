@@ -3,7 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import {
   User, Mail, Calendar, Target, Dumbbell, TrendingUp,
   Award, Clock, ChevronRight, Edit3, LogOut, Shield,
-  Zap, BarChart2, CheckCircle, Lock, Eye, EyeOff, ArrowRight, Flame,
+  Zap, BarChart2, CheckCircle, Lock, Eye, EyeOff, ArrowRight, Flame, Loader,
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -198,7 +198,7 @@ function ChangePasswordModal({ onClose }) {
 // PROFILE PAGE
 // ═══════════════════════════════════════════════════════════
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
   const [enrolledPrograms, setEnrolledPrograms] = useState([]);
   const [recentActivity, setRecentActivity]     = useState([]);
@@ -208,6 +208,7 @@ export default function ProfilePage() {
   const [showPassModal, setShowPassModal]        = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) return;
 
     // برامج اليوزر
@@ -253,12 +254,22 @@ export default function ProfilePage() {
     supabase.from('user_onboarding').select('*').eq('user_id', user.id).single()
       .then(({ data }) => { if (data) setOnboarding(data); });
 
-  }, [user]);
+  }, [user, authLoading]);
 
   const handleLogout = async () => {
     await logout();
     router.push('/login');
   };
+
+  // Still checking the session — avoid flashing "please log in" at a real user
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader size={28} color="var(--accent)" style={{ animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   // Redirect if not logged in
   if (!user) {

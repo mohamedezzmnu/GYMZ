@@ -38,11 +38,11 @@ export default function App({ Component, pageProps }) {
             alignItems: 'center',
             gap: 6,
           }}>
-            GYMX
+            GYMZ
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ash)' }}>
-            © 2026 GYMX. جميع الحقوق محفوظة لدي MZ
+            © 2026 GYMZ. جميع الحقوق محفوظة
           </div>
         </footer>
 

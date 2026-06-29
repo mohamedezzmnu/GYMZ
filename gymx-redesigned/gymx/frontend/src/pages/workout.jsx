@@ -250,7 +250,7 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
 // الصفحة الرئيسية
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export default function WorkoutPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [userPrograms, setUserPrograms]   = useState([]);
@@ -265,9 +265,10 @@ export default function WorkoutPage() {
 
   // ── جلب البيانات ─────────────────────────────────────
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/login'); return; }
     fetchAll();
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchAll = async () => {
     setLoading(true);

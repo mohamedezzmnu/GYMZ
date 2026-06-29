@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { supabase } from '../lib/supabaseClient';
@@ -110,7 +111,7 @@ const PROGRAM_MAP = {
 
 export default function OnboardingPage() {
   const { lang } = useLang();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const steps = STEPS[lang];
   const programMap = PROGRAM_MAP[lang];
@@ -122,7 +123,7 @@ export default function OnboardingPage() {
 
   // لو اليوزر عمل onboarding قبل كده — جيب بياناته
   useEffect(() => {
-    if (!user) return;
+    if (authLoading || !user) return;
     supabase
       .from('user_onboarding')
       .select('*')
@@ -134,14 +135,19 @@ export default function OnboardingPage() {
           setDone(true);
         }
       });
-  }, [user]);
+  }, [user, authLoading]);
 
   // احفظ في Supabase لما يخلص
   const saveOnboarding = async (finalAnswers, program) => {
-    if (!user) return;
+    if (authLoading) return false; // متستدعى أبداً بدري عن اللازم — بس حماية إضافية
+    if (!user) {
+      toast.error('لازم تسجل دخول الأول عشان نحفظ بياناتك');
+      router.push('/login');
+      return false;
+    }
     setSaving(true);
-    // احفظ الـ onboarding
-    await supabase.from('user_onboarding').upsert({
+
+    const { error: onboardingError } = await supabase.from('user_onboarding').upsert({
       user_id: user.id,
       goal: finalAnswers.goal,
       level: finalAnswers.level,
@@ -152,7 +158,7 @@ export default function OnboardingPage() {
 
     // سجّله في البرنامج تلقائياً
     const levelMap = { beginner: 'beginner', intermediate: 'intermediate', advanced: 'advanced' };
-    await supabase.from('user_programs').upsert({
+    const { error: programError } = await supabase.from('user_programs').upsert({
       user_id: user.id,
       program_title: program.sub || program.name,
       program_title_ar: program.name,
@@ -163,6 +169,12 @@ export default function OnboardingPage() {
     }, { onConflict: 'user_id,program_title' });
 
     setSaving(false);
+
+    if (onboardingError || programError) {
+      toast.error('حصلت مشكلة في حفظ بياناتك، جرب تاني');
+      return false;
+    }
+    return true;
   };
 
   const select = (optionId) => {
@@ -176,8 +188,8 @@ export default function OnboardingPage() {
         const program = programMap[key] || (lang === 'ar'
           ? { name: 'كامل الجسم', reason: 'الأنسب لبدايتك' }
           : { name: 'Full Body', reason: 'Best to start with' });
-        await saveOnboarding(newAnswers, program);
-        setDone(true);
+        const ok = await saveOnboarding(newAnswers, program);
+        if (ok) setDone(true);
       }, 300);
     }
   };
