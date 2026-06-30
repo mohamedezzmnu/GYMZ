@@ -22,14 +22,13 @@ export default function Navbar() {
   useEffect(() => { setMenuOpen(false); }, [router.pathname]);
 
   const navLinks = [
-    { href: '/programs',   label: lang === 'ar' ? 'البرامج'  : 'Programs',  icon: LayoutGrid },
-    { href: '/exercises',  label: lang === 'ar' ? 'التمارين' : 'Exercises', icon: Dumbbell },
-    { href: '/tools',      label: lang === 'ar' ? 'الحاسبات' : 'Tools',     icon: Calculator },
-    { href: '/nutrition',  label: lang === 'ar' ? 'التغذية'  : 'Nutrition', icon: Apple },
-    { href: '/dashboard',  label: lang === 'ar' ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
-    { href: '/bmi',        label: lang === 'ar' ? 'BMI'      : 'BMI',       icon: Activity },
-    { href: '/profile',    label: lang === 'ar' ? 'حسابي'    : 'Profile',   icon: User },
-    { href: '/workout', label: lang === 'ar' ? 'جلستي' : 'Workout', icon: Dumbbell },
+    { href: '/programs',   label: lang === 'ar' ? 'البرامج'   : 'Programs',    icon: LayoutGrid },
+    { href: '/exercises',  label: lang === 'ar' ? 'التمارين'  : 'Exercises',   icon: Dumbbell },
+    { href: '/tools',      label: lang === 'ar' ? 'الحاسبات'  : 'Calculators', icon: Calculator },
+    { href: '/nutrition',  label: lang === 'ar' ? 'التغذية'   : 'Nutrition',   icon: Apple },
+    { href: '/dashboard',  label: lang === 'ar' ? 'داشبورد'   : 'Dashboard',   icon: LayoutDashboard },
+    { href: '/profile',    label: lang === 'ar' ? 'حسابي'     : 'Profile',     icon: User },
+    { href: '/workout',    label: lang === 'ar' ? 'جلستي'     : 'Workout',     icon: Dumbbell },
   ];
 
   // Bottom nav — 6 أهم صفحات

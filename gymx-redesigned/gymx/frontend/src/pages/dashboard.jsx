@@ -398,7 +398,7 @@ export default function DashboardPage() {
                       { href:'/exercises', label:'التمارين', icon:'🏋️', color:'var(--accent)' },
                       { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FFFFFF' },
                       { href:'/tools',     label:'الحاسبات', icon:'🧮', color:'#4ade80' },
-                      { href:'/bmi',       label:'BMI',      icon:'📊', color:'#FFFFFF' },
+                      { href:'/tools',      label:'الحاسبات', icon:'🧮', color:'#FFFFFF' },
                     ].map(({ href, label, icon, color }) => (
                       <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'all 150ms' }}>
                         <span>{icon}</span>

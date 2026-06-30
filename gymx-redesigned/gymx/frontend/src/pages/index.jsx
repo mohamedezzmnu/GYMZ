@@ -157,14 +157,9 @@ export default function HomePage() {
       desc: 'سجّل وزنك وقياساتك وتابع تطورك أسبوع بأسبوع. شوف النتيجة الحقيقية بالأرقام.',
     },
     {
-      icon: Calculator, accent: 'var(--ash-light)', linkHref: '/bmi',
+      icon: Calculator, accent: 'var(--ash-light)', linkHref: '/tools',
       title: 'حاسبات ذكية',
-      desc: 'BMI، TDEE، ومعدل الحرق — كل الأدوات اللي محتاجها في مكان واحد بدون تعقيد.',
-    },
-    {
-      icon: Target, accent: 'var(--ash-light)', linkHref: '/shapes',
-      title: 'تحليل شكل الجسم',
-      desc: 'اعرف نوع جسمك واتعلم أفضل أسلوب تدريب وتغذية يناسب تركيبتك الطبيعية.',
+      desc: 'TDEE، BMI، 1RM، والماكروز — كل الأدوات اللي محتاجها في مكان واحد بدون تعقيد.',
     },
     {
       icon: ShieldCheck, accent: 'var(--ash-light)', linkHref: '/register',
@@ -188,14 +183,9 @@ export default function HomePage() {
       desc: 'Log your weight and measurements, track your weekly progress. See real results in real numbers.',
     },
     {
-      icon: Calculator, accent: 'var(--ash-light)', linkHref: '/bmi',
+      icon: Calculator, accent: 'var(--ash-light)', linkHref: '/tools',
       title: 'Smart Calculators',
-      desc: 'BMI, TDEE, and burn rate — all the tools you need in one place, no complexity.',
-    },
-    {
-      icon: Target, accent: 'var(--ash-light)', linkHref: '/shapes',
-      title: 'Body Type Analysis',
-      desc: 'Discover your body type and learn the best training and nutrition approach for your natural build.',
+      desc: 'TDEE, BMI, 1RM, and Macros — all the tools you need in one place, no complexity.',
     },
     {
       icon: ShieldCheck, accent: 'var(--ash-light)', linkHref: '/register',
@@ -230,14 +220,14 @@ export default function HomePage() {
     'برامج مصممة على أسس علمية حقيقية',
     'مناسب لكل المستويات — من الصفر للمتقدم',
     'شغّال كويس على موبايل وكمبيوتر',
-    'حاسبات دقيقة للسعرات والـ BMI والـ TDEE',
+    'TDEE وBMI و1RM والماكروز — كل الحاسبات في مكان',
     'مجاناً تماماً — مفيش اشتراكات',
     'واجهة عربية وإنجليزية',
   ] : [
     'Programs based on real scientific principles',
     'Suitable for all levels — beginner to advanced',
     'Works great on mobile and desktop',
-    'Accurate calorie, BMI, and TDEE calculators',
+    'TDEE, BMI, 1RM, and Macros — all calculators in one place',
     'Completely free — no subscriptions',
     'Arabic and English interface',
   ];

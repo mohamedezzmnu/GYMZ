@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calculator, Zap, Target, Scale } from 'lucide-react';
+import { Calculator, Zap, Target, Scale, Activity } from 'lucide-react';
 import Head from 'next/head';
 
 // ── TDEE Calculator ────────────────────────────────────────
@@ -230,6 +230,78 @@ function MacroCalc() {
   );
 }
 
+// ── BMI Calculator ─────────────────────────────────────────
+function BMICalc() {
+  const [form, setForm] = useState({ weight: '', height: '' });
+  const [result, setResult] = useState(null);
+
+  const CATEGORIES = [
+    { max: 18.5, label: 'ناقص وزن',  color: '#60a5fa', tip: 'ركز على تمارين المقاومة وزود السعرات عشان تبني عضل.' },
+    { max: 25,   label: 'وزن تمام',  color: '#4ade80', tip: 'أنت في المنطقة المثالية! حافظ على مستواك وكمّل.' },
+    { max: 30,   label: 'زيادة وزن', color: '#facc15', tip: 'اجمع بين الكارديو والمقاومة عشان توصل للوزن المثالي.' },
+    { max: 999,  label: 'سمنة',      color: '#f87171', tip: 'ابدأ بخطوات صغيرة — الاستمرارية أهم من الشدة.' },
+  ];
+
+  const calculate = () => {
+    const w = parseFloat(form.weight);
+    const h = parseFloat(form.height) / 100;
+    if (!w || !h || w <= 0 || h <= 0) return;
+    const bmi = w / (h * h);
+    const cat = CATEGORIES.find(c => bmi < c.max);
+    setResult({ bmi: bmi.toFixed(1), ...cat });
+  };
+
+  return (
+    <div>
+      <p style={{ fontSize:'0.8rem', color:'var(--ash-light)', marginBottom:14, direction:'rtl', lineHeight:1.6 }}>
+        مؤشر كتلة الجسم — مقياس تقريبي سريع. للحصول على صورة أدق استخدم حاسبة الـ TDEE.
+      </p>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+        <div>
+          <label style={labelStyle}>الوزن (kg)</label>
+          <input type="number" placeholder="80" value={form.weight}
+            onChange={e => setForm({ ...form, weight: e.target.value })} style={inputStyle} />
+        </div>
+        <div>
+          <label style={labelStyle}>الطول (cm)</label>
+          <input type="number" placeholder="175" value={form.height}
+            onChange={e => setForm({ ...form, height: e.target.value })} style={inputStyle} />
+        </div>
+      </div>
+
+      <motion.button onClick={calculate} whileTap={{ scale: 0.97 }} style={calcBtn}>
+        احسب الـ BMI
+      </motion.button>
+
+      <AnimatePresence>
+        {result && (
+          <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16 }}>
+            <div style={{ textAlign:'center', padding:'20px', background:`${result.color}10`, border:`1px solid ${result.color}30`, borderRadius:'var(--radius-sm)', marginBottom:12 }}>
+              <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginBottom:4 }}>مؤشر كتلة الجسم</div>
+              <div style={{ fontFamily:'var(--font-display)', fontSize:'3rem', color: result.color, lineHeight:1 }}>{result.bmi}</div>
+              <div style={{ fontSize:'0.9rem', color: result.color, marginTop:6, fontWeight:600 }}>{result.label}</div>
+            </div>
+            {/* scale bar */}
+            <div style={{ marginBottom:12 }}>
+              <div style={{ display:'flex', height:6, borderRadius:3, overflow:'hidden', gap:2 }}>
+                {[{ color:'#60a5fa', w:25 },{ color:'#4ade80', w:25 },{ color:'#facc15', w:25 },{ color:'#f87171', w:25 }].map((s, i) => (
+                  <div key={i} style={{ flex:s.w, background:s.color, opacity:0.5 }} />
+                ))}
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash)', marginTop:4 }}>
+                <span>{'< 18.5'}</span><span>18.5</span><span>25</span><span>30+</span>
+              </div>
+            </div>
+            <div style={{ padding:'10px 14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'var(--radius-sm)', fontSize:'0.78rem', color:'var(--ash-light)', direction:'rtl', lineHeight:1.7 }}>
+              💡 {result.tip}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── shared styles ──────────────────────────────────────────
 const labelStyle = { display:'block', fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing: '0.02em', marginBottom:6 };
 const inputStyle = { width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'var(--radius-sm)', padding:'10px 12px', color:'var(--chalk)', fontFamily:'var(--font-body)', fontSize:'0.875rem', outline:'none', direction:'rtl' };
@@ -239,9 +311,10 @@ const toggleActive = { background:'var(--accent-dim)', border:'1px solid rgba(25
 
 // ── TABS ──────────────────────────────────────────────────
 const TABS = [
-  { id:'tdee',  label:'TDEE',  icon:Zap,        desc:'احتياج السعرات',    component: TDEECalc },
-  { id:'1rm',   label:'1RM',   icon:Scale,       desc:'أقصى وزن للتكرار',  component: OneRMCalc },
+  { id:'tdee',  label:'TDEE',  icon:Zap,        desc:'احتياج السعرات',          component: TDEECalc },
+  { id:'1rm',   label:'1RM',   icon:Scale,       desc:'أقصى وزن للتكرار',        component: OneRMCalc },
   { id:'macro', label:'Macro', icon:Target,      desc:'البروتين والكارب والدهون', component: MacroCalc },
+  { id:'bmi',   label:'BMI',   icon:Activity,    desc:'مؤشر كتلة الجسم',         component: BMICalc },
 ];
 
 export default function ToolsPage() {
