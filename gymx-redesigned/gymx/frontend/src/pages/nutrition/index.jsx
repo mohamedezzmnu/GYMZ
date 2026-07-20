@@ -1,5 +1,5 @@
 // src/pages/nutrition/index.jsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap } from 'lucide-react';
 import Head from 'next/head';
@@ -122,6 +122,28 @@ const FAT_OPTIONS = [
   { name: '20جم فول سوداني محمص',              protein: 5.2, carbs: 4.5, fat: 10,  cal: 124 },
 ];
 
+// ── تطبيع النص العربي عشان البحث يشتغل صح مهما كتب المستخدم ──
+function normalizeArabic(str = '') {
+  return str
+    .replace(/[\u064B-\u0652]/g, '')   // شكل/تشكيل
+    .replace(/[إأآا]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/^ال/, '')                 // شيل "ال" التعريف من الأول
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// ── كل الأكلات مجمّعة (للبحث السريع) ──────────────────────
+const ALL_FOODS = [
+  ...PROTEIN_OPTIONS.map(f => ({ ...f, category: 'بروتين', icon: '🥩', color: '#f87171' })),
+  ...CARB_OPTIONS.map(f => ({ ...f, category: 'كارب', icon: '🍚', color: '#facc15' })),
+  ...FAT_OPTIONS.map(f => ({ ...f, category: 'دهون', icon: '🥑', color: '#4ade80' })),
+];
+
 // ── مكملات مقترحة حسب الهدف ──────────────────────────────
 const SUPPLEMENTS = {
   cut: [
@@ -141,6 +163,79 @@ const SUPPLEMENTS = {
     { name: 'فيتامين D3', dose: '2000-4000 IU يومياً', reason: 'الأغلبية ناقصاه خصوصاً في مصر', important: false },
   ],
 };
+
+// ── حفظ بيانات المستخدم على Supabase (تفضل معاه من أي جهاز) ──
+async function loadUserDataFromSupabase(userId) {
+  if (!userId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('nutrition_user_data')
+      .select('weight, height, age, gender, activity')
+      .eq('user_id', userId)
+      .single();
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+async function saveUserDataToSupabase(userId, data) {
+  if (!userId) return;
+  try {
+    await supabase.from('nutrition_user_data').upsert({
+      user_id: userId,
+      weight: data.weight,
+      height: data.height,
+      age: data.age,
+      gender: data.gender,
+      activity: data.activity,
+      updated_at: new Date().toISOString(),
+    });
+  } catch {
+    // لو النت وقع أو حصلت مشكلة، البيانات لسه محفوظة محلياً في localStorage
+  }
+}
+
+async function clearUserDataFromSupabase(userId) {
+  if (!userId) return;
+  try {
+    await supabase.from('nutrition_user_data').delete().eq('user_id', userId);
+  } catch {
+    // تجاهل
+  }
+}
+
+// ── حفظ بيانات المستخدم محلياً (عشان متتكتبش من جديد كل مرة) ──
+const NUTRITION_STORAGE_KEY = 'gymz_nutrition_userdata';
+
+function loadSavedUserData() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(NUTRITION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveUserData(data) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(NUTRITION_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // متجاهلين لو الخزنة ممتلئة أو متبلوكة
+  }
+}
+
+function clearSavedUserData() {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(NUTRITION_STORAGE_KEY);
+  } catch {
+    // متجاهلين
+  }
+}
 
 // ── حساب TDEE ─────────────────────────────────────────────
 function calcTDEE({ weight, height, age, gender, activity }) {
@@ -500,14 +595,101 @@ function WaterCard({ weight }) {
   );
 }
 
+// ── بحث ذكي في قاعدة بيانات الأكلات ───────────────────────
+function FoodSearch() {
+  const [query, setQuery] = useState('');
+
+  const results = useMemo(() => {
+    const nq = normalizeArabic(query);
+    if (!nq) return [];
+    return ALL_FOODS
+      .map(f => ({ ...f, _n: normalizeArabic(f.name) }))
+      .filter(f => f._n.includes(nq))
+      .sort((a, b) => {
+        // الأكلة اللي بتبدأ بنفس اللي كتبه المستخدم تطلع الأول
+        const aStarts = a._n.startsWith(nq) ? 0 : 1;
+        const bStarts = b._n.startsWith(nq) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return a.name.length - b.name.length;
+      })
+      .slice(0, 10);
+  }, [query]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '20px 20px 22px', marginBottom: 24, position: 'relative', overflow: 'hidden' }}
+    >
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#facc15,transparent)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <span style={{ fontSize: '1rem' }}>🔍</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>دوّر على أكلة</span>
+      </div>
+      <input
+        type="text"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="اكتب اسم الأكلة... (مثلاً: فراخ، أرز، لوز)"
+        style={{
+          width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)',
+          color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
+          outline: 'none', boxSizing: 'border-box', direction: 'rtl',
+        }}
+      />
+      <AnimatePresence>
+        {query.trim() && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            style={{ overflow: 'hidden' }}
+          >
+            {results.length === 0 ? (
+              <div style={{ marginTop: 12, fontSize: '0.78rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)' }}>
+                معملناش لقيلها حاجة، جرّب اسم تاني.
+              </div>
+            ) : (
+              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {results.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', background: `${f.color}0a`, border: `1px solid ${f.color}25`, borderRadius: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span>{f.icon}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{f.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>
+                      <span style={{ color: f.color }}>{f.category}</span>
+                      <span>{f.cal} كال</span>
+                      <span>{f.protein}g بروتين</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 // ── فورم البيانات ─────────────────────────────────────────
-function UserDataForm({ onCalculate }) {
+function UserDataForm({ onCalculate, initialData, onClear }) {
   const [weight, setWeight]   = useState('');
   const [height, setHeight]   = useState('');
   const [age,    setAge]      = useState('');
   const [gender, setGender]   = useState('male');
   const [activity, setActivity] = useState('moderate');
   const [error,  setError]    = useState('');
+
+  // ✅ لو فيه بيانات محفوظة من قبل، نعبي بيها الفورم تلقائياً
+  useEffect(() => {
+    if (initialData) {
+      setWeight(initialData.weight ?? '');
+      setHeight(initialData.height ?? '');
+      setAge(initialData.age ?? '');
+      setGender(initialData.gender ?? 'male');
+      setActivity(initialData.activity ?? 'moderate');
+    }
+  }, [initialData]);
 
   const inputStyle = {
     width: '100%', padding: '10px 12px',
@@ -594,6 +776,18 @@ function UserDataForm({ onCalculate }) {
       >
         احسب TDEE وأنا الخطة 🔥
       </button>
+      {initialData && (
+        <button
+          onClick={() => {
+            clearSavedUserData();
+            onClear?.();
+            setWeight(''); setHeight(''); setAge(''); setGender('male'); setActivity('moderate');
+          }}
+          style={{ width: '100%', marginTop: 10, padding: '8px', background: 'transparent', border: 'none', color: 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.66rem', textDecoration: 'underline' }}
+        >
+          🗑 امسح البيانات المحفوظة وابدأ من جديد
+        </button>
+      )}
     </motion.div>
   );
 }
@@ -608,6 +802,8 @@ export default function NutritionPage() {
   const [plans,     setPlans]     = useState(null);
   const [activePlan, setActivePlan] = useState(null);
   const [userData,  setUserData]  = useState(null);
+  const [savedData, setSavedData] = useState(null);
+  const [autoLoaded, setAutoLoaded] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -620,14 +816,45 @@ export default function NutritionPage() {
     checkPremium();
   }, [user, authLoading]);
 
+  // ✅ لما الصفحة تفتح، نجيب بيانات المستخدم المحفوظة (لو موجودة) ونحسب على طول من غيرها تكتب تاني
   const handleCalculate = useCallback(({ weight, height, age, gender, activity }) => {
     const calculatedTdee = calcTDEE({ weight, height, age, gender, activity });
     setTdee(calculatedTdee);
     setPlans(generatePlans(calculatedTdee));
     setActivePlan('maintain');
-    setUserData({ weight, height, age, gender, activity });
+    const data = { weight, height, age, gender, activity };
+    setUserData(data);
+    setSavedData(data);
+    saveUserData(data); // 💾 نسخة محلية سريعة
+    saveUserDataToSupabase(user?.id, data); // ☁️ نسخة على حسابه، تفضل معاه من أي جهاز
     setTimeout(() => document.getElementById('plans-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    if (!isPremium || autoLoaded) return;
+    let cancelled = false;
+    (async () => {
+      // نجرب Supabase الأول (البيانات دي بتفضل معاه من أي جهاز)
+      const remote = user?.id ? await loadUserDataFromSupabase(user.id) : null;
+      if (cancelled) return;
+      if (remote) {
+        setSavedData(remote);
+        saveUserData(remote); // نحدّث النسخة المحلية كمان عشان الفتح السريع بعد كده
+        handleCalculate(remote);
+      } else {
+        // مفيش على Supabase؟ نجرب النسخة المحلية القديمة ونرفعها فوق
+        const local = loadSavedUserData();
+        if (local) {
+          setSavedData(local);
+          handleCalculate(local);
+          saveUserDataToSupabase(user?.id, local);
+        }
+      }
+      setAutoLoaded(true);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPremium, autoLoaded, user]);
 
   if (authLoading || checking) {
     return (
@@ -667,7 +894,16 @@ export default function NutritionPage() {
             </p>
           </motion.div>
 
-          <UserDataForm onCalculate={handleCalculate} />
+          <FoodSearch />
+
+          <UserDataForm
+            onCalculate={handleCalculate}
+            initialData={savedData}
+            onClear={() => {
+              setSavedData(null);
+              clearUserDataFromSupabase(user?.id);
+            }}
+          />
 
           {plans && activePlan && (
             <div id="plans-section">
