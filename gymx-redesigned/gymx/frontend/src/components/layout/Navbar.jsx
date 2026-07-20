@@ -4,14 +4,14 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutGrid, Dumbbell, Calculator, Apple,
-  LayoutDashboard, User, LogOut, Sun, Moon,
+  LayoutDashboard, User, LogOut,
   Menu, X, Home, Zap, ChevronDown,
 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Navbar() {
-  const { lang, toggleLang, theme, toggleTheme, isRTL } = useLang();
+  const { lang, toggleLang, isRTL } = useLang();
   const { user, logout } = useAuth();
   const router = useRouter();
   const ar = lang === 'ar';
@@ -117,11 +117,6 @@ export default function Navbar() {
 
         {/* RIGHT */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-
-          {/* theme */}
-          <button onClick={toggleTheme} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 30, height: 30, borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
-          </button>
 
           {/* language */}
           <button onClick={toggleLang} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer', letterSpacing: '0.05em' }}>

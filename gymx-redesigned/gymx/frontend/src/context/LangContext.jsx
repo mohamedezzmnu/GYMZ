@@ -5,16 +5,18 @@ const LangContext = createContext();
 
 export function LangProvider({ children }) {
   const [lang, setLang] = useState('ar');
-  const [theme, setTheme] = useState('dark');
-  
+
   const t = translations[lang];
   const toggleLang = () => setLang(l => l === 'ar' ? 'en' : 'ar');
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
   const isRTL = lang === 'ar';
 
+  // Dark-only — the brutalist orange/black aesthetic doesn't support light mode.
+  // Every page uses hardcoded dark inline styles; forcing light breaks the UI.
+  const theme = 'dark';
+
   return (
-    <LangContext.Provider value={{ lang, t, toggleLang, isRTL, theme, toggleTheme }}>
-      <div dir={isRTL ? 'rtl' : 'ltr'} data-theme={theme}>
+    <LangContext.Provider value={{ lang, t, toggleLang, isRTL, theme }}>
+      <div dir={isRTL ? 'rtl' : 'ltr'} data-theme="dark">
         {children}
       </div>
     </LangContext.Provider>
