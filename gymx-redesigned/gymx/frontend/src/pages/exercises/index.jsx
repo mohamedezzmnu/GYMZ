@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { Search, ChevronRight, X } from 'lucide-react';
+import { Search, ChevronRight, X, Crown, Play } from 'lucide-react';
 import Head from 'next/head';
 
 const MUSCLE_GROUPS = ['Chest','Back','Shoulders','Biceps','Triceps','Legs','Glutes','Abs','Calves','Forearms'];
@@ -331,6 +332,31 @@ export default function ExercisesPage() {
               كل<br /><span style={{ color:'var(--accent)' }}>التمارين</span>
             </h1>
           </motion.div>
+
+          {/* بانر مكتبة التمارين المتحركة (بريميوم) */}
+          <Link href="/exercises/videos" style={{ textDecoration: 'none' }}>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
+              whileHover={{ borderColor: 'rgba(250,204,21,0.4)' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, marginTop: 24, padding: '16px 20px', background: 'rgba(250,204,21,0.06)', border: '1px solid rgba(250,204,21,0.2)', borderRadius: 14, cursor: 'pointer', transition: 'all 250ms' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Play size={16} color="#facc15" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)', letterSpacing: '0.03em' }}>مكتبة التمارين المتحركة</span>
+                    <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 20, background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.35)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Crown size={9} /> PRO
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--ash-light)' }}>شوف كل تمرين بشكل متحرك قبل ما تأديه</div>
+                </div>
+              </div>
+              <ChevronRight size={16} color="var(--ash-light)" style={{ transform: 'rotate(180deg)' }} />
+            </motion.div>
+          </Link>
         </div>
       </section>
 

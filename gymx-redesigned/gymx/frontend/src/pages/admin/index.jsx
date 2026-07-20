@@ -3,7 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import {
   Users, Dumbbell, LayoutGrid, ShieldAlert,
   TrendingUp, Trash2, Search, RefreshCw, Crown,
-  UserCheck, UserX, ChevronDown, Activity, Apple, Plus,
+  UserCheck, UserX, ChevronDown, Activity, Apple, Plus, Play,
 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -90,6 +90,12 @@ export default function AdminPage() {
   const [addingEmail, setAddingEmail] = useState(false);
   const [removingEmail, setRemovingEmail] = useState(null);
 
+  // ── exercise videos premium ────────────────────────────────
+  const [exercisePremiumEmails, setExercisePremiumEmails] = useState([]);
+  const [newExerciseEmail, setNewExerciseEmail] = useState('');
+  const [addingExerciseEmail, setAddingExerciseEmail] = useState(false);
+  const [removingExerciseEmail, setRemovingExerciseEmail] = useState(null);
+
   // ── guard ────────────────────────────────────────────────
   useEffect(() => {
     if (!loading) {
@@ -121,6 +127,7 @@ export default function AdminPage() {
       });
 
       fetchPremiumEmails();
+      fetchExercisePremiumEmails();
     } catch (e) {
       toast.error('خطأ في جلب البيانات');
     }
@@ -134,6 +141,15 @@ export default function AdminPage() {
       .select('id, email, added_at')
       .order('added_at', { ascending: false });
     setPremiumEmails(data || []);
+  }
+
+  // ── exercise videos premium emails ─────────────────────────
+  async function fetchExercisePremiumEmails() {
+    const { data } = await supabase
+      .from('exercise_premium')
+      .select('id, email, added_at')
+      .order('added_at', { ascending: false });
+    setExercisePremiumEmails(data || []);
   }
 
   useEffect(() => {
@@ -197,6 +213,37 @@ export default function AdminPage() {
       setPremiumEmails(prev => prev.filter(p => p.id !== id));
     }
     setRemovingEmail(null);
+  }
+
+  // ── exercise videos premium handlers ──────────────────────
+  async function addExercisePremiumEmail() {
+    const email = newExerciseEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      toast.error('اكتب إيميل صحيح');
+      return;
+    }
+    setAddingExerciseEmail(true);
+    const { error } = await supabase.from('exercise_premium').insert({ email });
+    if (error) {
+      if (error.code === '23505') toast.error('الإيميل ده مضاف قبل كده');
+      else toast.error('فشلت الإضافة');
+    } else {
+      toast.success('تم تفعيل الاشتراك ✅');
+      setNewExerciseEmail('');
+      fetchExercisePremiumEmails();
+    }
+    setAddingExerciseEmail(false);
+  }
+
+  async function removeExercisePremiumEmail(id) {
+    setRemovingExerciseEmail(id);
+    const { error } = await supabase.from('exercise_premium').delete().eq('id', id);
+    if (error) toast.error('فشل الحذف');
+    else {
+      toast.success('تم إلغاء الاشتراك');
+      setExercisePremiumEmails(prev => prev.filter(p => p.id !== id));
+    }
+    setRemovingExerciseEmail(null);
   }
 
   // ── filter ───────────────────────────────────────────────
@@ -328,6 +375,87 @@ export default function AdminPage() {
                       }}
                     >
                       {removingEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
+                    </motion.button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── Exercise Videos Premium ── */}
+        <Reveal delay={0.18}>
+          <GlassCard accent="#facc15" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <Play size={16} color="#facc15" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                اشتراكات مكتبة التمارين المتحركة ({exercisePremiumEmails.length})
+              </span>
+            </div>
+
+            {/* add email */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+              <input
+                type="email"
+                placeholder="example@gmail.com"
+                value={newExerciseEmail}
+                onChange={e => setNewExerciseEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !addingExerciseEmail && addExercisePremiumEmail()}
+                style={{
+                  flex: 1, minWidth: 220, padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                  borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                  fontSize: '0.78rem', outline: 'none', direction: 'ltr', textAlign: 'right',
+                }}
+              />
+              <motion.button
+                onClick={addExercisePremiumEmail}
+                disabled={addingExerciseEmail}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px',
+                  background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.35)',
+                  borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                  cursor: addingExerciseEmail ? 'not-allowed' : 'pointer', opacity: addingExerciseEmail ? 0.5 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {addingExerciseEmail ? <RefreshCw size={13} /> : <Plus size={13} />}
+                تفعيل اشتراك
+              </motion.button>
+            </div>
+
+            {/* list */}
+            {exercisePremiumEmails.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                مفيش مشتركين لسه
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {exercisePremiumEmails.map(p => (
+                  <div key={p.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', background: 'rgba(250,204,21,0.06)',
+                    border: '1px solid rgba(250,204,21,0.15)', borderRadius: 8,
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--chalk)', direction: 'ltr', textAlign: 'right' }}>{p.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', marginTop: 2 }}>
+                        {new Date(p.added_at).toLocaleDateString('ar-EG')}
+                      </div>
+                    </div>
+                    <motion.button
+                      onClick={() => removeExercisePremiumEmail(p.id)}
+                      whileTap={{ scale: 0.9 }}
+                      disabled={removingExerciseEmail === p.id}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28, background: 'rgba(248,113,113,0.08)',
+                        border: '1px solid rgba(248,113,113,0.25)', borderRadius: 6,
+                        cursor: 'pointer', color: '#f87171',
+                      }}
+                    >
+                      {removingExerciseEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
                     </motion.button>
                   </div>
                 ))}
