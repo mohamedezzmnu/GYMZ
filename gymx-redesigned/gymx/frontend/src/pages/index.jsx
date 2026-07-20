@@ -486,14 +486,45 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════
-          HOW IT WORKS — giant background numbers
+          LOGGED-IN QUICK ACTIONS
       ══════════════════════════════════════ */}
+      {user && (
+      <section style={{ padding: 'clamp(48px,8vw,80px) 32px', background: 'var(--carbon)', direction: ar ? 'rtl' : 'ltr' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+            <div className="rule-orange" />
+            <span className="label-tag">{ar ? `أهلاً يا ${userName}` : `HEY, ${userName.toUpperCase()}`}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+            {[
+              { href: '/workout',   emoji: '⚡', title: ar ? 'ابدأ جلستي'     : 'START WORKOUT',   desc: ar ? 'سجّل تمرين جديد دلوقتي'           : 'Log a new workout session now'      },
+              { href: '/dashboard', emoji: '📊', title: ar ? 'تقدمي'           : 'MY PROGRESS',     desc: ar ? 'شوف أرقامك ومؤشراتك الأسبوعية'    : 'View your weekly stats and numbers'  },
+              { href: '/programs',  emoji: '🏋️', title: ar ? 'برامجي'          : 'MY PROGRAMS',     desc: ar ? 'استكشف وغيّر برنامجك التدريبي'     : 'Explore and switch training programs' },
+              { href: '/nutrition', emoji: '🥗', title: ar ? 'خطتي الغذائية'  : 'NUTRITION PLAN',  desc: ar ? 'اتابع وجباتك وسعراتك اليومية'      : 'Track your meals and daily calories'  },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href}>
+                <div style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', borderLeft: '3px solid var(--volt)', borderRadius: 'var(--radius-md)', padding: '20px 18px', cursor: 'pointer', transition: 'all 0.18s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderLeftColor = 'var(--volt-bright)'; e.currentTarget.style.transform = 'translateX(-4px)'; e.currentTarget.style.background = 'var(--iron-light)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'var(--volt)'; e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.background = 'var(--iron)'; }}
+                >
+                  <div style={{ fontSize: '1.5rem', marginBottom: 10 }}>{emoji}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', letterSpacing: '0.06em', color: 'var(--chalk)', marginBottom: 6 }}>{title}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>{desc}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+      )}
+
+      {/* HOW IT WORKS — for new visitors only */}
+      {!user && (
       <section style={{ padding: 'clamp(64px,10vw,120px) 32px', background: 'var(--carbon)', direction: ar ? 'rtl' : 'ltr', position: 'relative', overflow: 'hidden' }}>
-        {/* decorative background text */}
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-display)', fontSize: 'clamp(200px,30vw,300px)', color: 'rgba(255,85,0,0.03)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
           GYMZ
         </div>
-
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
             <div className="rule-orange" />
@@ -502,12 +533,12 @@ export default function HomePage() {
           <h2 className="display-lg" style={{ color: 'var(--chalk)', marginBottom: 56 }}>
             {ar ? '٣ خطوات\nبس وانت جاهز' : 'THREE STEPS.\nTHATS IT.'}
           </h2>
-
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2 }}>
             {steps.map((s, i) => <StepItem key={s.num} s={s} i={i} />)}
           </div>
         </div>
       </section>
+      )}
 
       {/* ══════════════════════════════════════
           CTA — inverted (orange bg)
