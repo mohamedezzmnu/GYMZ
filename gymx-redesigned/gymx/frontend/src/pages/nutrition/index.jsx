@@ -72,6 +72,12 @@ const PROTEIN_OPTIONS = [
   { name: '150جم جبنة فيتا قليلة الدسم',     protein: 18,   carbs: 4,   fat: 9,    cal: 169 },
   { name: '100جم حبار مشوي',                 protein: 16,   carbs: 3,   fat: 1.5,  cal: 90  },
   { name: '100جم ديك رومي مشوي',             protein: 29,   carbs: 0,   fat: 1,    cal: 125 },
+  // 💰 خيارات اقتصادية
+  { name: '100جم سردين معلب',                protein: 25,   carbs: 0,   fat: 11,   cal: 208 },
+  { name: '3 بيضات كاملة مقلية',             protein: 18,   carbs: 1,   fat: 21,   cal: 258 },
+  { name: '100جم ورك فراخ بالجلد مشوي',      protein: 24,   carbs: 0,   fat: 15,   cal: 245 },
+  { name: '150جم زبادي بلدي كامل الدسم',     protein: 8,    carbs: 11,  fat: 8,    cal: 150 },
+  { name: '150جم فراخ مفرومة اقتصادية',      protein: 28,   carbs: 0,   fat: 6,    cal: 165 },
 ];
 
 const CARB_OPTIONS = [
@@ -92,6 +98,11 @@ const CARB_OPTIONS = [
   { name: '100جم حمص مسلوق',             protein: 8.9, carbs: 27,   fat: 2.6, cal: 167 },
   { name: '150جم مكرونة قمح كامل مطبوخة',protein: 8,   carbs: 37.5, fat: 0.8, cal: 189 },
   { name: '100جم توست أسمر',             protein: 13,  carbs: 41,   fat: 3.4, cal: 247 },
+  // 💰 خيارات اقتصادية
+  { name: '200جم كشري (أرز+عدس+مكرونة)', protein: 10,  carbs: 65,   fat: 3,   cal: 330 },
+  { name: '100جم بطاطس مقلية منزلي',     protein: 3,   carbs: 35,   fat: 12,  cal: 260 },
+  { name: '2 رغيف بلدي إضافي',           protein: 8,   carbs: 60,   fat: 2,   cal: 290 },
+  { name: '100جم دقيق شوفان اقتصادي',    protein: 6.3, carbs: 68,   fat: 4.4, cal: 335 },
 ];
 
 // ✅ إصلاح: FAT_OPTIONS متصلة دلوقتي بالوجبات
@@ -106,6 +117,9 @@ const FAT_OPTIONS = [
   { name: '30جم جبنة شيدر',                    protein: 7.5, carbs: 0.4, fat: 9.9, cal: 121 },
   { name: '15جم طحينة',                        protein: 2.6, carbs: 3.2, fat: 8.1, cal: 96  },
   { name: '30جم كاجو',                          protein: 5.4, carbs: 9,   fat: 13.2,cal: 176 },
+  // 💰 خيارات اقتصادية
+  { name: '1 ملعقة كبيرة زيت دوار الشمس',     protein: 0,   carbs: 0,   fat: 14,   cal: 120 },
+  { name: '20جم فول سوداني محمص',              protein: 5.2, carbs: 4.5, fat: 10,  cal: 124 },
 ];
 
 // ── مكملات مقترحة حسب الهدف ──────────────────────────────
