@@ -5,6 +5,15 @@
    DM Sans   — body
    JetBrains Mono — numbers / mono */
 
+/* Force dark — prevents Chrome/Safari light mode from overriding our variables */
+:root {
+  color-scheme: dark;
+}
+html {
+  color-scheme: dark;
+  background-color: #080808;
+}
+
 /* =============================================
    DARK THEME
    ============================================= */
