@@ -18,6 +18,7 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { getExercises } from "../services/exerciseApi";
 
 // ── بيانات التمارين لكل برنامج ───────────────────────────
 const PROGRAM_EXERCISES = {
@@ -262,6 +263,7 @@ export default function WorkoutPage() {
   const [logingWeight, setLogingWeight]   = useState(false);
   const [activeProgram, setActiveProgram] = useState(0);
   const [loading, setLoading]             = useState(true);
+  const [apiExercises, setApiExercises] = useState([]);
 
   // ── جلب البيانات ─────────────────────────────────────
   useEffect(() => {
@@ -269,6 +271,19 @@ export default function WorkoutPage() {
     if (!user) { router.push('/login'); return; }
     fetchAll();
   }, [user, authLoading]);
+
+  useEffect(() => {
+  async function loadExercises() {
+    try {
+      const data = await getExercises();
+      setApiExercises(data.slice(0, 15));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadExercises();
+}, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -596,6 +611,62 @@ export default function WorkoutPage() {
               </div>
             </Reveal>
           )}
+
+          {apiExercises.length > 0 && (
+  <Reveal delay={0.3}>
+    <div style={{ marginTop: 30, direction: "rtl" }}>
+      <h2
+        style={{
+          color: "white",
+          marginBottom: 20,
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        تمارين من ExerciseDB
+      </h2>
+
+      {apiExercises.map((exercise) => (
+        <GlassCard
+          key={exercise.id}
+          style={{ padding: 15, marginBottom: 12 }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: 15,
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={exercise.gifUrl}
+              alt={exercise.name}
+              width={90}
+              height={90}
+            />
+
+            <div>
+              <h3 style={{ color: "white" }}>
+                {exercise.name}
+              </h3>
+
+              <p style={{ color: "#aaa" }}>
+                العضلة: {exercise.target}
+              </p>
+
+              <p style={{ color: "#aaa" }}>
+                الجزء: {exercise.bodyPart}
+              </p>
+
+              <p style={{ color: "#ff4d2e" }}>
+                الأداة: {exercise.equipment}
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      ))}
+    </div>
+  </Reveal>
+)}
 
         </div>
       </div>
