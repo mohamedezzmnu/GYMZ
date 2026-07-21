@@ -392,7 +392,7 @@ export default function WorkoutPage() {
                 — جلسة اليوم
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,2.8rem)', letterSpacing: '0.03em', color: 'var(--chalk)', lineHeight: 1, marginBottom: 6 }}>
-                وقت الجيم <span style={{ color: 'var(--accent)' }}>💪</span>
+               وقت الجيم 💪🔥 TEST<span style={{ color: 'var(--accent)' }}>💪</span>
               </h1>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ash-light)' }}>
                 {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
