@@ -275,8 +275,11 @@ export default function WorkoutPage() {
   useEffect(() => {
   async function loadExercises() {
     try {
-      const data = await getExercises();
-      setApiExercises(data.slice(0, 15));
+const data = await getExercises();
+
+console.log("ExerciseDB Data:", data);
+
+setApiExercises(data || []);      setApiExercises(data.slice(0, 15));
     } catch (err) {
       console.error(err);
     }
