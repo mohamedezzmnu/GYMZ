@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_EXERCISE_API;
+const API = process.env.NEXT_PUBLIC_EXERCISEDB_API_URL;
 
 export async function getExercises() {
   const res = await fetch(`${API}/exercises`);
