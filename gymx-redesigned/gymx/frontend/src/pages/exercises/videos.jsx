@@ -95,9 +95,7 @@ function ApiNotConfigured() {
           وبعدين تحط رابطه في متغير <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>NEXT_PUBLIC_EXERCISEDB_API_URL</span> في إعدادات المشروع.
         </p>
         
-        <div style={{ marginTop: 20, padding: '10px 14px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 8, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#facc15', direction: 'ltr', wordBreak: 'break-all' }}>
-          DEBUG API_BASE = "{API_BASE || '(فاضي تماماً)'}"
-        </div>
+       
    
       </div>
     </div>
