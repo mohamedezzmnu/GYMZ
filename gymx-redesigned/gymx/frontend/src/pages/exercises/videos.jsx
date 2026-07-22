@@ -1,45 +1,106 @@
 // src/pages/exercises/videos.jsx
 // ── مكتبة التمارين — صفحة مستقلة، بريميوم ──────────────────
 //
-// المصدر: yuhonas/free-exercise-db (Public Domain — رخصة Unlicense، حر تمامًا)
-// https://github.com/yuhonas/free-exercise-db
+// المصدر: arhxam/free-exercise-db-with-videos (رخصة MIT — حر تمامًا)
+// https://github.com/arhxam/free-exercise-db-with-videos
+// 317 تمرين، 593 فيديو حقيقي (راجل وست) بجودة Full HD، بالإضافة لخطوات
+// أداء، ملاحظات فورم، أخطاء شائعة، وتعليمات تنفس لكل تمرين.
+//
 // الداتا بتتجاب عن طريق jsDelivr (مرآة CDN لأي مشروع مفتوح المصدر على
-// GitHub، ومضمون إنها بتشتغل مع طلبات المتصفح CORS).
+// GitHub، ومضمون إنها بتشتغل مع طلبات المتصفح CORS) — مفيش API key
+// ولا سيرفر مطلوب.
 //
-// ⚠️ ملحوظة: الداتا هنا صور ثابتة (وضع البداية + وضع النهاية لكل تمرين)
-// مش GIF متحرك. في المقابل، مفيش أي سيرفر أو Deploy أو API key مطلوب —
-// الداتا كلها مستضافة مجانًا وللأبد على GitHub، وبنجيبها مباشرة من المتصفح.
-//
-// مفيش أي إعداد مطلوب قبل ما الصفحة دي تشتغل. لو حصل خطأ فهو غالبًا
-// مشكلة اتصال مؤقتة بس (مش إعداد ناقص زي المكتبة القديمة).
+// ⚠️ التعليمات وخطوات الأداء جايه من المصدر بالإنجليزي. الصفحة فيها زرار
+// "ترجم بالمصري" بيبعت التمرين لسيرفر GYMZ (/api/translate-exercise)
+// يترجمه بالعامية المصرية ويكاشه، عشان يترجم مرة واحدة بس لكل تمرين.
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff } from 'lucide-react';
+import { Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, Languages, User, UserRound } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 
 // ── مصدر الداتا: jsDelivr (مرآة CDN رسمية لأي مشروع GitHub، بتدعم
-// CORS بشكل مضمون من المتصفح — على عكس raw.githubusercontent.com اللي
-// بيرفض طلبات المتصفح أحيانًا حتى لو شغال من أدوات السيرفر) ──
-const DATA_URL = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/dist/exercises.json';
-const IMAGE_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/';
+// CORS بشكل مضمون من المتصفح) ──────────────────────────────
+const DATA_URL = 'https://cdn.jsdelivr.net/gh/arhxam/free-exercise-db-with-videos@main/data/exercises.json';
 const PAGE_LIMIT = 24;
 
-// ── ترجمة أسماء العضلات المستهدفة ──────────────────────────
-const MUSCLE_AR = {
-  abdominals: 'البطن', abductors: 'الفخذ الخارجي', adductors: 'الفخذ الداخلي',
-  biceps: 'الباي', calves: 'السمانة', chest: 'الصدر', forearms: 'الساعد',
-  glutes: 'الجلوتس', hamstrings: 'الهامسترينج', lats: 'اللاتس',
-  'lower back': 'أسفل الظهر', 'middle back': 'وسط الظهر', neck: 'الرقبة',
-  quadriceps: 'أعلى الرجل', shoulders: 'الأكتاف', traps: 'الترابس', triceps: 'التراي',
+// ── ترجمة أقسام الجسم ──────────────────────────────────────
+const BODYPART_AR = {
+  back: 'الظهر', cardio: 'كارديو', chest: 'الصدر', hips: 'الحوض والجلوتس',
+  'lower arms': 'أسفل الذراع', 'lower legs': 'أسفل الرجل', shoulders: 'الأكتاف',
+  'upper arms': 'أعلى الذراع', 'upper legs': 'أعلى الرجل', waist: 'الخصر',
 };
-const MUSCLES = Object.keys(MUSCLE_AR);
+const BODYPARTS = Object.keys(BODYPART_AR);
 
-function imgUrl(path) {
-  return path ? `${IMAGE_BASE}${path}` : '';
+// ── ترجمة المعدات ──────────────────────────────────────────
+const EQUIPMENT_AR = {
+  band: 'رباط مقاومة', barbell: 'بار', 'body weight': 'وزن الجسم', cable: 'كابل',
+  dumbbell: 'دمبل', 'ez barbell': 'بار EZ', kettlebell: 'كيتلبل',
+  'leverage machine': 'جهاز رافعة', rope: 'حبل', 'sled machine': 'زلاجة',
+  'smith machine': 'سميث مشين', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
+};
+const EQUIPMENTS = Object.keys(EQUIPMENT_AR);
+
+// ── ترجمة مستوى الصعوبة ─────────────────────────────────────
+const DIFFICULTY_AR = { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' };
+
+// ── قاموس ترجمة أسماء العضلات (شامل لكل مصطلحات المصدر) ─────
+const MUSCLE_AR = {
+  abdominals: 'البطن', abs: 'البطن', 'lower abdominals': 'أسفل البطن', 'lower abs': 'أسفل البطن',
+  abductors: 'الفخذ الخارجي', 'hip abductors': 'عضلات فتح الفخذ', adductors: 'الفخذ الداخلي',
+  'adductor group': 'مجموعة عضلات الفخذ الداخلي', 'adductor muscles': 'عضلات الفخذ الداخلي', 'hip adductors': 'عضلات ضم الفخذ',
+  'achilles tendon': 'وتر أكيلوس', anconeus: 'عضلة خلف المرفق',
+  'ankle stabilizers': 'عضلات ثبات الكاحل', ankles: 'الكاحل',
+  'anterior deltoid': 'مقدمة الكتف', 'anterior deltoids': 'مقدمة الكتف',
+  biceps: 'الباي', 'biceps brachii': 'الباي',
+  brachialis: 'عضلة الذراع العميقة', brachioradialis: 'عضلة الساعد العلوي',
+  calves: 'السمانة', chest: 'الصدر', core: 'عضلات الجذع', 'core stabilizers': 'عضلات ثبات الجذع',
+  'cardiovascular system': 'الجهاز الدوري', 'heart and lungs': 'القلب والرئتين',
+  deltoid: 'الكتف', 'deltoid anterior': 'مقدمة الكتف', deltoideus: 'الكتف', deltoids: 'الأكتاف', delts: 'الأكتاف',
+  'erector spinae': 'عضلات مقيم الظهر', erectors: 'عضلات مقيم الظهر', 'spinal erectors': 'عضلات مقيم الظهر',
+  'thoracic spinal extensors': 'عضلات مد الظهر العلوي',
+  'external and internal obliques': 'عضلات الخصر الجانبية', 'external obliques': 'عضلات الخصر الجانبية',
+  obliques: 'عضلات الخصر الجانبية', 'obliquus externus abdominis': 'عضلات الخصر الجانبية',
+  'flexor carpi radialis': 'عضلة ثني الساعد الكعبرية', 'flexor carpi ulnaris': 'عضلة ثني الساعد الزندية',
+  'forearm extensors': 'عضلات مد الساعد', 'forearm flexors': 'عضلات ثني الساعد',
+  'forearm flexors and extensors': 'عضلات الساعد (ثني ومد)', forearms: 'الساعد',
+  'full body': 'الجسم كله',
+  gastrocnemius: 'السمانة', 'gastrocnemius, soleus': 'السمانة بالكامل', soleus: 'عضلة السمانة العميقة',
+  glutes: 'الجلوتس', 'gluteus maximus': 'الجلوتس الكبرى', 'gluteus medius': 'الجلوتس الوسطى', 'gluteus minimus': 'الجلوتس الصغرى',
+  groin: 'الفخذ الداخلي', hamstrings: 'الهامسترينج', 'hip flexors': 'عضلات ثني الفخذ',
+  iliopsoas: 'عضلة الحرقفي القطني', 'iliopsoas, gluteus medius, gluteus minimus': 'الحرقفي القطني والجلوتس',
+  infraspinatus: 'الكتف الدوارة', intercostals: 'عضلات ما بين الأضلاع',
+  'latissimus dorsi': 'اللاتس', lats: 'اللاتس',
+  'lower back': 'أسفل الظهر', 'lower trapezius': 'أسفل الترابس', 'middle back': 'وسط الظهر', 'middle trapezius': 'وسط الترابس',
+  'neck flexors': 'عضلات ثني الرقبة',
+  'pectoralis major': 'الصدر', 'pectoralis major, clavicular head': 'أعلى الصدر', pectorals: 'الصدر',
+  'upper pectorals': 'أعلى الصدر', 'upper chest': 'أعلى الصدر',
+  peroneals: 'عضلات الساق الجانبية', 'peroneus longus and brevis': 'عضلات الساق الجانبية',
+  piriformis: 'عضلة الكمثري', 'quadratus lumborum': 'عضلة أسفل الظهر الجانبية',
+  quadriceps: 'أعلى الرجل', 'quadriceps femoris': 'أعلى الرجل', quads: 'أعلى الرجل',
+  'rear deltoids': 'خلفية الكتف', 'posterior deltoid': 'خلفية الكتف', 'posterior deltoids': 'خلفية الكتف',
+  'rectus abdominis': 'عضلة البطن المستقيمة', 'rectus femoris': 'مقدمة الفخذ',
+  rhoboids: 'عضلات الرومبويد', rhomboids: 'عضلات الرومبويد', 'rhomboids, trapezius, latissimus dorsi': 'الرومبويد والترابس واللاتس',
+  'rotator cuff': 'الكتف الدوارة', scalenes: 'عضلات جانب الرقبة', 'serratus anterior': 'عضلة جانب الصدر',
+  shoulders: 'الأكتاف',
+  spine: 'العمود الفقري', 'thoracic spine': 'أعلى الظهر', 'thoracic spine muscles': 'عضلات أعلى الظهر',
+  sternocleidomastoid: 'عضلة جانب الرقبة',
+  'tensor fasciae latae': 'عضلة جانب الفخذ العلوي', 'teres major': 'عضلة أسفل الكتف الخلفية',
+  'tibialis anterior': 'مقدمة الساق', 'tibialis posterior': 'خلفية الساق العميقة',
+  'transverse abdominis': 'عضلة البطن العرضية',
+  trapezius: 'الترابس', traps: 'الترابس', 'upper trapezius': 'أعلى الترابس',
+  triceps: 'التراي', 'triceps brachii': 'التراي',
+  'upper arms': 'أعلى الذراع', 'upper back': 'أعلى الظهر',
+  'varies by machine': 'بيختلف حسب الجهاز', 'varies by machine (legs, glutes, arms)': 'بيختلف حسب الجهاز',
+  'varies by movement': 'بيختلف حسب الحركة', 'vastus medialis': 'عضلة داخل الفخذ',
+};
+
+function muscleAr(term) {
+  if (!term) return '';
+  return MUSCLE_AR[term.toLowerCase()] || term;
 }
 
 // ── شاشة غير مشترك (بريميوم — بعلامة التاج) ────────────────
@@ -111,6 +172,7 @@ function LoadFailed({ onRetry }) {
 
 // ── كارت التمرين ──────────────────────────────────────────
 function ExerciseCard({ exercise, onOpen }) {
+  const poster = exercise.thumbnails?.male || exercise.thumbnails?.female || '';
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -119,17 +181,28 @@ function ExerciseCard({ exercise, onOpen }) {
       style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden', transition: 'all 250ms' }}
     >
       <div style={{ position: 'relative', height: 170, background: 'rgba(255,255,255,0.03)' }}>
-        <img src={imgUrl(exercise.images?.[0])} alt={exercise.name} loading="lazy"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          onError={e => { e.currentTarget.style.opacity = 0.15; }}
-        />
+        {poster && (
+          <img src={poster} alt={exercise.name} loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            onError={e => { e.currentTarget.style.opacity = 0.15; }}
+          />
+        )}
         <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 20, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Crown size={9} /> PRO
         </span>
+        <span style={{ position: 'absolute', bottom: 10, left: 10, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Play size={13} color="#fff" fill="#fff" />
+        </span>
       </div>
       <div style={{ padding: '14px 16px 16px' }}>
-        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 6, textTransform: 'capitalize' }}>
-          {MUSCLE_AR[exercise.primaryMuscles?.[0]] || exercise.primaryMuscles?.[0] || '—'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: '#facc15' }}>
+            {muscleAr(exercise.target)}
+          </span>
+          <span style={{ fontSize: '0.58rem', color: 'var(--ash)' }}>·</span>
+          <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>
+            {DIFFICULTY_AR[exercise.difficulty] || exercise.difficulty}
+          </span>
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.03em', color: 'var(--chalk)', textTransform: 'capitalize' }}>
           {exercise.name}
@@ -141,8 +214,56 @@ function ExerciseCard({ exercise, onOpen }) {
 
 // ── مودال تفاصيل التمرين ──────────────────────────────────
 function ExerciseModal({ exercise, onClose }) {
+  const [gender, setGender] = useState('male');
+  const [translated, setTranslated] = useState(null);
+  const [translating, setTranslating] = useState(false);
+  const [showArabic, setShowArabic] = useState(false);
+  const [translateError, setTranslateError] = useState(false);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    setGender('male');
+    setTranslated(null);
+    setShowArabic(false);
+    setTranslateError(false);
+  }, [exercise?.id]);
+
   if (!exercise) return null;
-  const images = (exercise.images || []).filter(Boolean);
+
+  const videoSrc = exercise.videos?.[gender] || exercise.videos?.male || exercise.videos?.female;
+  const poster = exercise.thumbnails?.[gender] || exercise.thumbnails?.male;
+  const hasBothGenders = exercise.videos?.male && exercise.videos?.female;
+
+  const handleTranslate = async () => {
+    if (translated) { setShowArabic(true); return; }
+    setTranslating(true);
+    setTranslateError(false);
+    try {
+      const res = await fetch('/api/translate-exercise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: exercise.id,
+          name: exercise.name,
+          instructions: exercise.instructions,
+          steps: exercise.steps,
+          formCues: exercise.formCues,
+          commonMistakes: exercise.commonMistakes,
+          breathing: exercise.breathing,
+        }),
+      });
+      if (!res.ok) throw new Error('translate failed');
+      const data = await res.json();
+      setTranslated(data);
+      setShowArabic(true);
+    } catch {
+      setTranslateError(true);
+    }
+    setTranslating(false);
+  };
+
+  const view = showArabic && translated ? translated : exercise;
+
   return (
     <AnimatePresence>
       <motion.div
@@ -153,42 +274,131 @@ function ExerciseModal({ exercise, onClose }) {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
           onClick={e => e.stopPropagation()}
-          style={{ width: '100%', maxWidth: 520, maxHeight: '85vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, direction: 'rtl' }}
+          style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, direction: 'rtl' }}
         >
-          <div style={{ position: 'relative', display: 'flex', gap: 2, height: 260, background: 'rgba(255,255,255,0.03)' }}>
-            {(images.length ? images : [null]).slice(0, 2).map((img, i) => (
-              <img key={i} src={imgUrl(img)} alt={`${exercise.name} ${i + 1}`}
-                style={{ flex: 1, width: '50%', height: '100%', objectFit: 'contain', background: '#0a0a0a' }}
+          <div style={{ position: 'relative', background: '#000' }}>
+            {videoSrc ? (
+              <video
+                ref={videoRef}
+                key={videoSrc}
+                src={videoSrc}
+                poster={poster}
+                controls
+                loop
+                playsInline
+                style={{ width: '100%', maxHeight: 320, display: 'block', background: '#000' }}
               />
-            ))}
+            ) : (
+              <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ash-light)', fontSize: '0.8rem' }}>
+                مفيش فيديو متاح للتمرين ده
+              </div>
+            )}
             <button onClick={onClose} style={{ position: 'absolute', top: 12, left: 12, width: 32, height: 32, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} />
             </button>
+            {hasBothGenders && (
+              <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.6)', borderRadius: 20, padding: 3 }}>
+                <button
+                  onClick={() => setGender('male')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 16, border: 'none', cursor: 'pointer', background: gender === 'male' ? '#facc15' : 'transparent', color: gender === 'male' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
+                >
+                  <User size={12} /> راجل
+                </button>
+                <button
+                  onClick={() => setGender('female')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 16, border: 'none', cursor: 'pointer', background: gender === 'female' ? '#facc15' : 'transparent', color: gender === 'female' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
+                >
+                  <UserRound size={12} /> ست
+                </button>
+              </div>
+            )}
           </div>
-          {images.length > 1 && (
-            <div style={{ textAlign: 'center', fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash)', padding: '6px 0 0' }}>
-              وضع البداية ← وضع النهاية
-            </div>
-          )}
+
           <div style={{ padding: '20px 22px 26px' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', textTransform: 'capitalize', marginBottom: 8 }}>
-              {exercise.name}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', textTransform: 'capitalize' }}>
+                {exercise.name}
+              </div>
+              <button
+                onClick={translated && showArabic ? () => setShowArabic(false) : handleTranslate}
+                disabled={translating}
+                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 20, border: '1px solid rgba(250,204,21,0.3)', background: 'rgba(250,204,21,0.1)', color: '#facc15', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', cursor: translating ? 'wait' : 'pointer' }}
+              >
+                {translating ? <Loader size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Languages size={12} />}
+                {translating ? 'بيترجم...' : (translated && showArabic ? 'رجّع الإنجليزي' : 'ترجم بالمصري')}
+              </button>
             </div>
+
+            {translateError && (
+              <div style={{ fontSize: '0.7rem', color: '#f87171', marginBottom: 10 }}>
+                مقدرناش نترجم دلوقتي، جرب تاني بعد شوية.
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-              {[...(exercise.primaryMuscles || []), ...(exercise.secondaryMuscles || []), exercise.equipment].filter(Boolean).map((tag, i) => (
-                <span key={i} style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)', textTransform: 'capitalize' }}>
-                  {MUSCLE_AR[tag] || tag}
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+                {BODYPART_AR[exercise.bodyPart] || exercise.bodyPart}
+              </span>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+                {muscleAr(exercise.target)}
+              </span>
+              {(exercise.secondaryMuscles || []).map((m, i) => (
+                <span key={i} style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+                  {muscleAr(m)}
                 </span>
               ))}
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+                {EQUIPMENT_AR[exercise.equipment] || exercise.equipment}
+              </span>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.25)', color: '#facc15' }}>
+                {DIFFICULTY_AR[exercise.difficulty] || exercise.difficulty}
+              </span>
             </div>
-            {exercise.instructions?.length > 0 && (
-              <div>
+
+            {view.instructions && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 8 }}>نبذة عن التمرين</div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>{view.instructions}</p>
+              </div>
+            )}
+
+            {view.steps?.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 10 }}>خطوات الأداء</div>
                 <ol style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {exercise.instructions.filter(Boolean).map((step, i) => (
+                  {view.steps.filter(Boolean).map((step, i) => (
                     <li key={i} style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>{step}</li>
                   ))}
                 </ol>
+              </div>
+            )}
+
+            {view.formCues?.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 10 }}>ملاحظات الفورم</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {view.formCues.filter(Boolean).map((cue, i) => (
+                    <span key={i} style={{ fontSize: '0.72rem', color: 'var(--chalk)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '5px 10px' }}>{cue}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {view.commonMistakes?.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#f87171', marginBottom: 10 }}>أخطاء شائعة</div>
+                <ul style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {view.commonMistakes.filter(Boolean).map((m, i) => (
+                    <li key={i} style={{ fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>{m}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {view.breathing && (
+              <div>
+                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 6 }}>التنفس</div>
+                <p style={{ fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.6, margin: 0 }}>{view.breathing}</p>
               </div>
             )}
           </div>
@@ -207,7 +417,9 @@ export default function ExerciseVideosPage() {
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [muscle, setMuscle] = useState('');
+  const [bodyPart, setBodyPart] = useState('');
+  const [equipment, setEquipment] = useState('');
+  const [difficulty, setDifficulty] = useState('');
   const [allExercises, setAllExercises] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -225,7 +437,6 @@ export default function ExerciseVideosPage() {
     checkPremium();
   }, [user, authLoading]);
 
-  // ✅ debounce للبحث
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 400);
     return () => clearTimeout(t);
@@ -254,17 +465,23 @@ export default function ExerciseVideosPage() {
   // فلترة وترقيم على الجهاز نفسه (مفيش API نرجعله فلتر)
   const filtered = useMemo(() => {
     return allExercises.filter(ex => {
-      if (debouncedSearch && !ex.name?.toLowerCase().includes(debouncedSearch)) return false;
-      if (muscle && !ex.primaryMuscles?.includes(muscle)) return false;
+      if (debouncedSearch) {
+        const inName = ex.name?.toLowerCase().includes(debouncedSearch);
+        const inAlias = (ex.aliases || []).some(a => a.toLowerCase().includes(debouncedSearch));
+        if (!inName && !inAlias) return false;
+      }
+      if (bodyPart && ex.bodyPart !== bodyPart) return false;
+      if (equipment && ex.equipment !== equipment) return false;
+      if (difficulty && ex.difficulty !== difficulty) return false;
       return true;
     });
-  }, [allExercises, debouncedSearch, muscle]);
+  }, [allExercises, debouncedSearch, bodyPart, equipment, difficulty]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_LIMIT));
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, muscle]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, bodyPart, equipment, difficulty]);
 
   if (authLoading || checking) {
     return (
@@ -296,7 +513,7 @@ export default function ExerciseVideosPage() {
               مكتبة<br /><span style={{ color: '#facc15' }}>التمارين</span>
             </h1>
             <p style={{ color: 'var(--ash-light)', marginTop: 12, fontSize: '0.875rem', lineHeight: 1.7 }}>
-              شوف وضع البداية والنهاية لكل تمرين قبل ما تنزل تتمرن.
+              فيديو حقيقي راجل وست لكل تمرين، مع خطوات الأداء وملاحظات الفورم.
             </p>
           </motion.div>
 
@@ -310,9 +527,17 @@ export default function ExerciseVideosPage() {
                 style={{ width: '100%', paddingRight: 38, boxSizing: 'border-box', direction: 'ltr', textAlign: 'right' }}
               />
             </div>
-            <select className="input" value={muscle} onChange={e => setMuscle(e.target.value)} style={{ flex: '1 1 150px', cursor: 'pointer' }}>
-              <option value="">كل العضلات</option>
-              {MUSCLES.map(m => <option key={m} value={m}>{MUSCLE_AR[m]}</option>)}
+            <select className="input" value={bodyPart} onChange={e => setBodyPart(e.target.value)} style={{ flex: '1 1 140px', cursor: 'pointer' }}>
+              <option value="">كل أقسام الجسم</option>
+              {BODYPARTS.map(b => <option key={b} value={b}>{BODYPART_AR[b]}</option>)}
+            </select>
+            <select className="input" value={equipment} onChange={e => setEquipment(e.target.value)} style={{ flex: '1 1 140px', cursor: 'pointer' }}>
+              <option value="">كل المعدات</option>
+              {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{EQUIPMENT_AR[eq]}</option>)}
+            </select>
+            <select className="input" value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ flex: '1 1 120px', cursor: 'pointer' }}>
+              <option value="">كل المستويات</option>
+              {Object.keys(DIFFICULTY_AR).map(d => <option key={d} value={d}>{DIFFICULTY_AR[d]}</option>)}
             </select>
             <button
               onClick={fetchExercises}
