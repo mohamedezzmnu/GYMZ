@@ -3,6 +3,8 @@
 //
 // المصدر: yuhonas/free-exercise-db (Public Domain — رخصة Unlicense، حر تمامًا)
 // https://github.com/yuhonas/free-exercise-db
+// الداتا بتتجاب عن طريق jsDelivr (مرآة CDN لأي مشروع مفتوح المصدر على
+// GitHub، ومضمون إنها بتشتغل مع طلبات المتصفح CORS).
 //
 // ⚠️ ملحوظة: الداتا هنا صور ثابتة (وضع البداية + وضع النهاية لكل تمرين)
 // مش GIF متحرك. في المقابل، مفيش أي سيرفر أو Deploy أو API key مطلوب —
@@ -19,9 +21,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 
-// ── مصدر الداتا (JSON عام على GitHub، بيدعم CORS من المتصفح مباشرة) ──
-const DATA_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
-const IMAGE_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+// ── مصدر الداتا: jsDelivr (مرآة CDN رسمية لأي مشروع GitHub، بتدعم
+// CORS بشكل مضمون من المتصفح — على عكس raw.githubusercontent.com اللي
+// بيرفض طلبات المتصفح أحيانًا حتى لو شغال من أدوات السيرفر) ──
+const DATA_URL = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/dist/exercises.json';
+const IMAGE_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/';
 const PAGE_LIMIT = 24;
 
 // ── ترجمة أسماء العضلات المستهدفة ──────────────────────────
