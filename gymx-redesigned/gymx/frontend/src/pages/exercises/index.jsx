@@ -421,7 +421,11 @@ function FilterSection({ title, isOpen, onToggle, children }) {
 // ── كارت أيقونة داخل الفلتر ──────────────────────────────────
 function FilterIconCard({ Icon, label, selected, onClick }) {
   return (
-    <button
+    <motion.button
+      layout
+      whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
+      animate={selected ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 0.25 }}
       onClick={onClick}
       style={{
         position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
@@ -429,7 +433,6 @@ function FilterIconCard({ Icon, label, selected, onClick }) {
         background: selected ? 'rgba(255,77,46,0.08)' : 'rgba(255,255,255,0.03)',
         border: selected ? '1px solid rgba(255,77,46,0.55)' : '1px solid rgba(255,255,255,0.08)',
         boxShadow: selected ? '0 0 0 1px rgba(255,77,46,0.15), 0 0 16px rgba(255,77,46,0.15)' : 'none',
-        transition: 'all 180ms',
       }}
     >
       <span style={{
@@ -440,7 +443,7 @@ function FilterIconCard({ Icon, label, selected, onClick }) {
       </span>
       <Icon size={22} color={selected ? 'var(--accent)' : 'rgba(255,255,255,0.6)'} />
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--chalk)' }}>{label}</div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -532,18 +535,20 @@ function FiltersDrawer({ open, onClose, muscleGroup, equipment, difficulty, onAp
           </div>
 
           <div style={{ position: 'sticky', bottom: 0, marginTop: 20, display: 'flex', gap: 10 }}>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
               onClick={() => { setDraftMuscle(''); setDraftEquipment(''); setDraftDifficulty(''); }}
               style={{ padding: '13px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', cursor: 'pointer' }}
             >
               مسح الكل
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
               onClick={() => onApply({ muscleGroup: draftMuscle, equipment: draftEquipment, difficulty: draftDifficulty })}
               style={{ flex: 1, padding: '13px 18px', borderRadius: 10, background: 'var(--accent)', border: 'none', color: '#000', fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.03em', cursor: 'pointer' }}
             >
               تطبيق الفلاتر
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </motion.div>
@@ -632,17 +637,22 @@ export default function ExercisesPage() {
               <Search size={15} style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'rgba(255,255,255,0.3)' }} />
               <input className="input" placeholder="ابحث عن تمرين..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft:38 }} />
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
               onClick={() => setFiltersOpen(true)}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: activeFilterCount ? 'rgba(255,77,46,0.1)' : 'rgba(255,255,255,0.04)', border: activeFilterCount ? '1px solid rgba(255,77,46,0.35)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: activeFilterCount ? 'var(--accent)' : 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
             >
               <SlidersHorizontal size={13} /> الفلاتر
               {activeFilterCount > 0 && (
-                <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent)', color: '#000', fontSize: '0.62rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                <motion.span
+                  key={activeFilterCount}
+                  initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  style={{ minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent)', color: '#000', fontSize: '0.62rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}
+                >
                   {activeFilterCount}
-                </span>
+                </motion.span>
               )}
-            </button>
+            </motion.button>
             {hasFilters && (
               <button className="btn btn-ghost" onClick={() => { setSearch(''); setMuscleGroup(''); setDifficulty(''); setEquipment(''); }} style={{ display:'flex', alignItems:'center', gap:5, fontSize:'0.75rem' }}>
                 <X size={13} /> مسح

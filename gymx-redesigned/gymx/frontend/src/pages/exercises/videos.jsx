@@ -284,19 +284,23 @@ function LoadFailed({ onRetry }) {
 }
 
 // ── كارت التمرين ──────────────────────────────────────────
-function ExerciseCard({ exercise, onOpen }) {
+function ExerciseCard({ exercise, onOpen, index = 0 }) {
   const poster = exercise.thumbnails?.male || exercise.thumbnails?.female || '';
+  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      whileHover={{ borderColor: 'rgba(250,204,21,0.4)' }}
+      transition={{ duration: 0.35, delay: Math.min(index, 8) * 0.04 }}
+      whileHover={{ borderColor: 'rgba(250,204,21,0.4)', y: -3 }}
+      whileTap={{ scale: 0.97 }}
       onClick={() => onOpen(exercise)}
-      style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden', transition: 'all 250ms' }}
+      style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden', transition: 'border-color 250ms' }}
     >
       <div style={{ position: 'relative', height: 170, background: 'rgba(255,255,255,0.03)' }}>
         {poster && (
           <img src={poster} alt={exercise.name} loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: imgLoaded ? 1 : 0, transition: 'opacity 300ms ease' }}
+            onLoad={() => setImgLoaded(true)}
             onError={e => { e.currentTarget.style.opacity = 0.15; }}
           />
         )}
@@ -453,7 +457,11 @@ function FilterSection({ title, isOpen, onToggle, children }) {
 // ── كارت أيقونة داخل الفلتر (قسم جسم / معدة / مستوى) ────────
 function FilterIconCard({ Icon, label, subtitle, selected, onClick }) {
   return (
-    <button
+    <motion.button
+      layout
+      whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
+      animate={selected ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 0.25 }}
       onClick={onClick}
       style={{
         position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
@@ -461,7 +469,6 @@ function FilterIconCard({ Icon, label, subtitle, selected, onClick }) {
         background: selected ? 'rgba(250,204,21,0.08)' : 'rgba(255,255,255,0.03)',
         border: selected ? '1px solid rgba(250,204,21,0.55)' : '1px solid rgba(255,255,255,0.08)',
         boxShadow: selected ? '0 0 0 1px rgba(250,204,21,0.15), 0 0 16px rgba(250,204,21,0.15)' : 'none',
-        transition: 'all 180ms',
       }}
     >
       <span style={{
@@ -475,7 +482,7 @@ function FilterIconCard({ Icon, label, subtitle, selected, onClick }) {
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--chalk)' }}>{label}</div>
         {subtitle && <div style={{ fontSize: '0.6rem', color: 'var(--ash)', marginTop: 2, lineHeight: 1.4 }}>{subtitle}</div>}
       </div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -567,18 +574,20 @@ function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply
           </div>
 
           <div style={{ position: 'sticky', bottom: 0, marginTop: 20, display: 'flex', gap: 10 }}>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
               onClick={() => { setDraftBodyPart(''); setDraftEquipment(''); setDraftDifficulty(''); }}
               style={{ padding: '13px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', cursor: 'pointer' }}
             >
               مسح الكل
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
               onClick={() => onApply({ bodyPart: draftBodyPart, equipment: draftEquipment, difficulty: draftDifficulty })}
               style={{ flex: 1, padding: '13px 18px', borderRadius: 10, background: '#facc15', border: 'none', color: '#000', fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.03em', cursor: 'pointer' }}
             >
               تطبيق الفلاتر
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </motion.div>
@@ -707,23 +716,29 @@ export default function ExerciseVideosPage() {
                 style={{ width: '100%', paddingRight: 38, boxSizing: 'border-box', direction: 'ltr', textAlign: 'right' }}
               />
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
               onClick={() => setFiltersOpen(true)}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: activeFilterCount ? 'rgba(250,204,21,0.1)' : 'rgba(255,255,255,0.04)', border: activeFilterCount ? '1px solid rgba(250,204,21,0.35)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: activeFilterCount ? '#facc15' : 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
             >
               <SlidersHorizontal size={13} /> الفلاتر
               {activeFilterCount > 0 && (
-                <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#facc15', color: '#000', fontSize: '0.62rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                <motion.span
+                  key={activeFilterCount}
+                  initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#facc15', color: '#000', fontSize: '0.62rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}
+                >
                   {activeFilterCount}
-                </span>
+                </motion.span>
               )}
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.9, rotate: 180 }}
               onClick={fetchExercises}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
             >
               <RefreshCw size={13} /> تحديث
-            </button>
+            </motion.button>
           </div>
 
           <FiltersDrawer
@@ -738,44 +753,61 @@ export default function ExerciseVideosPage() {
 
           {/* المحتوى */}
           {loadingList ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-              <Loader size={26} color="#facc15" style={{ animation: 'spin 1s linear infinite' }} />
-              <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)' }}>
+                  <div className="skeleton-shimmer" style={{ height: 170 }} />
+                  <div style={{ padding: '14px 16px 16px' }}>
+                    <div className="skeleton-shimmer" style={{ height: 10, width: '50%', borderRadius: 4, marginBottom: 8 }} />
+                    <div className="skeleton-shimmer" style={{ height: 14, width: '80%', borderRadius: 4 }} />
+                  </div>
+                </div>
+              ))}
+              <style>{`
+                .skeleton-shimmer {
+                  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 37%, rgba(255,255,255,0.04) 63%);
+                  background-size: 400% 100%;
+                  animation: shimmer 1.4s ease infinite;
+                }
+                @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+              `}</style>
             </div>
           ) : loadError ? (
             <LoadFailed onRetry={fetchExercises} />
           ) : pageItems.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '60px 0' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', marginBottom: 6 }}>مفيش نتايج</div>
               <div style={{ fontSize: '0.82rem', color: 'var(--ash-light)' }}>جرّب كلمة تانية أو غيّر الفلتر</div>
-            </div>
+            </motion.div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 24 }}>
-                {pageItems.map(ex => (
-                  <ExerciseCard key={ex.id} exercise={ex} onOpen={setSelected} />
+              <div key={`${currentPage}-${bodyPart}-${equipment}-${difficulty}-${debouncedSearch}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 24 }}>
+                {pageItems.map((ex, i) => (
+                  <ExerciseCard key={ex.id} exercise={ex} onOpen={setSelected} index={i} />
                 ))}
               </div>
 
               {/* pagination */}
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 14 }}>
-                <button
+                <motion.button
+                  whileHover={currentPage > 1 ? { scale: 1.05 } : {}} whileTap={currentPage > 1 ? { scale: 0.94 } : {}}
                   disabled={currentPage <= 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: currentPage <= 1 ? 'var(--ash)' : 'var(--chalk)', cursor: currentPage <= 1 ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 4 }}
                 >
                   <ChevronRight size={14} /> السابق
-                </button>
+                </motion.button>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash-light)' }}>
                   {currentPage} / {totalPages}
                 </span>
-                <button
+                <motion.button
+                  whileHover={currentPage < totalPages ? { scale: 1.05 } : {}} whileTap={currentPage < totalPages ? { scale: 0.94 } : {}}
                   disabled={currentPage >= totalPages}
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: currentPage >= totalPages ? 'var(--ash)' : 'var(--chalk)', cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 4 }}
                 >
                   التالي <ChevronRight size={14} style={{ transform: 'rotate(180deg)' }} />
-                </button>
+                </motion.button>
               </div>
             </>
           )}
