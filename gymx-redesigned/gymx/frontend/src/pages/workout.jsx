@@ -18,48 +18,30 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { PROGRAMS } from '../data/programs';
 
-// ── بيانات التمارين لكل برنامج ───────────────────────────
-const PROGRAM_EXERCISES = {
-  'Full Body': {
-    'اليوم الأول': [
-      'إحماء 10 دقايق', 'بنش برس 4×8', 'سكوات 4×10',
-      'رووينج بار 3×10', 'ضغط كتف 3×10', 'كيرل بايسبس 3×12', 'تبريد وإطالات',
-    ],
-    'اليوم التاني': [
-      'إحماء 10 دقايق', 'ضغط بنش مائل 4×8', 'ديد ليفت رومانيان 4×10',
-      'لات بول داون 3×12', 'رفع جانبي 3×15', 'تراسبس بوش داون 3×12', 'تبريد وإطالات',
-    ],
-    'اليوم التالت': [
-      'إحماء 10 دقايق', 'فلاي كيبل 3×15', 'ليج برس 4×12',
-      'سيتد رووينج 3×12', 'أرنولد برس 3×10', 'هامر كيرل 3×12', 'تبريد وإطالات',
-    ],
-  },
-  'PPL': {
-    'دفع (Chest/Shoulder/Triceps)': [
-      'إحماء 10 دقايق', 'بنش برس 4×8', 'ضغط كتف 4×8',
-      'فلاي دمبل 3×12', 'رفع جانبي 3×15', 'تراسبس بوش داون 3×12', 'سكال كراشر 3×10',
-    ],
-    'سحب (Back/Biceps)': [
-      'إحماء 10 دقايق', 'ديد ليفت 4×5', 'لات بول داون 4×10',
-      'رووينج بار 3×10', 'فيس بول 3×15', 'كيرل بايسبس 3×12', 'هامر كيرل 3×12',
-    ],
-    'أرجل (Legs)': [
-      'إحماء 10 دقايق', 'سكوات 4×8', 'ليج برس 4×12',
-      'ديد ليفت رومانيان 3×10', 'ليج كيرل 3×12', 'ليج إكستنشن 3×15', 'كالف ريز 4×15',
-    ],
-  },
-  'Upper/Lower': {
-    'جزء علوي (أ)': [
-      'إحماء 10 دقايق', 'بنش برس 4×6', 'رووينج دمبل 4×8',
-      'ضغط كتف 3×10', 'لات بول داون 3×10', 'كيرل بار 3×10', 'تراسبس 3×12',
-    ],
-    'جزء سفلي (أ)': [
-      'إحماء 10 دقايق', 'سكوات 4×6', 'ليج كيرل 4×10',
-      'ليج إكستنشن 3×12', 'كالف ريز 4×15', 'هيب ثرست 3×12', 'تبريد وإطالات',
-    ],
-  },
-};
+// ── بناء أيام وتمارين البرنامج من نفس بيانات صفحة البرامج ──
+// (مصدر واحد: أي تعديل في صفحة البرامج بينعكس هنا تلقائي)
+function getProgramDays(programTitle) {
+  if (!programTitle) return null;
+  const norm = (s) => (s || '').toLowerCase().trim();
+  const t = norm(programTitle);
+
+  // مطابقة دقيقة الأول (subtitle أو title)
+  let prog = PROGRAMS.find(p => norm(p.subtitle) === t || norm(p.title) === t);
+
+  // لو مفيش مطابقة دقيقة، جرب مطابقة مرنة
+  if (!prog) {
+    prog = PROGRAMS.find(p => t.includes(norm(p.subtitle)) || norm(p.subtitle).includes(t));
+  }
+  if (!prog) return null;
+
+  const result = {};
+  prog.days_detail.forEach((d) => {
+    result[d.day] = d.exercises.map((ex) => `${ex.name} — ${ex.detail}`);
+  });
+  return result;
+}
 
 // ── helpers ───────────────────────────────────────────────
 function Reveal({ children, delay = 0 }) {
@@ -343,9 +325,7 @@ export default function WorkoutPage() {
   // البرنامج النشط وتمريناته — مطابقة مرنة
   const activeProgObj = userPrograms[activeProgram];
   const activeProgramName = activeProgObj?.program_title || '';
-  const programDays = Object.entries(PROGRAM_EXERCISES).find(
-    ([key]) => activeProgramName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(activeProgramName.toLowerCase())
-  )?.[1] || null;
+  const programDays = getProgramDays(activeProgramName);
 
   // آخر 7 أيام للرسم
   const last7 = [...weightLog].reverse().slice(-7);
@@ -377,7 +357,7 @@ export default function WorkoutPage() {
                 — جلسة اليوم
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,2.8rem)', letterSpacing: '0.03em', color: 'var(--chalk)', lineHeight: 1, marginBottom: 6 }}>
-               وقت الجيم 💪🔥 TEST<span style={{ color: 'var(--accent)' }}>💪</span>
+               وقت الجيم 💪🔥<span style={{ color: 'var(--accent)' }}>💪</span>
               </h1>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ash-light)' }}>
                 {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
