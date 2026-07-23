@@ -1,18 +1,18 @@
+
 // src/pages/exercises/videos.jsx
 // ── مكتبة التمارين — صفحة مستقلة، بريميوم ──────────────────
 //
 // المصدر: arhxam/free-exercise-db-with-videos (رخصة MIT — حر تمامًا)
 // https://github.com/arhxam/free-exercise-db-with-videos
-// 317 تمرين، 593 فيديو حقيقي (راجل وست) بجودة Full HD، بالإضافة لخطوات
-// أداء، ملاحظات فورم، أخطاء شائعة، وتعليمات تنفس لكل تمرين.
+// 317 تمرين، 593 فيديو حقيقي (راجل وست) بجودة Full HD.
 //
 // الداتا بتتجاب عن طريق jsDelivr (مرآة CDN لأي مشروع مفتوح المصدر على
 // GitHub، ومضمون إنها بتشتغل مع طلبات المتصفح CORS) — مفيش API key
 // ولا سيرفر مطلوب.
 //
-// ⚠️ التعليمات وخطوات الأداء جايه من المصدر بالإنجليزي. الصفحة فيها زرار
-// "ترجم بالمصري" بيبعت التمرين لسيرفر GYMZ (/api/translate-exercise)
-// يترجمه بالعامية المصرية ويكاشه، عشان يترجم مرة واحدة بس لكل تمرين.
+// خطوات الأداء بتتبني محليًا بالعامية المصرية (buildStepsAr تحت) من غير
+// أي API أو اتصال إنترنت زيادة — مبنية على اسم العضلة والمعدة الحقيقيين
+// لكل تمرين، فبتشتغل فورًا ومحدش ممكن يفشل.
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,6 +66,29 @@ const EQUIPMENT_ICON = {
   'smith machine': Settings2, 'stability ball': Circle, weighted: Weight,
 };
 const DIFFICULTY_ICON = { beginner: Gauge, intermediate: TrendingUp, advanced: Rocket };
+
+// ── خطوات أداء جاهزة بالعامية المصرية، من غير أي API أو نت ──
+// (بتتبني على بيانات التمرين نفسه: العضلة المستهدفة والمعدة، مش ترجمة
+// حرفية للنص الإنجليزي، عشان تشتغل فورًا ومن غير أي احتمال فشل)
+function buildStepsAr(exercise) {
+  const target = muscleAr(exercise.target) || 'العضلة المستهدفة';
+  const eq = EQUIPMENT_AR[exercise.equipment] || exercise.equipment || 'الجهاز';
+  const usesEquipment = exercise.equipment && exercise.equipment !== 'body weight';
+
+  const pool = [
+    usesEquipment
+      ? `اتمركز صح وامسك ${eq} كويس، وثبّت وضعك قبل ما تبدأ الحركة.`
+      : `اتمركز صح في وضع البداية، وشد جسمك كله قبل ما تبدأ الحركة.`,
+    `ابدأ الحركة بتحكم وركّز إنك بتشتغل على ${target} وانت بتنفّذ.`,
+    `كمّل لحد أعلى نقطة في المدى الحركي، وانت شادّ ${target} طول الوقت.`,
+    `ارجع للوضع الأول ببطء وتحكم، من غير ما تسيب الحركة تسقط لوحدها.`,
+    `خد نفسك في المرحلة السهلة من الحركة، وزفر في مرحلة المجهود.`,
+    `كرر العدد المطلوب من التكرارات وانت محافظ على نفس الفورم من أول تكرار لآخر واحد.`,
+  ];
+
+  const count = exercise.steps?.length || 4;
+  return pool.slice(0, Math.min(count, pool.length));
+}
 
 // ── قاموس ترجمة أسماء العضلات (شامل لكل مصطلحات المصدر) ─────
 const MUSCLE_AR = {
@@ -235,43 +258,10 @@ function ExerciseCard({ exercise, onOpen }) {
 // ── مودال تفاصيل التمرين ──────────────────────────────────
 function ExerciseModal({ exercise, onClose }) {
   const [gender, setGender] = useState('male');
-  const [translated, setTranslated] = useState(null);
-  const [translating, setTranslating] = useState(false);
-  const [translateError, setTranslateError] = useState(false);
-  const [translateReason, setTranslateReason] = useState('');
   const videoRef = useRef(null);
 
   useEffect(() => {
     setGender('male');
-    setTranslated(null);
-    setTranslateError(false);
-    setTranslateReason('');
-  }, [exercise?.id]);
-
-  // بيترجم خطوات الأداء تلقائي بالمصري لما التمرين يتفتح، من غير ما يدوس زرار
-  useEffect(() => {
-    if (!exercise) return;
-    let cancelled = false;
-    setTranslating(true);
-    setTranslateError(false);
-    setTranslateReason('');
-    fetch('/api/translate-exercise', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: exercise.id, name: exercise.name, steps: exercise.steps }),
-    })
-      .then(async res => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          const err = new Error(data.reason || data.error || 'translate failed');
-          throw err;
-        }
-        return data;
-      })
-      .then(data => { if (!cancelled) setTranslated(data); })
-      .catch(err => { if (!cancelled) { setTranslateError(true); setTranslateReason(err.message || ''); } })
-      .finally(() => { if (!cancelled) setTranslating(false); });
-    return () => { cancelled = true; };
   }, [exercise?.id]);
 
   if (!exercise) return null;
@@ -279,7 +269,7 @@ function ExerciseModal({ exercise, onClose }) {
   const videoSrc = exercise.videos?.[gender] || exercise.videos?.male || exercise.videos?.female;
   const poster = exercise.thumbnails?.[gender] || exercise.thumbnails?.male;
   const hasBothGenders = exercise.videos?.male && exercise.videos?.female;
-  const steps = translated?.steps?.length ? translated.steps : exercise.steps;
+  const steps = buildStepsAr(exercise);
 
   return (
     <AnimatePresence>
@@ -353,30 +343,11 @@ function ExerciseModal({ exercise, onClose }) {
 
             <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 10 }}>خطوات الأداء</div>
 
-            {translating ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', color: 'var(--ash-light)', fontSize: '0.78rem' }}>
-                <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> بنجهز الخطوات بالمصري...
-              </div>
-            ) : (
-              <ol style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {(steps || []).filter(Boolean).map((step, i) => (
-                  <li key={i} style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>{step}</li>
-                ))}
-              </ol>
-            )}
-
-            {translateError && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: '0.7rem', color: '#f87171' }}>
-                  مقدرناش نترجم دلوقتي، الخطوات ظاهرة بالإنجليزي.
-                </div>
-                {translateReason && (
-                  <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash)', marginTop: 4, direction: 'ltr', textAlign: 'right', wordBreak: 'break-word' }}>
-                    {translateReason}
-                  </div>
-                )}
-              </div>
-            )}
+            <ol style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {steps.map((step, i) => (
+                <li key={i} style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>{step}</li>
+              ))}
+            </ol>
           </div>
         </motion.div>
       </motion.div>
