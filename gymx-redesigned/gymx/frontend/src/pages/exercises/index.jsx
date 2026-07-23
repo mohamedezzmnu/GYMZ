@@ -21,7 +21,7 @@ const MUSCLE_AR = {
 };
 
 const EQUIP_AR = {
-  'Barbell':'بار', 'Dumbbells':'دمبل', 'Cable Machine':'كيبل', 'Bodyweight':'بدون معدات', 'Machine':'ماكينة',
+  'Barbell':'بار', 'Dumbbells':'دمبل', 'Cable Machine':'كيبل', 'Bodyweight':'بدون معدات', 'Machine':'ماشين',
 };
 
 const EQUIP_ICON = {

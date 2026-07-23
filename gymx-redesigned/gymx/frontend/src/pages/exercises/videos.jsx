@@ -44,8 +44,8 @@ const BODYPARTS = Object.keys(BODYPART_AR);
 const EQUIPMENT_AR = {
   band: 'رباط مقاومة', barbell: 'بار', 'body weight': 'وزن الجسم', cable: 'كابل',
   dumbbell: 'دمبل', 'ez barbell': 'بار EZ', kettlebell: 'كيتلبل',
-  'leverage machine': 'جهاز رافعة', rope: 'حبل', 'sled machine': 'زلاجة',
-  'smith machine': 'سميث مشين', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
+  'leverage machine': 'ماشين رافعة', rope: 'حبل', 'sled machine': 'ماشين زلاجة',
+  'smith machine': 'سميث ماشين', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
 };
 const EQUIPMENTS = Object.keys(EQUIPMENT_AR);
 
