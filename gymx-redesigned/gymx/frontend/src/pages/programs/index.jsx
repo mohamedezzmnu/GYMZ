@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2 } from 'lucide-react';
 import Head from 'next/head';
@@ -11,7 +10,261 @@ import { useAuth } from '../../context/AuthContext';
 // ══════════════════════════════════════════
 // بيانات البرامج
 // ══════════════════════════════════════════
-import { PROGRAMS } from '../../data/programs';
+const PROGRAMS = [
+  {
+    id: 1,
+    tag: 'FULL BODY',
+    title: 'كامل الجسم',
+    subtitle: 'Full Body',
+    days: '3 أيام أسبوعياً',
+    level: 'مبتدئ',
+    levelColor: { bg: 'rgba(74,222,128,0.12)', border: 'rgba(74,222,128,0.3)', text: '#4ade80' },
+    accentColor: '#4ade80',
+    icon: '💪',
+    suitable: 'للمبتدئين أو اللي عندهم وقت محدود',
+    schedule: 'السبت، الإثنين، الأربعاء',
+    description: 'في الـ Full Body بتشتغل على كل عضلات جسمك في نفس الجلسة. مش محتاج تيجي كتير — 3 أيام في الأسبوع بس وهتحس بالفرق.',
+    days_detail: [
+      {
+        day: 'اليوم الأول — السبت',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق كارديو خفيف + تمدد مفاصل' },
+          { name: 'بنش برس', detail: '4 سيتات × 8 رباعات — الصدر الأساسي' },
+          { name: 'سكوات', detail: '4 سيتات × 10 رباعات — الأرجل الأساسي' },
+          { name: 'رووينج بار', detail: '3 سيتات × 10 رباعات — الظهر' },
+          { name: 'ضغط كتف', detail: '3 سيتات × 10 رباعات — الكتف' },
+          { name: 'كيرل بايسبس', detail: '3 سيتات × 12 رباعة — الذراع' },
+          { name: 'تبريد وإطالات', detail: '5 دقايق تمدد للعضلات' },
+        ],
+      },
+      {
+        day: 'اليوم التاني — الإثنين',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق كارديو خفيف + تمدد مفاصل' },
+          { name: 'ضغط بنش مائل', detail: '4 سيتات × 8 رباعات — الصدر العلوي' },
+          { name: 'ديد ليفت رومانيان', detail: '4 سيتات × 10 رباعات — الهامسترينج' },
+          { name: 'لات بول داون', detail: '3 سيتات × 12 رباعة — الظهر العريض' },
+          { name: 'رفع جانبي', detail: '3 سيتات × 15 رباعة — الكتف الجانبي' },
+          { name: 'تراسبس بوش داون', detail: '3 سيتات × 12 رباعة — التراسبس' },
+          { name: 'تبريد وإطالات', detail: '5 دقايق تمدد للعضلات' },
+        ],
+      },
+      {
+        day: 'اليوم التالت — الأربعاء',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق كارديو خفيف + تمدد مفاصل' },
+          { name: 'فلاي كيبل', detail: '3 سيتات × 15 رباعة — الصدر عزل' },
+          { name: 'ليج برس', detail: '4 سيتات × 12 رباعة — الكواد' },
+          { name: 'سيتد رووينج', detail: '3 سيتات × 12 رباعة — الظهر الوسط' },
+          { name: 'أرنولد برس', detail: '3 سيتات × 10 رباعات — الكتف الكامل' },
+          { name: 'هامر كيرل', detail: '3 سيتات × 12 رباعة — البايسبس' },
+          { name: 'تبريد وإطالات', detail: '5 دقايق تمدد للعضلات' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 2,
+    tag: 'PPL',
+    title: 'دفع / سحب / أرجل',
+    subtitle: 'Push / Pull / Legs',
+    days: '3 أو 6 أيام أسبوعياً',
+    level: 'متوسط — متقدم',
+    levelColor: { bg: 'rgba(250,204,21,0.12)', border: 'rgba(250,204,21,0.3)', text: '#facc15' },
+    accentColor: '#facc15',
+    icon: '🔥',
+    suitable: 'للمستويات المتوسطة والمتقدمة',
+    schedule: 'الإثنين، الأربعاء، الجمعة (أو 6 أيام)',
+    description: 'التقسيم الأشهر في الجيم. بتقسم جسمك على 3 أيام حسب حركة العضلة — دفع أو سحب أو أرجل. لو عندك وقت أكتر تقدر تعمله 6 أيام.',
+    days_detail: [
+      {
+        day: 'يوم الدفع — Push 💥',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق كارديو + إطالة للكتف والصدر' },
+          { name: 'بنش برس بار', detail: '4 سيتات × 6-8 رباعات — الصدر الأساسي' },
+          { name: 'ضغط بنش مائل دمبل', detail: '3 سيتات × 10 رباعات — الصدر العلوي' },
+          { name: 'أوفر هيد برس', detail: '4 سيتات × 8 رباعات — الكتف الأمامي' },
+          { name: 'رفع جانبي', detail: '4 سيتات × 15 رباعة — الكتف الجانبي' },
+          { name: 'تراسبس بوش داون', detail: '3 سيتات × 12 رباعة — التراسبس' },
+          { name: 'سكال كراشر', detail: '3 سيتات × 10 رباعات — التراسبس' },
+          { name: 'تبريد', detail: '5 دقايق إطالات خفيفة' },
+        ],
+      },
+      {
+        day: 'يوم السحب — Pull 🦾',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق كارديو + إطالة للظهر والكتف' },
+          { name: 'ديد ليفت', detail: '4 سيتات × 5 رباعات — الظهر الكامل' },
+          { name: 'عقلة', detail: '4 سيتات × بقصاك — الظهر العريض' },
+          { name: 'رووينج بار', detail: '3 سيتات × 8 رباعات — الظهر الوسط' },
+          { name: 'لات بول داون', detail: '3 سيتات × 12 رباعة — الظهر العريض' },
+          { name: 'فيس بولز', detail: '3 سيتات × 15 رباعة — الكتف الخلفي' },
+          { name: 'كيرل بار', detail: '4 سيتات × 10 رباعات — البايسبس' },
+          { name: 'هامر كيرل', detail: '3 سيتات × 12 رباعة — البايسبس' },
+          { name: 'تبريد', detail: '5 دقايق إطالات خفيفة' },
+        ],
+      },
+      {
+        day: 'يوم الأرجل — Legs 🦵',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق كارديو + فرد الركبة والورك' },
+          { name: 'سكوات بار', detail: '4 سيتات × 6-8 رباعات — الكواد الأساسي' },
+          { name: 'ليج برس', detail: '4 سيتات × 12 رباعة — الكواد' },
+          { name: 'رومانيان ديد ليفت', detail: '3 سيتات × 10 رباعات — الهامسترينج' },
+          { name: 'ليج كيرل', detail: '3 سيتات × 12 رباعة — الهامسترينج' },
+          { name: 'هيب ثراست', detail: '4 سيتات × 12 رباعة — المؤخرة' },
+          { name: 'رفع سمانة', detail: '4 سيتات × 20 رباعة — السمانة' },
+          { name: 'تبريد', detail: '5 دقايق إطالات للأرجل' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 3,
+    tag: 'UPPER / LOWER',
+    title: 'علوي / سفلي',
+    subtitle: 'Upper / Lower',
+    days: '4 أيام أسبوعياً',
+    level: 'جميع المستويات',
+    levelColor: { bg: 'rgba(255,255,255,0.12)', border: 'rgba(255,255,255,0.3)', text: '#FFFFFF' },
+    accentColor: '#FFFFFF',
+    icon: '⚖️',
+    suitable: 'ممتاز لكل المستويات وللموازنة بين البناء والراحة',
+    schedule: 'الإثنين، الثلاثاء، الخميس، الجمعة',
+    description: 'تقسيم ذكي بيخليك تشتغل على الجزء العلوي يومين والسفلي يومين، مع راحة كافية لكل عضلة. مناسب لأي مستوى.',
+    days_detail: [
+      {
+        day: 'علوي أ — Upper A 🏋️',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد للكتف والصدر' },
+          { name: 'بنش برس', detail: '4 سيتات × 6-8 رباعات' },
+          { name: 'رووينج بار', detail: '4 سيتات × 6-8 رباعات' },
+          { name: 'أوفر هيد برس', detail: '3 سيتات × 10 رباعات' },
+          { name: 'لات بول داون', detail: '3 سيتات × 10 رباعات' },
+          { name: 'كيرل بايسبس', detail: '3 سيتات × 12 رباعة' },
+          { name: 'تراسبس بوش داون', detail: '3 سيتات × 12 رباعة' },
+          { name: 'تبريد', detail: '5 دقايق إطالات' },
+        ],
+      },
+      {
+        day: 'سفلي أ — Lower A 🦵',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الأرجل' },
+          { name: 'سكوات بار', detail: '4 سيتات × 6-8 رباعات' },
+          { name: 'رومانيان ديد ليفت', detail: '3 سيتات × 8 رباعات' },
+          { name: 'ليج برس', detail: '3 سيتات × 12 رباعة' },
+          { name: 'ليج كيرل', detail: '3 سيتات × 12 رباعة' },
+          { name: 'هيب ثراست', detail: '3 سيتات × 15 رباعة' },
+          { name: 'رفع سمانة', detail: '4 سيتات × 20 رباعة' },
+          { name: 'تبريد', detail: '5 دقايق إطالات' },
+        ],
+      },
+      {
+        day: 'علوي ب — Upper B 💪',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد للكتف والظهر' },
+          { name: 'ضغط مائل دمبل', detail: '4 سيتات × 10 رباعات' },
+          { name: 'عقلة أو كيبل', detail: '4 سيتات × بقصاك' },
+          { name: 'رفع جانبي', detail: '4 سيتات × 15 رباعة' },
+          { name: 'سيتد رووينج', detail: '3 سيتات × 12 رباعة' },
+          { name: 'هامر كيرل', detail: '3 سيتات × 12 رباعة' },
+          { name: 'سكال كراشر', detail: '3 سيتات × 12 رباعة' },
+          { name: 'تبريد', detail: '5 دقايق إطالات' },
+        ],
+      },
+      {
+        day: 'سفلي ب — Lower B 🔥',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الأرجل' },
+          { name: 'ديد ليفت', detail: '4 سيتات × 5 رباعات' },
+          { name: 'سبليت سكوات بلغاري', detail: '3 سيتات × 10 لكل رجل' },
+          { name: 'ليج اكستنشن', detail: '3 سيتات × 15 رباعة' },
+          { name: 'كيبل كيك باك', detail: '3 سيتات × 15 رباعة' },
+          { name: 'رفع سمانة جالس', detail: '4 سيتات × 20 رباعة' },
+          { name: 'تبريد', detail: '5 دقايق إطالات' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 4,
+    tag: 'BRO SPLIT',
+    title: 'عضلة في اليوم',
+    subtitle: 'Bro Split',
+    days: '5 أيام أسبوعياً',
+    level: 'متقدم',
+    levelColor: { bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.3)', text: '#f87171' },
+    accentColor: '#f87171',
+    icon: '🏆',
+    suitable: 'للمحترفين ولاعبي كمال الأجسام',
+    schedule: 'الإثنين للجمعة — يوم كامل لكل عضلة',
+    description: 'الأسلوب الكلاسيكي اللي بيعمله المحترفين. يوم كامل لكل عضلة بس عشان تقدر تعمل أعلى حجم تدريب ممكن.',
+    days_detail: [
+      {
+        day: 'يوم الصدر — Chest 💪',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الصدر والكتف' },
+          { name: 'بنش برس بار', detail: '5 سيتات × 5 رباعات — القوة الأساسية' },
+          { name: 'ضغط مائل دمبل', detail: '4 سيتات × 10 رباعات — الصدر العلوي' },
+          { name: 'ضغط نازل', detail: '3 سيتات × 12 رباعة — الصدر السفلي' },
+          { name: 'فلاي دمبل', detail: '3 سيتات × 15 رباعة — فتح الصدر' },
+          { name: 'فلاي كيبل', detail: '3 سيتات × 15 رباعة — عزل الصدر' },
+          { name: 'تبريد', detail: '5 دقايق إطالات للصدر' },
+        ],
+      },
+      {
+        day: 'يوم الظهر — Back 🦾',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الظهر والكتف' },
+          { name: 'ديد ليفت', detail: '5 سيتات × 5 رباعات — الظهر الكامل' },
+          { name: 'عقلة', detail: '4 سيتات × بقصاك — الظهر العريض' },
+          { name: 'رووينج بار', detail: '4 سيتات × 8 رباعات — الظهر الوسط' },
+          { name: 'لات بول داون', detail: '3 سيتات × 12 رباعة — الظهر العريض' },
+          { name: 'سيتد رووينج', detail: '3 سيتات × 12 رباعة — الظهر الكامل' },
+          { name: 'تبريد', detail: '5 دقايق إطالات للظهر' },
+        ],
+      },
+      {
+        day: 'يوم الأرجل — Legs 🦵',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الأرجل والورك' },
+          { name: 'سكوات بار', detail: '5 سيتات × 5 رباعات — الكواد الأساسي' },
+          { name: 'ليج برس', detail: '4 سيتات × 12 رباعة — الكواد' },
+          { name: 'رومانيان ديد ليفت', detail: '4 سيتات × 10 رباعات — الهامسترينج' },
+          { name: 'ليج كيرل', detail: '3 سيتات × 15 رباعة — الهامسترينج' },
+          { name: 'هيب ثراست', detail: '4 سيتات × 12 رباعة — المؤخرة' },
+          { name: 'رفع سمانة واقف', detail: '5 سيتات × 20 رباعة — السمانة' },
+          { name: 'تبريد', detail: '5 دقايق إطالات للأرجل' },
+        ],
+      },
+      {
+        day: 'يوم الأكتاف — Shoulders 💪',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الكتف والعنق' },
+          { name: 'أوفر هيد برس بار', detail: '4 سيتات × 6-8 رباعات — الكتف الأساسي' },
+          { name: 'أرنولد برس', detail: '4 سيتات × 10 رباعات — الكتف الكامل' },
+          { name: 'رفع جانبي', detail: '4 سيتات × 15 رباعة — الكتف الجانبي' },
+          { name: 'رفع أمامي', detail: '3 سيتات × 15 رباعة — الكتف الأمامي' },
+          { name: 'فيس بولز', detail: '4 سيتات × 15 رباعة — الكتف الخلفي' },
+          { name: 'تبريد', detail: '5 دقايق إطالات للكتف' },
+        ],
+      },
+      {
+        day: 'يوم الذراعين — Arms 💪',
+        exercises: [
+          { name: 'إحماء', detail: '10 دقايق + تمدد الكوع والمعصم' },
+          { name: 'كيرل بار', detail: '4 سيتات × 10 رباعات — بايسبس' },
+          { name: 'هامر كيرل', detail: '3 سيتات × 12 رباعة — بايسبس' },
+          { name: 'بريتشر كيرل', detail: '3 سيتات × 12 رباعة — بايسبس عزل' },
+          { name: 'تراسبس بوش داون', detail: '4 سيتات × 12 رباعة — تراسبس' },
+          { name: 'سكال كراشر', detail: '3 سيتات × 10 رباعات — تراسبس' },
+          { name: 'مط تراسبس فوق الرأس', detail: '3 سيتات × 12 رباعة — تراسبس' },
+          { name: 'تبريد', detail: '5 دقايق إطالات للذراعين' },
+        ],
+      },
+    ],
+  },
+];
 
 // ══════════════════════════════════════════
 // الهيكل الأساسي لأي يوم تمرين
@@ -185,13 +438,14 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               {/* Day tabs */}
               <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
                 {program.days_detail.map((d, i) => (
-                  <button
+                  <motion.button
                     key={i}
+                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
                     onClick={() => setActiveDay(i)}
                     style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', border: '1px solid', transition: 'all 200ms ease', background: activeDay === i ? program.accentColor + '22' : 'transparent', borderColor: activeDay === i ? program.accentColor + '88' : 'rgba(255,255,255,0.1)', color: activeDay === i ? program.accentColor : 'rgba(255,255,255,0.4)' }}
                   >
                     يوم {i + 1}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
 
@@ -212,16 +466,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)', marginBottom: 2 }}>
-                          {ex.exId ? (
-                            <Link
-                              href={`/exercises?ex=${ex.exId}`}
-                              style={{ color: 'var(--chalk)', textDecoration: 'underline', textDecorationColor: program.accentColor, textDecorationThickness: 1, textUnderlineOffset: 3 }}
-                            >
-                              {ex.name}
-                            </Link>
-                          ) : ex.name}
-                        </div>
+                        <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)', marginBottom: 2 }}>{ex.name}</div>
                         <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
                       </div>
                     </div>
@@ -357,7 +602,7 @@ export default function ProgramsPage() {
             <div className="mono" style={{ color: 'var(--ash)', marginBottom: 12 }}>Training programs</div>
             <h1 className="display-lg" style={{ marginBottom: 16 }}>اختار <span style={{ color: 'var(--accent)' }}>برنامجك</span></h1>
             <p style={{ fontSize: '1rem', color: 'var(--ash-light)', maxWidth: 560, lineHeight: 1.8, direction: 'rtl', fontFamily: 'var(--font-body)' }}>
-              5 برامج تمرين جاهزة — كل واحد ليه أسلوبه وناسه. اختار اللي يناسب مستواك ووقتك وابدأ.
+              4 برامج تمرين جاهزة — كل واحد ليه أسلوبه وناسه. اختار اللي يناسب مستواك ووقتك وابدأ.
             </p>
           </motion.div>
         </div>

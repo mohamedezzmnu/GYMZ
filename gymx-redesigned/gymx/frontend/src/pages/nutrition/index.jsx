@@ -508,22 +508,23 @@ function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, 
       <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 6 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: `${color}09`, border: `1px solid ${color}25`, borderRadius: 'var(--radius-sm)' }}>
         <span style={{ fontSize: '0.82rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{item.name}</span>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
           onClick={() => setSwapping(swapping === swapKey ? null : swapKey)}
           style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: `${color}18`, border: `1px solid ${color}40`, borderRadius: 6, color, cursor: 'pointer', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}
         >
           <RefreshCw size={11} /> بدّل
-        </button>
+        </motion.button>
       </div>
       <AnimatePresence>
         {swapping === swapKey && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {options.map((opt, i) => (
-              <button key={i} onClick={() => onSelect(i)}
+              <motion.button key={i} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => onSelect(i)}
                 style={{ textAlign: 'right', padding: '8px 12px', background: i === currentIndex ? `${color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${i === currentIndex ? color + '50' : 'rgba(255,255,255,0.07)'}`, borderRadius: 6, color: 'var(--chalk)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.62rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{opt.cal} كال · {opt.protein}g بروتين</span>
                 {opt.name}
-              </button>
+              </motion.button>
             ))}
           </motion.div>
         )}
@@ -734,10 +735,10 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         <span style={labelStyle}>الجنس</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {[{ id: 'male', label: '👨 ذكر' }, { id: 'female', label: '👩 أنثى' }].map(g => (
-            <button key={g.id} onClick={() => setGender(g.id)}
+            <motion.button key={g.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setGender(g.id)}
               style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,77,46,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gender === g.id ? 'rgba(255,77,46,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--accent)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}>
               {g.label}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -757,11 +758,11 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         <span style={labelStyle}>مستوى النشاط</span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {activities.map(a => (
-            <button key={a.id} onClick={() => setActivity(a.id)}
+            <motion.button key={a.id} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }} onClick={() => setActivity(a.id)}
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,77,46,0.1)' : 'rgba(255,255,255,0.02)', border: `1px solid ${activity === a.id ? 'rgba(255,77,46,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: activity === a.id ? 'var(--accent)' : 'var(--chalk)' }}>{a.label}</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>{a.desc}</span>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -770,14 +771,16 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
           ⚠️ {error}
         </div>
       )}
-      <button
+      <motion.button
+        whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
         onClick={handleCalc}
         style={{ width: '100%', padding: '14px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer' }}
       >
         احسب TDEE وأنا الخطة 🔥
-      </button>
+      </motion.button>
       {initialData && (
-        <button
+        <motion.button
+          whileHover={{ opacity: 0.8 }} whileTap={{ scale: 0.97 }}
           onClick={() => {
             clearSavedUserData();
             onClear?.();
@@ -786,7 +789,7 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
           style={{ width: '100%', marginTop: 10, padding: '8px', background: 'transparent', border: 'none', color: 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.66rem', textDecoration: 'underline' }}
         >
           🗑 امسح البيانات المحفوظة وابدأ من جديد
-        </button>
+        </motion.button>
       )}
     </motion.div>
   );
@@ -920,12 +923,13 @@ export default function NutritionPage() {
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 4 }}>TDEE — حرقك اليومي</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--accent)', lineHeight: 1 }}>{tdee} <span style={{ fontSize: '0.8rem', color: 'var(--ash-light)' }}>سعرة/يوم</span></div>
                 </div>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
                   onClick={() => { setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); }}
                   style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}
                 >
                   <RefreshCw size={11} /> غيّر
-                </button>
+                </motion.button>
               </motion.div>
 
               {/* plan selector */}
@@ -933,12 +937,12 @@ export default function NutritionPage() {
                 {Object.entries(plans).map(([key, p]) => {
                   const active = activePlan === key;
                   return (
-                    <button key={key} onClick={() => setActivePlan(key)}
+                    <motion.button key={key} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }} onClick={() => setActivePlan(key)}
                       style={{ padding: '10px 14px', background: active ? `${p.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${active ? p.color + '55' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, transition: 'all 200ms', minWidth: 100 }}>
                       <span style={{ fontSize: '1.2rem' }}>{p.icon}</span>
                       <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', color: active ? p.color : 'var(--chalk)', letterSpacing: '0.04em' }}>{p.label}</span>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.56rem', color: active ? p.color : 'var(--ash)', letterSpacing: '0.06em' }}>{p.goal}</span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>

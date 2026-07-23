@@ -244,9 +244,9 @@ export default function OnboardingPage() {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.02em' }}>
                       {txt.step} {step + 1} {txt.of} {steps.length}
                     </span>
-                    <button onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.8rem', cursor: 'pointer' }}>
+                    <motion.button whileTap={{ scale: 0.95 }} onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.8rem', cursor: 'pointer' }}>
                       {txt.skip} ←
-                    </button>
+                    </motion.button>
                   </div>
                   <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
                     <motion.div
@@ -299,13 +299,13 @@ export default function OnboardingPage() {
 
                 {/* Back */}
                 {step > 0 && (
-                  <button onClick={() => setStep(step - 1)} style={{
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setStep(step - 1)} style={{
                     marginTop: 20, background: 'none', border: 'none',
                     color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
                     cursor: 'pointer', display: 'block', width: '100%', textAlign: 'center',
                   }}>
                     {lang === 'ar' ? '→' : '←'} {txt.back}
-                  </button>
+                  </motion.button>
                 )}
               </motion.div>
             </AnimatePresence>
@@ -364,12 +364,13 @@ export default function OnboardingPage() {
               </motion.button>
 
               {/* زرار إعادة الاختيار */}
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => { setDone(false); setStep(0); setAnswers({}); }}
                 style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', cursor: 'pointer', width: '100%', textAlign: 'center' }}
               >
                 {lang === 'ar' ? '↺ اختار برنامج تاني' : '↺ Choose a different program'}
-              </button>
+              </motion.button>
             </motion.div>
           )}
         </div>

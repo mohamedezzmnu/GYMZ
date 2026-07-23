@@ -172,11 +172,11 @@ function ChangePasswordModal({ onClose }) {
           ))}
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-            <button onClick={onClose} style={{
+            <motion.button whileTap={{ scale: 0.97 }} onClick={onClose} style={{
               flex: 1, padding: '11px', background: 'rgba(255,255,255,0.05)',
               border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)',
               color: 'var(--ash-light)', fontFamily: 'var(--font-body)', cursor: 'pointer', fontSize: '0.875rem',
-            }}>إلغاء</button>
+            }}>إلغاء</motion.button>
             <motion.button onClick={handleSave} disabled={loading} whileTap={{ scale: 0.97 }} style={{
               flex: 2, padding: '11px',
               background: 'var(--accent)',
