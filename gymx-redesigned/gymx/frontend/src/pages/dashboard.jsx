@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import toast from 'react-hot-toast';
 
 function Reveal({ children, delay = 0 }) {
   const ref = useRef(null);
@@ -168,13 +169,15 @@ export default function DashboardPage() {
   }, [user, authLoading]);
 
   const logWeight = async () => {
-    if (!newWeight || isNaN(newWeight)) return;
+    if (!newWeight || isNaN(newWeight)) { toast.error('أدخل وزن صحيح'); return; }
     setLoadingWeight(true);
-    await supabase.from('weight_log').insert({ user_id: user.id, weight: parseFloat(newWeight), logged_at: new Date().toISOString() });
+    const { error } = await supabase.from('weight_log').insert({ user_id: user.id, weight: parseFloat(newWeight), logged_at: new Date().toISOString() });
+    if (error) { toast.error('حصل خطأ، جرب تاني'); setLoadingWeight(false); return; }
     const { data } = await supabase.from('weight_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(10);
     if (data) setWeightLog(data);
     setNewWeight('');
     setLoadingWeight(false);
+    toast.success('✅ اتسجل الوزن');
   };
 
   const thisMonth = new Date().getMonth();
