@@ -1,4 +1,3 @@
-
 // src/pages/exercises/videos.jsx
 // ── مكتبة التمارين — صفحة مستقلة، بريميوم ──────────────────
 //
@@ -19,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, User, UserRound,
   SlidersHorizontal, ChevronDown, ChevronUp, Check,
-  Move, HeartPulse, Shield, CircleDot, Hand, Footprints, PersonStanding, Target,
+  HeartPulse, CircleDot, PersonStanding, Target,
   Cable, Dumbbell, Weight, Link2, Settings, Settings2, Truck, Circle, Waves,
   Gauge, TrendingUp, Rocket,
 } from 'lucide-react';
@@ -53,11 +52,82 @@ const EQUIPMENTS = Object.keys(EQUIPMENT_AR);
 // ── ترجمة مستوى الصعوبة ─────────────────────────────────────
 const DIFFICULTY_AR = { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' };
 
-// ── أيقونات كروت الفلتر (شكل بصري بس، مالهاش دخل بمنطق الفلترة) ─
+// ── أيقونات كروت "أقسام الجسم" — رسمة عضلة مبسّطة لكل قسم، بنفس
+// أسلوب الصورة المرجعية (سيلويت خط واحد، currentColor) ────────
+function MuscleIconBase({ children, size = 22, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      {children}
+    </svg>
+  );
+}
+function ChestIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M12 4c-2.2 0-3.6 1-4.2 2.2C7 8 6 9 5 9.6c-.9.5-1.5 1.6-1.5 3 0 2.4 1.8 4 3.8 4 1.4 0 2.3-.7 2.7-1.6" />
+      <path d="M12 4c2.2 0 3.6 1 4.2 2.2C17 8 18 9 19 9.6c.9.5 1.5 1.6 1.5 3 0 2.4-1.8 4-3.8 4-1.4 0-2.3-.7-2.7-1.6" />
+      <path d="M12 4v6.4M9.5 10.5c0 1.3 1.1 2.3 2.5 2.3s2.5-1 2.5-2.3" />
+    </MuscleIconBase>
+  );
+}
+function BackIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M12 3c-1 0-1.8.7-1.8 1.8 0 .8-.3 1.4-1 1.9-2 1.5-3.7 3.5-3.7 6.6 0 3 1.6 5.2 3.6 6.4M12 3c1 0 1.8.7 1.8 1.8 0 .8.3 1.4 1 1.9 2 1.5 3.7 3.5 3.7 6.6 0 3-1.6 5.2-3.6 6.4" />
+      <path d="M12 3v6M9 9h6M8.5 13.5h7M9 17.5h6" />
+    </MuscleIconBase>
+  );
+}
+function LegsIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M9.5 3h5l.4 6.5c.15 2.3.6 4.5 1.4 6.6l1.1 3.4" />
+      <path d="M9.5 3l-.4 6.5c-.15 2.3-.6 4.5-1.4 6.6L6.6 19.5" />
+      <path d="M9.3 9.5h5.4M8.9 14.5h6.3" />
+    </MuscleIconBase>
+  );
+}
+function ShoulderIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M4 15c0-4 2.5-7 5.5-8 .6-.2 1-.7 1-1.4C10.5 4.7 11.2 4 12 4s1.5.7 1.5 1.6c0 .7.4 1.2 1 1.4 3 1 5.5 4 5.5 8" />
+      <path d="M4 15c0 2.5 1.6 4.3 3.6 4.3S11 17.5 11 15M13 15c0 2.5 1.6 4.3 3.6 4.3S20 17.5 20 15" />
+    </MuscleIconBase>
+  );
+}
+function ArmIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M7 20c-1.2-2-1.8-4.3-1.8-7 0-3 1-5.6 2.7-7.2" />
+      <path d="M7.9 5.8c1-.9 2.3-1.4 3.8-1.4 3.6 0 6.3 2.8 6.3 6.5 0 1.7-.5 3-1.5 4" />
+      <path d="M10 9.2c.5 1.3 1.7 2.2 3.1 2.2s2.6-.9 3.1-2.2M12 11.4c-.4 2-.2 4 .6 6" />
+    </MuscleIconBase>
+  );
+}
+function CoreIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M8 4h8l.6 8c.3 3.4-1.4 7-4.6 8-3.2-1-4.9-4.6-4.6-8L8 4Z" />
+      <path d="M8.4 9h7.2M8.7 13h6.6" />
+      <path d="M12 4v16" />
+    </MuscleIconBase>
+  );
+}
+function HipIcon(props) {
+  return (
+    <MuscleIconBase {...props}>
+      <path d="M12 4c-3 0-5 2-5 5 0 2 1 3.3 1 5 0 2.4-1 4-2 6M12 4c3 0 5 2 5 5 0 2-1 3.3-1 5 0 2.4 1 4 2 6" />
+      <path d="M7 10.5h10" />
+    </MuscleIconBase>
+  );
+}
+
+// ── أيقونات كروت "أقسام الجسم" — رسمة عضلة مبسّطة لكل قسم، بنفس
+// أسلوب الصورة المرجعية بدل الأيقونات العامة ──────────────────
 const BODYPART_ICON = {
-  back: Move, cardio: HeartPulse, chest: Shield, hips: CircleDot,
-  'lower arms': Hand, 'lower legs': Footprints, shoulders: PersonStanding,
-  'upper arms': Dumbbell, 'upper legs': Footprints, waist: Target,
+  back: BackIcon, cardio: HeartPulse, chest: ChestIcon, hips: HipIcon,
+  'lower arms': ArmIcon, 'lower legs': LegsIcon, shoulders: ShoulderIcon,
+  'upper arms': ArmIcon, 'upper legs': LegsIcon, waist: CoreIcon,
 };
 const EQUIPMENT_ICON = {
   band: Waves, barbell: Dumbbell, 'body weight': PersonStanding, cable: Cable,
