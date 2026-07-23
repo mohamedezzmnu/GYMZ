@@ -16,7 +16,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, Languages, User, UserRound } from 'lucide-react';
+import { Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, User, UserRound } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -217,15 +217,31 @@ function ExerciseModal({ exercise, onClose }) {
   const [gender, setGender] = useState('male');
   const [translated, setTranslated] = useState(null);
   const [translating, setTranslating] = useState(false);
-  const [showArabic, setShowArabic] = useState(false);
   const [translateError, setTranslateError] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
     setGender('male');
     setTranslated(null);
-    setShowArabic(false);
     setTranslateError(false);
+  }, [exercise?.id]);
+
+  // بيترجم خطوات الأداء تلقائي بالمصري لما التمرين يتفتح، من غير ما يدوس زرار
+  useEffect(() => {
+    if (!exercise) return;
+    let cancelled = false;
+    setTranslating(true);
+    setTranslateError(false);
+    fetch('/api/translate-exercise', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: exercise.id, name: exercise.name, steps: exercise.steps }),
+    })
+      .then(res => { if (!res.ok) throw new Error('translate failed'); return res.json(); })
+      .then(data => { if (!cancelled) setTranslated(data); })
+      .catch(() => { if (!cancelled) setTranslateError(true); })
+      .finally(() => { if (!cancelled) setTranslating(false); });
+    return () => { cancelled = true; };
   }, [exercise?.id]);
 
   if (!exercise) return null;
@@ -233,36 +249,7 @@ function ExerciseModal({ exercise, onClose }) {
   const videoSrc = exercise.videos?.[gender] || exercise.videos?.male || exercise.videos?.female;
   const poster = exercise.thumbnails?.[gender] || exercise.thumbnails?.male;
   const hasBothGenders = exercise.videos?.male && exercise.videos?.female;
-
-  const handleTranslate = async () => {
-    if (translated) { setShowArabic(true); return; }
-    setTranslating(true);
-    setTranslateError(false);
-    try {
-      const res = await fetch('/api/translate-exercise', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: exercise.id,
-          name: exercise.name,
-          instructions: exercise.instructions,
-          steps: exercise.steps,
-          formCues: exercise.formCues,
-          commonMistakes: exercise.commonMistakes,
-          breathing: exercise.breathing,
-        }),
-      });
-      if (!res.ok) throw new Error('translate failed');
-      const data = await res.json();
-      setTranslated(data);
-      setShowArabic(true);
-    } catch {
-      setTranslateError(true);
-    }
-    setTranslating(false);
-  };
-
-  const view = showArabic && translated ? translated : exercise;
+  const steps = translated?.steps?.length ? translated.steps : exercise.steps;
 
   return (
     <AnimatePresence>
@@ -315,38 +302,17 @@ function ExerciseModal({ exercise, onClose }) {
           </div>
 
           <div style={{ padding: '20px 22px 26px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', textTransform: 'capitalize' }}>
-                {exercise.name}
-              </div>
-              <button
-                onClick={translated && showArabic ? () => setShowArabic(false) : handleTranslate}
-                disabled={translating}
-                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 20, border: '1px solid rgba(250,204,21,0.3)', background: 'rgba(250,204,21,0.1)', color: '#facc15', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', cursor: translating ? 'wait' : 'pointer' }}
-              >
-                {translating ? <Loader size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Languages size={12} />}
-                {translating ? 'بيترجم...' : (translated && showArabic ? 'رجّع الإنجليزي' : 'ترجم بالمصري')}
-              </button>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', textTransform: 'capitalize', marginBottom: 12 }}>
+              {exercise.name}
             </div>
 
-            {translateError && (
-              <div style={{ fontSize: '0.7rem', color: '#f87171', marginBottom: 10 }}>
-                مقدرناش نترجم دلوقتي، جرب تاني بعد شوية.
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
               <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
                 {BODYPART_AR[exercise.bodyPart] || exercise.bodyPart}
               </span>
               <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
                 {muscleAr(exercise.target)}
               </span>
-              {(exercise.secondaryMuscles || []).map((m, i) => (
-                <span key={i} style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
-                  {muscleAr(m)}
-                </span>
-              ))}
               <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
                 {EQUIPMENT_AR[exercise.equipment] || exercise.equipment}
               </span>
@@ -355,50 +321,23 @@ function ExerciseModal({ exercise, onClose }) {
               </span>
             </div>
 
-            {view.instructions && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 8 }}>نبذة عن التمرين</div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0 }}>{view.instructions}</p>
+            <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 10 }}>خطوات الأداء</div>
+
+            {translating ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', color: 'var(--ash-light)', fontSize: '0.78rem' }}>
+                <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> بنجهز الخطوات بالمصري...
               </div>
+            ) : (
+              <ol style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(steps || []).filter(Boolean).map((step, i) => (
+                  <li key={i} style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>{step}</li>
+                ))}
+              </ol>
             )}
 
-            {view.steps?.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 10 }}>خطوات الأداء</div>
-                <ol style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {view.steps.filter(Boolean).map((step, i) => (
-                    <li key={i} style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
-
-            {view.formCues?.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 10 }}>ملاحظات الفورم</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {view.formCues.filter(Boolean).map((cue, i) => (
-                    <span key={i} style={{ fontSize: '0.72rem', color: 'var(--chalk)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '5px 10px' }}>{cue}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {view.commonMistakes?.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#f87171', marginBottom: 10 }}>أخطاء شائعة</div>
-                <ul style={{ margin: 0, paddingRight: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {view.commonMistakes.filter(Boolean).map((m, i) => (
-                    <li key={i} style={{ fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>{m}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {view.breathing && (
-              <div>
-                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: '#facc15', marginBottom: 6 }}>التنفس</div>
-                <p style={{ fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.6, margin: 0 }}>{view.breathing}</p>
+            {translateError && (
+              <div style={{ fontSize: '0.7rem', color: '#f87171', marginTop: 10 }}>
+                مقدرناش نترجم دلوقتي، الخطوات ظاهرة بالإنجليزي.
               </div>
             )}
           </div>

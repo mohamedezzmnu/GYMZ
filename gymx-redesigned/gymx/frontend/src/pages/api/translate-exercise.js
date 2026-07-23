@@ -26,33 +26,26 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'method not allowed' });
   }
 
-  const { id, name, instructions, steps, formCues, commonMistakes, breathing } = req.body || {};
+  const { id, name, steps } = req.body || {};
   if (!id) return res.status(400).json({ error: 'missing exercise id' });
+  if (!steps?.length) return res.status(200).json({ steps: [] });
 
   try {
     // 1) هل التمرين ده اتترجم قبل كده؟
     const { data: cached } = await supabaseAdmin
       .from('exercise_ar_translations')
-      .select('*')
+      .select('steps')
       .eq('id', id)
       .single();
 
-    if (cached) {
-      return res.status(200).json({
-        instructions: cached.instructions,
-        steps: cached.steps,
-        formCues: cached.form_cues,
-        commonMistakes: cached.common_mistakes,
-        breathing: cached.breathing,
-      });
+    if (cached?.steps?.length) {
+      return res.status(200).json({ steps: cached.steps });
     }
 
     // 2) لو مش موجود، ترجمه دلوقتي عن طريق Claude
     if (!process.env.ANTHROPIC_API_KEY) {
       return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
     }
-
-    const payload = { instructions, steps, formCues, commonMistakes, breathing };
 
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -63,16 +56,14 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 1024,
+        max_tokens: 512,
         system:
-          'انت مترجم متخصص في محتوى الجيم والفتنس. مهمتك تترجم نصوص تمارين رياضية من الإنجليزي ' +
-          'للعامية المصرية، بأسلوب كابتن جيم بيشرح لمتدرب — واضح ومباشر ومحفّز، من غير فصحى ومن غير ' +
-          'ترجمة حرفية جوجل-ترانسليت-ستايل. حافظ على نفس عدد العناصر في كل مصفوفة (steps, formCues, ' +
-          'commonMistakes) بنفس الترتيب. رجّع الرد بصيغة JSON فقط من غير أي نص زيادة قبله أو بعده، ' +
-          'ونفس الأسماء بالظبط: instructions (string), steps (array of strings), formCues (array of ' +
-          'strings), commonMistakes (array of strings), breathing (string).',
+          'انت مدرب جيم بتشرح خطوات أداء تمرين لمتدرب. مهمتك تترجم مصفوفة خطوات أداء تمرين من ' +
+          'الإنجليزي للعامية المصرية، بأسلوب واضح ومباشر ومحفّز، من غير فصحى ومن غير ترجمة حرفية ' +
+          'جوجل-ترانسليت-ستايل. حافظ على نفس عدد العناصر بالظبط وبنفس الترتيب. رجّع الرد بصيغة JSON ' +
+          'فقط من غير أي نص زيادة قبله أو بعده، بالشكل ده بالظبط: {"steps": ["...", "..."]}.',
         messages: [
-          { role: 'user', content: `اسم التمرين: ${name}\n\nترجملي الأوبچكت ده:\n${JSON.stringify(payload)}` },
+          { role: 'user', content: `اسم التمرين: ${name}\n\nترجملي خطوات الأداء دي:\n${JSON.stringify(steps)}` },
         ],
       }),
     });
@@ -102,20 +93,10 @@ export default async function handler(req, res) {
     // 3) كاش الناتج في Supabase عشان محدش يترجمه تاني
     await supabaseAdmin.from('exercise_ar_translations').upsert({
       id,
-      instructions: translated.instructions || null,
       steps: translated.steps || null,
-      form_cues: translated.formCues || null,
-      common_mistakes: translated.commonMistakes || null,
-      breathing: translated.breathing || null,
     });
 
-    return res.status(200).json({
-      instructions: translated.instructions,
-      steps: translated.steps,
-      formCues: translated.formCues,
-      commonMistakes: translated.commonMistakes,
-      breathing: translated.breathing,
-    });
+    return res.status(200).json({ steps: translated.steps || [] });
   } catch (err) {
     console.error('translate-exercise error:', err);
     return res.status(500).json({ error: 'unexpected server error' });
