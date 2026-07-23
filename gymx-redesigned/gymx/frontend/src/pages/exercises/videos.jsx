@@ -238,12 +238,14 @@ function ExerciseModal({ exercise, onClose }) {
   const [translated, setTranslated] = useState(null);
   const [translating, setTranslating] = useState(false);
   const [translateError, setTranslateError] = useState(false);
+  const [translateReason, setTranslateReason] = useState('');
   const videoRef = useRef(null);
 
   useEffect(() => {
     setGender('male');
     setTranslated(null);
     setTranslateError(false);
+    setTranslateReason('');
   }, [exercise?.id]);
 
   // بيترجم خطوات الأداء تلقائي بالمصري لما التمرين يتفتح، من غير ما يدوس زرار
@@ -252,14 +254,22 @@ function ExerciseModal({ exercise, onClose }) {
     let cancelled = false;
     setTranslating(true);
     setTranslateError(false);
+    setTranslateReason('');
     fetch('/api/translate-exercise', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: exercise.id, name: exercise.name, steps: exercise.steps }),
     })
-      .then(res => { if (!res.ok) throw new Error('translate failed'); return res.json(); })
+      .then(async res => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err = new Error(data.reason || data.error || 'translate failed');
+          throw err;
+        }
+        return data;
+      })
       .then(data => { if (!cancelled) setTranslated(data); })
-      .catch(() => { if (!cancelled) setTranslateError(true); })
+      .catch(err => { if (!cancelled) { setTranslateError(true); setTranslateReason(err.message || ''); } })
       .finally(() => { if (!cancelled) setTranslating(false); });
     return () => { cancelled = true; };
   }, [exercise?.id]);
@@ -356,8 +366,15 @@ function ExerciseModal({ exercise, onClose }) {
             )}
 
             {translateError && (
-              <div style={{ fontSize: '0.7rem', color: '#f87171', marginTop: 10 }}>
-                مقدرناش نترجم دلوقتي، الخطوات ظاهرة بالإنجليزي.
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: '0.7rem', color: '#f87171' }}>
+                  مقدرناش نترجم دلوقتي، الخطوات ظاهرة بالإنجليزي.
+                </div>
+                {translateReason && (
+                  <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash)', marginTop: 4, direction: 'ltr', textAlign: 'right', wordBreak: 'break-word' }}>
+                    {translateReason}
+                  </div>
+                )}
               </div>
             )}
           </div>
