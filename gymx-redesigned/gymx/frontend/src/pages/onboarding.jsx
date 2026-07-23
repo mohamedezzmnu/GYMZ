@@ -244,7 +244,7 @@ export default function OnboardingPage() {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', letterSpacing: '0.02em' }}>
                       {txt.step} {step + 1} {txt.of} {steps.length}
                     </span>
-                    <motion.button whileTap={{ scale: 0.95 }} onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.8rem', cursor: 'pointer' }}>
+                    <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))} style={{ background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.8rem', cursor: 'pointer' }}>
                       {txt.skip} ←
                     </motion.button>
                   </div>
@@ -274,10 +274,10 @@ export default function OnboardingPage() {
                       key={opt.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.07 }}
+                      transition={{ default: { delay: i * 0.07 }, scale: { duration: 0.12 } }}
                       onClick={() => select(opt.id)}
                       whileHover={{ borderColor: 'rgba(255,77,46,0.5)', background: 'rgba(255,77,46,0.06)' }}
-                      whileTap={{ scale: 0.98 }}
+                      whileTap={{ scale: 0.9 }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 16,
                         padding: '16px 20px', borderRadius: 14, cursor: 'pointer', width: '100%',
@@ -299,7 +299,7 @@ export default function OnboardingPage() {
 
                 {/* Back */}
                 {step > 0 && (
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setStep(step - 1)} style={{
+                  <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setStep(step - 1)} style={{
                     marginTop: 20, background: 'none', border: 'none',
                     color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
                     cursor: 'pointer', display: 'block', width: '100%', textAlign: 'center',
@@ -349,7 +349,7 @@ export default function OnboardingPage() {
               {/* زرار ابدأ */}
               <motion.button
                 onClick={() => router.push('/programs?program=' + encodeURIComponent(getProgram().sub || getProgram().name))}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                 style={{
                   width: '100%', padding: '14px',
                   background: 'var(--accent)',
@@ -365,7 +365,7 @@ export default function OnboardingPage() {
 
               {/* زرار إعادة الاختيار */}
               <motion.button
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                 onClick={() => { setDone(false); setStep(0); setAnswers({}); }}
                 style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', cursor: 'pointer', width: '100%', textAlign: 'center' }}
               >

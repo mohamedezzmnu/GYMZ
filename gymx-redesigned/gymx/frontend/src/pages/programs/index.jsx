@@ -440,7 +440,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                 {program.days_detail.map((d, i) => (
                   <motion.button
                     key={i}
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
+                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                     onClick={() => setActiveDay(i)}
                     style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', border: '1px solid', transition: 'all 200ms ease', background: activeDay === i ? program.accentColor + '22' : 'transparent', borderColor: activeDay === i ? program.accentColor + '88' : 'rgba(255,255,255,0.1)', color: activeDay === i ? program.accentColor : 'rgba(255,255,255,0.4)' }}
                   >
@@ -504,7 +504,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               <motion.button
                 onClick={handleJoin}
                 disabled={joining || joined}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                 style={{
                   marginTop: 20, width: '100%', padding: '13px',
                   background: joined ? 'rgba(74,222,128,0.1)' : 'var(--accent)',
@@ -522,7 +522,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               <motion.button
                 onClick={handleLogSession}
                 disabled={savingSession || sessionDone}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                 style={{
                   marginTop: 10, width: '100%', padding: '12px',
                   background: sessionDone ? 'rgba(74,222,128,0.06)' : 'rgba(255,255,255,0.04)',

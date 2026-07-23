@@ -290,9 +290,9 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: Math.min(index, 8) * 0.04 }}
+      transition={{ default: { duration: 0.35, delay: Math.min(index, 8) * 0.04 }, scale: { duration: 0.12 } }}
       whileHover={{ borderColor: 'rgba(250,204,21,0.4)', y: -3 }}
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.9 }}
       onClick={() => onOpen(exercise)}
       style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden', transition: 'border-color 250ms' }}
     >
@@ -459,9 +459,9 @@ function FilterIconCard({ Icon, label, subtitle, selected, onClick }) {
   return (
     <motion.button
       layout
-      whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.9 }}
       animate={selected ? { scale: [1, 1.05, 1] } : {}}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.15 }}
       onClick={onClick}
       style={{
         position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
@@ -575,14 +575,14 @@ function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply
 
           <div style={{ position: 'sticky', bottom: 0, marginTop: 20, display: 'flex', gap: 10 }}>
             <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
               onClick={() => { setDraftBodyPart(''); setDraftEquipment(''); setDraftDifficulty(''); }}
               style={{ padding: '13px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', cursor: 'pointer' }}
             >
               مسح الكل
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
               onClick={() => onApply({ bodyPart: draftBodyPart, equipment: draftEquipment, difficulty: draftDifficulty })}
               style={{ flex: 1, padding: '13px 18px', borderRadius: 10, background: '#facc15', border: 'none', color: '#000', fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.03em', cursor: 'pointer' }}
             >
@@ -717,7 +717,7 @@ export default function ExerciseVideosPage() {
               />
             </div>
             <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
               onClick={() => setFiltersOpen(true)}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: activeFilterCount ? 'rgba(250,204,21,0.1)' : 'rgba(255,255,255,0.04)', border: activeFilterCount ? '1px solid rgba(250,204,21,0.35)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: activeFilterCount ? '#facc15' : 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
             >
@@ -733,7 +733,7 @@ export default function ExerciseVideosPage() {
               )}
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.9, rotate: 180 }}
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.85, rotate: 180 }} transition={{ duration: 0.12 }}
               onClick={fetchExercises}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
             >

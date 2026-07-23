@@ -48,7 +48,7 @@ function TDEECalc() {
         <label style={labelStyle}>الجنس</label>
         <div style={{ display:'flex', gap:8 }}>
           {[{ v:'male', l:'ذكر 👨' },{ v:'female', l:'أنثى 👩' }].map(({ v, l }) => (
-            <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setForm({ ...form, gender: v })}
+            <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setForm({ ...form, gender: v })}
               style={{ ...toggleStyle, ...(form.gender === v ? toggleActive : {}) }}>{l}</motion.button>
           ))}
         </div>
@@ -61,7 +61,7 @@ function TDEECalc() {
         </select>
       </div>
 
-      <motion.button onClick={calculate} whileTap={{ scale:0.97 }} style={calcBtn}>
+      <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
         احسب TDEE
       </motion.button>
 
@@ -122,7 +122,7 @@ function OneRMCalc() {
           <input type="number" placeholder="8" value={reps} onChange={e => setReps(e.target.value)} style={inputStyle} />
         </div>
       </div>
-      <motion.button onClick={calculate} whileTap={{ scale:0.97 }} style={calcBtn}>
+      <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
         احسب الـ 1RM
       </motion.button>
       <AnimatePresence>
@@ -192,12 +192,12 @@ function MacroCalc() {
         <label style={labelStyle}>الهدف</label>
         <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
           {goals.map(({ v, l }) => (
-            <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setGoal(v)}
+            <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setGoal(v)}
               style={{ ...toggleStyle, ...(goal === v ? toggleActive : {}), flex:'1 1 auto' }}>{l}</motion.button>
           ))}
         </div>
       </div>
-      <motion.button onClick={calculate} whileTap={{ scale:0.97 }} style={calcBtn}>
+      <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
         احسب الماكروز
       </motion.button>
       <AnimatePresence>
@@ -269,7 +269,7 @@ function BMICalc() {
         </div>
       </div>
 
-      <motion.button onClick={calculate} whileTap={{ scale: 0.97 }} style={calcBtn}>
+      <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
         احسب الـ BMI
       </motion.button>
 
@@ -341,7 +341,7 @@ export default function ToolsPage() {
           {/* tabs */}
           <div style={{ display:'flex', gap:6, marginBottom:24, background:'var(--carbon)', border:'1px solid var(--glass-border)', borderRadius:'var(--radius-md)', padding:6 }}>
             {TABS.map(({ id, label, icon: Icon, desc }) => (
-              <motion.button key={id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setActiveTab(id)} style={{ flex:1, padding:'10px 8px', background: activeTab === id ? 'var(--iron)' : 'transparent', border: 'none', borderRadius:'var(--radius-sm)', cursor:'pointer', transition:'background 120ms', display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+              <motion.button key={id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setActiveTab(id)} style={{ flex:1, padding:'10px 8px', background: activeTab === id ? 'var(--iron)' : 'transparent', border: 'none', borderRadius:'var(--radius-sm)', cursor:'pointer', transition:'background 120ms', display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
                 <Icon size={16} color={activeTab === id ? 'var(--accent)' : 'var(--ash)'} />
                 <span style={{ fontFamily:'var(--font-body)', fontWeight: 600, fontSize:'0.85rem', color: activeTab === id ? 'var(--chalk)' : 'var(--ash)' }}>{label}</span>
                 <span style={{ fontSize:'0.55rem', fontFamily:'var(--font-mono)', color:'var(--ash)', display:'none' }} className="tab-desc">{desc}</span>

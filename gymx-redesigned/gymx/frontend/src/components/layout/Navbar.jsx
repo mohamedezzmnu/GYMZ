@@ -119,7 +119,7 @@ export default function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
 
           {/* language */}
-          <motion.button whileTap={{ scale: 0.92 }} onClick={toggleLang} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer', letterSpacing: '0.05em' }}>
+          <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={toggleLang} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer', letterSpacing: '0.05em' }}>
             {lang === 'ar' ? 'EN' : 'ع'}
           </motion.button>
 
@@ -127,7 +127,7 @@ export default function Navbar() {
           {!user && (
             <>
               <Link href="/login">
-                <motion.button whileTap={{ scale: 0.95 }} style={{ background: 'transparent', border: '1px solid var(--iron-light)', color: 'var(--ash)', padding: '6px 14px', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.06em', cursor: 'pointer' }}>
+                <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={{ background: 'transparent', border: '1px solid var(--iron-light)', color: 'var(--ash)', padding: '6px 14px', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.06em', cursor: 'pointer' }}>
                   {ar ? 'دخول' : 'LOGIN'}
                 </motion.button>
               </Link>
@@ -142,7 +142,7 @@ export default function Navbar() {
           {/* LOGGED IN — user dropdown */}
           {user && (
             <div ref={userMenuRef} style={{ position: 'relative' }}>
-              <motion.button whileTap={{ scale: 0.96 }} onClick={() => setUserMenuOpen(o => !o)}
+              <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setUserMenuOpen(o => !o)}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', padding: '4px 12px 4px 8px', cursor: 'pointer' }}
               >
                 <div style={{ width: 24, height: 24, background: 'var(--volt)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: '#fff', borderRadius: 'var(--radius-sm)' }}>
@@ -184,7 +184,7 @@ export default function Navbar() {
                     ))}
 
                     <div style={{ borderTop: '1px solid var(--iron)', marginTop: 4, paddingTop: 4 }}>
-                      <motion.button whileTap={{ scale: 0.97 }} onClick={async () => { await logout(); router.push('/'); }}
+                      <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={async () => { await logout(); router.push('/'); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', color: '#EF4444', background: 'transparent', border: 'none', fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.05em', cursor: 'pointer', transition: 'all 0.12s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
@@ -199,7 +199,7 @@ export default function Navbar() {
           )}
 
           {/* mobile menu btn */}
-          <motion.button whileTap={{ scale: 0.9 }} onClick={() => setMobileOpen(o => !o)} className="mobile-menu-btn"
+          <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setMobileOpen(o => !o)} className="mobile-menu-btn"
             style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--chalk)', width: 30, height: 30, borderRadius: 'var(--radius-sm)', display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
             {mobileOpen ? <X size={15} /> : <Menu size={15} />}
@@ -223,7 +223,7 @@ export default function Navbar() {
             {!user && (
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <Link href="/login" style={{ flex: 1 }}>
-                  <motion.button whileTap={{ scale: 0.96 }} style={{ width: '100%', padding: '10px', background: 'transparent', border: '1px solid var(--iron-light)', color: 'var(--chalk)', fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.06em', cursor: 'pointer', borderRadius: 'var(--radius-sm)' }}>
+                  <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={{ width: '100%', padding: '10px', background: 'transparent', border: '1px solid var(--iron-light)', color: 'var(--chalk)', fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.06em', cursor: 'pointer', borderRadius: 'var(--radius-sm)' }}>
                     {ar ? 'دخول' : 'LOGIN'}
                   </motion.button>
                 </Link>

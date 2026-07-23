@@ -172,12 +172,12 @@ function ChangePasswordModal({ onClose }) {
           ))}
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-            <motion.button whileTap={{ scale: 0.97 }} onClick={onClose} style={{
+            <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={onClose} style={{
               flex: 1, padding: '11px', background: 'rgba(255,255,255,0.05)',
               border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)',
               color: 'var(--ash-light)', fontFamily: 'var(--font-body)', cursor: 'pointer', fontSize: '0.875rem',
             }}>إلغاء</motion.button>
-            <motion.button onClick={handleSave} disabled={loading} whileTap={{ scale: 0.97 }} style={{
+            <motion.button onClick={handleSave} disabled={loading} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={{
               flex: 2, padding: '11px',
               background: 'var(--accent)',
               border: 'none', borderRadius: 'var(--radius-sm)',
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                 {/* Logout */}
                 <motion.button
                   onClick={handleLogout}
-                  whileTap={{ scale: 0.96 }}
+                  whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '10px 18px',
@@ -543,7 +543,7 @@ export default function ProfilePage() {
                       <motion.button
                         key={label}
                         onClick={onClick}
-                        whileTap={{ scale: 0.98 }}
+                        whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12,
                           padding: '12px 14px',
