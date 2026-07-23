@@ -16,7 +16,13 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, User, UserRound } from 'lucide-react';
+import {
+  Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, User, UserRound,
+  SlidersHorizontal, ChevronDown, ChevronUp, Check,
+  Move, HeartPulse, Shield, CircleDot, Hand, Footprints, PersonStanding, Target,
+  Cable, Dumbbell, Weight, Link2, Settings, Settings2, Truck, Circle, Waves,
+  Gauge, TrendingUp, Rocket,
+} from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -46,6 +52,20 @@ const EQUIPMENTS = Object.keys(EQUIPMENT_AR);
 
 // ── ترجمة مستوى الصعوبة ─────────────────────────────────────
 const DIFFICULTY_AR = { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' };
+
+// ── أيقونات كروت الفلتر (شكل بصري بس، مالهاش دخل بمنطق الفلترة) ─
+const BODYPART_ICON = {
+  back: Move, cardio: HeartPulse, chest: Shield, hips: CircleDot,
+  'lower arms': Hand, 'lower legs': Footprints, shoulders: PersonStanding,
+  'upper arms': Dumbbell, 'upper legs': Footprints, waist: Target,
+};
+const EQUIPMENT_ICON = {
+  band: Waves, barbell: Dumbbell, 'body weight': PersonStanding, cable: Cable,
+  dumbbell: Dumbbell, 'ez barbell': Dumbbell, kettlebell: CircleDot,
+  'leverage machine': Settings, rope: Link2, 'sled machine': Truck,
+  'smith machine': Settings2, 'stability ball': Circle, weighted: Weight,
+};
+const DIFFICULTY_ICON = { beginner: Gauge, intermediate: TrendingUp, advanced: Rocket };
 
 // ── قاموس ترجمة أسماء العضلات (شامل لكل مصطلحات المصدر) ─────
 const MUSCLE_AR = {
@@ -347,6 +367,167 @@ function ExerciseModal({ exercise, onClose }) {
   );
 }
 
+// ── قسم واحد جوه درج الفلاتر (أكورديون بيفتح ويقفل) ─────────
+function FilterSection({ title, isOpen, onToggle, children }) {
+  return (
+    <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden', background: 'rgba(255,255,255,0.03)' }}>
+      <button
+        onClick={onToggle}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+      >
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>{title}</span>
+        {isOpen ? <ChevronUp size={16} color="var(--ash-light)" /> : <ChevronDown size={16} color="var(--ash-light)" />}
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{ padding: '4px 14px 16px' }}>{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── كارت أيقونة داخل الفلتر (قسم جسم / معدة / مستوى) ────────
+function FilterIconCard({ Icon, label, subtitle, selected, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
+        padding: '12px 12px', borderRadius: 12, cursor: 'pointer', textAlign: 'right',
+        background: selected ? 'rgba(250,204,21,0.08)' : 'rgba(255,255,255,0.03)',
+        border: selected ? '1px solid rgba(250,204,21,0.55)' : '1px solid rgba(255,255,255,0.08)',
+        boxShadow: selected ? '0 0 0 1px rgba(250,204,21,0.15), 0 0 16px rgba(250,204,21,0.15)' : 'none',
+        transition: 'all 180ms',
+      }}
+    >
+      <span style={{
+        width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: selected ? '1px solid #facc15' : '1px solid rgba(255,255,255,0.15)', position: 'absolute', top: 10, left: 10,
+      }}>
+        {selected && <Check size={13} color="#facc15" />}
+      </span>
+      <Icon size={22} color={selected ? '#facc15' : 'var(--ash-light)'} />
+      <div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--chalk)' }}>{label}</div>
+        {subtitle && <div style={{ fontSize: '0.6rem', color: 'var(--ash)', marginTop: 2, lineHeight: 1.4 }}>{subtitle}</div>}
+      </div>
+    </button>
+  );
+}
+
+// ── درج الفلاتر بالكامل ──────────────────────────────────────
+function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply }) {
+  const [openSection, setOpenSection] = useState('bodyPart');
+  const [draftBodyPart, setDraftBodyPart] = useState(bodyPart);
+  const [draftEquipment, setDraftEquipment] = useState(equipment);
+  const [draftDifficulty, setDraftDifficulty] = useState(difficulty);
+
+  useEffect(() => {
+    if (open) {
+      setDraftBodyPart(bodyPart);
+      setDraftEquipment(equipment);
+      setDraftDifficulty(difficulty);
+      setOpenSection('bodyPart');
+    }
+  }, [open, bodyPart, equipment, difficulty]);
+
+  if (!open) return null;
+
+  const toggleSection = (key) => setOpenSection(prev => (prev === key ? '' : key));
+  const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 8 };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 320, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+      >
+        <motion.div
+          initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+          onClick={e => e.stopPropagation()}
+          style={{ width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', direction: 'rtl', padding: '20px 18px 96px' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.03em', color: 'var(--chalk)' }}>الفلاتر</h2>
+            <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: 'none', color: 'var(--chalk)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <FilterSection title="أقسام الجسم" isOpen={openSection === 'bodyPart'} onToggle={() => toggleSection('bodyPart')}>
+              <div style={grid}>
+                {BODYPARTS.map(b => {
+                  const Icon = BODYPART_ICON[b] || Target;
+                  return (
+                    <FilterIconCard
+                      key={b} Icon={Icon} label={BODYPART_AR[b]}
+                      selected={draftBodyPart === b}
+                      onClick={() => setDraftBodyPart(prev => (prev === b ? '' : b))}
+                    />
+                  );
+                })}
+              </div>
+            </FilterSection>
+
+            <FilterSection title="المعدات" isOpen={openSection === 'equipment'} onToggle={() => toggleSection('equipment')}>
+              <div style={grid}>
+                {EQUIPMENTS.map(eq => {
+                  const Icon = EQUIPMENT_ICON[eq] || Dumbbell;
+                  return (
+                    <FilterIconCard
+                      key={eq} Icon={Icon} label={EQUIPMENT_AR[eq]}
+                      selected={draftEquipment === eq}
+                      onClick={() => setDraftEquipment(prev => (prev === eq ? '' : eq))}
+                    />
+                  );
+                })}
+              </div>
+            </FilterSection>
+
+            <FilterSection title="المستوى" isOpen={openSection === 'difficulty'} onToggle={() => toggleSection('difficulty')}>
+              <div style={grid}>
+                {Object.keys(DIFFICULTY_AR).map(d => {
+                  const Icon = DIFFICULTY_ICON[d] || Gauge;
+                  return (
+                    <FilterIconCard
+                      key={d} Icon={Icon} label={DIFFICULTY_AR[d]}
+                      selected={draftDifficulty === d}
+                      onClick={() => setDraftDifficulty(prev => (prev === d ? '' : d))}
+                    />
+                  );
+                })}
+              </div>
+            </FilterSection>
+          </div>
+
+          <div style={{ position: 'sticky', bottom: 0, marginTop: 20, display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => { setDraftBodyPart(''); setDraftEquipment(''); setDraftDifficulty(''); }}
+              style={{ padding: '13px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', cursor: 'pointer' }}
+            >
+              مسح الكل
+            </button>
+            <button
+              onClick={() => onApply({ bodyPart: draftBodyPart, equipment: draftEquipment, difficulty: draftDifficulty })}
+              style={{ flex: 1, padding: '13px 18px', borderRadius: 10, background: '#facc15', border: 'none', color: '#000', fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.03em', cursor: 'pointer' }}
+            >
+              تطبيق الفلاتر
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────
 export default function ExerciseVideosPage() {
   const { user, loading: authLoading } = useAuth();
@@ -364,6 +545,8 @@ export default function ExerciseVideosPage() {
   const [loadError, setLoadError] = useState(false);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterCount = [bodyPart, equipment, difficulty].filter(Boolean).length;
 
   useEffect(() => {
     if (authLoading) return;
@@ -466,18 +649,17 @@ export default function ExerciseVideosPage() {
                 style={{ width: '100%', paddingRight: 38, boxSizing: 'border-box', direction: 'ltr', textAlign: 'right' }}
               />
             </div>
-            <select className="input" value={bodyPart} onChange={e => setBodyPart(e.target.value)} style={{ flex: '1 1 140px', cursor: 'pointer' }}>
-              <option value="">كل أقسام الجسم</option>
-              {BODYPARTS.map(b => <option key={b} value={b}>{BODYPART_AR[b]}</option>)}
-            </select>
-            <select className="input" value={equipment} onChange={e => setEquipment(e.target.value)} style={{ flex: '1 1 140px', cursor: 'pointer' }}>
-              <option value="">كل المعدات</option>
-              {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{EQUIPMENT_AR[eq]}</option>)}
-            </select>
-            <select className="input" value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ flex: '1 1 120px', cursor: 'pointer' }}>
-              <option value="">كل المستويات</option>
-              {Object.keys(DIFFICULTY_AR).map(d => <option key={d} value={d}>{DIFFICULTY_AR[d]}</option>)}
-            </select>
+            <button
+              onClick={() => setFiltersOpen(true)}
+              style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: activeFilterCount ? 'rgba(250,204,21,0.1)' : 'rgba(255,255,255,0.04)', border: activeFilterCount ? '1px solid rgba(250,204,21,0.35)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: activeFilterCount ? '#facc15' : 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
+            >
+              <SlidersHorizontal size={13} /> الفلاتر
+              {activeFilterCount > 0 && (
+                <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#facc15', color: '#000', fontSize: '0.62rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={fetchExercises}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
@@ -485,6 +667,16 @@ export default function ExerciseVideosPage() {
               <RefreshCw size={13} /> تحديث
             </button>
           </div>
+
+          <FiltersDrawer
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            bodyPart={bodyPart} equipment={equipment} difficulty={difficulty}
+            onApply={({ bodyPart: b, equipment: eq, difficulty: d }) => {
+              setBodyPart(b); setEquipment(eq); setDifficulty(d);
+              setFiltersOpen(false);
+            }}
+          />
 
           {/* المحتوى */}
           {loadingList ? (
