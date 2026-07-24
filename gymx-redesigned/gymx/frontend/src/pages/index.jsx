@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   Dumbbell, Apple, Activity, Calculator, ShieldCheck,
   ArrowRight, Zap, BarChart3, Trophy, ChevronRight,
+  Flame, Star, TrendingUp,
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
@@ -41,15 +42,14 @@ function FloatCard({ style, animDelay = 0, animDuration = 4, children }) {
       transition={{ duration: animDuration, delay: animDelay, repeat: Infinity, ease: 'easeInOut' }}
       style={{
         position: 'absolute',
-        background: 'rgba(11,11,11,0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRadius: 'var(--radius-md)',
+        background: 'rgba(17,17,17,0.78)',
+        backdropFilter: 'blur(22px)',
+        WebkitBackdropFilter: 'blur(22px)',
+        borderRadius: 'var(--radius-lg)',
         padding: '12px 16px',
         zIndex: 10,
-        boxShadow: '4px 4px 0 rgba(255,85,0,0.15), 0 8px 40px rgba(0,0,0,0.6)',
-        border: '1px solid var(--iron-light)',
-        borderLeft: '3px solid var(--volt)',
+        boxShadow: '0 16px 40px rgba(0,0,0,0.55)',
+        border: '1px solid rgba(255,255,255,0.08)',
         ...style,
       }}
     >
@@ -231,6 +231,10 @@ export default function HomePage() {
       ══════════════════════════════════════ */}
       <section ref={heroRef} style={{ position: 'relative', minHeight: '100vh', background: '#080808', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
+        {/* grid texture */}
+        <div className="bg-grid" />
+        {/* soft glow blobs */}
+        <div className="bg-glow-blur" style={{ width: 420, height: 420, top: -120, right: ar ? 'auto' : '10%', left: ar ? '10%' : 'auto' }} />
         {/* scanlines */}
         <div className="hero-scanlines" />
         {/* noise */}
@@ -298,7 +302,7 @@ export default function HomePage() {
               {(() => {
                 const lines = user
                   ? (ar ? ['أهلاً', `يا ${userName}`] : ['BACK,', userName.toUpperCase()])
-                  : (ar ? ['ابنِ', 'جسمك', 'بخطة مخصصة'] : ['BUILD.', 'YOUR.', 'BODY.']);
+                  : (ar ? ['اتدرّب بذكاء.', 'سجّل كل عدة.', 'اسبق صحابك.'] : ['TRAIN SMARTER.', 'TRACK EVERY REP.', 'BEAT YOUR FRIENDS.']);
                 return (
                   <div style={{ overflow: 'hidden' }}>
                     {lines.filter(Boolean).map((line, i) => (
@@ -309,11 +313,12 @@ export default function HomePage() {
                       >
                         <div style={{
                           fontFamily: 'var(--font-display)',
-                          fontSize: 'clamp(4.5rem, 11vw, 9.5rem)',
-                          lineHeight: 0.9,
+                          fontWeight: 800,
+                          fontSize: user ? 'clamp(3.5rem, 9vw, 7rem)' : 'clamp(1.9rem, 5vw, 3.4rem)',
+                          lineHeight: 1.08,
                           color: i === 2 ? 'transparent' : i === 1 ? 'var(--volt)' : 'var(--chalk)',
                           WebkitTextStroke: i === 2 ? '2px var(--volt)' : '0',
-                          letterSpacing: '0.02em',
+                          letterSpacing: '-0.01em',
                           textTransform: 'uppercase',
                           userSelect: 'none',
                         }}>
@@ -334,8 +339,32 @@ export default function HomePage() {
               >
                 {user
                   ? (ar ? 'كمّل رحلتك من حيث وقفت 💪 — صفحتك فيها كل حاجة محتاجها.' : "Continue your journey 💪 — your dashboard has everything you need.")
-                  : (ar ? 'برامج تدريب وغذاء مصممة ليك أنت — مش نسخة من شخص تاني.' : 'Training and nutrition designed for you — not copied from someone else.')}
+                  : (ar ? 'برنامج تدريب وتغذية ذكي، بيتابع كل تقدمك، وسيستيم منافسة يخليك مكمّل.' : 'Smart programs, real-time rep tracking, and friendly competition to keep you going.')}
               </motion.p>
+
+              {/* IDENTITY STRIP — streaks / xp / levels / leaderboard */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}
+              >
+                {[
+                  { icon: Flame,       label: ar ? 'ستريك'      : 'STREAKS'     },
+                  { icon: Star,        label: 'XP'                              },
+                  { icon: TrendingUp,  label: ar ? 'مستويات'    : 'LEVELS'      },
+                  { icon: Trophy,      label: ar ? 'المتصدرين'  : 'LEADERBOARD' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: 'var(--iron)', border: '1px solid var(--iron-light)',
+                    borderRadius: 999, padding: '6px 12px',
+                  }}>
+                    <Icon size={12} color="var(--volt)" />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ash-light)' }}>{label}</span>
+                  </div>
+                ))}
+              </motion.div>
 
               {/* CTAs */}
               <motion.div
@@ -426,6 +455,19 @@ export default function HomePage() {
                 </div>
               </FloatCard>
 
+              {/* STAT CARD: streak — identity: gamified, not a plain dashboard */}
+              <FloatCard animDelay={1.2} animDuration={4.2} style={{ bottom: -18, left: 'calc(50% - 64px)', minWidth: 128 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Flame size={14} color="var(--volt)" />
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--chalk)', lineHeight: 1 }}>
+                    12 {ar ? 'يوم' : 'DAY'}
+                  </div>
+                </div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--ash)', marginTop: 4, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                  {ar ? 'ستريك نشط' : 'ACTIVE STREAK'}
+                </div>
+              </FloatCard>
+
               <PhoneMockup ar={ar} programs={programs} />
             </motion.div>
 
@@ -504,9 +546,9 @@ export default function HomePage() {
               { href: '/nutrition', emoji: '🥗', title: ar ? 'خطتي الغذائية'  : 'NUTRITION PLAN',  desc: ar ? 'اتابع وجباتك وسعراتك اليومية'      : 'Track your meals and daily calories'  },
             ].map(({ href, emoji, title, desc }) => (
               <Link key={href} href={href}>
-                <div style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', borderLeft: '3px solid var(--volt)', borderRadius: 'var(--radius-md)', padding: '20px 18px', cursor: 'pointer', transition: 'all 0.18s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderLeftColor = 'var(--volt-bright)'; e.currentTarget.style.transform = 'translateX(-4px)'; e.currentTarget.style.background = 'var(--iron-light)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'var(--volt)'; e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.background = 'var(--iron)'; }}
+                <div style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', padding: '20px 18px', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--volt)'; e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.background = 'var(--iron-light)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.5), 0 0 30px var(--volt-glow)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--iron-light)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'var(--iron)'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                   <div style={{ fontSize: '1.5rem', marginBottom: 10 }}>{emoji}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', letterSpacing: '0.06em', color: 'var(--chalk)', marginBottom: 6 }}>{title}</div>

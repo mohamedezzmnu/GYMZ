@@ -16,7 +16,7 @@ export default function App({ Component, pageProps }) {
       </Head>
       <AuthProvider>
         <Navbar />
-        <main className="animate-fade-in" style={{ paddingTop: 64, minHeight: '100vh' }}>
+        <main className="animate-fade-in" style={{ paddingTop: 92, minHeight: '100vh' }}>
           <Component {...pageProps} />
         </main>
 

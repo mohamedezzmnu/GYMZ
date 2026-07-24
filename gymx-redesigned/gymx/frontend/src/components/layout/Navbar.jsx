@@ -62,19 +62,19 @@ export default function Navbar() {
   return (
     <>
       <header style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        height: 56,
-        background: 'rgba(8,8,8,0.92)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid #1A1A1A',
+        position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
+        width: 'calc(100% - 32px)', maxWidth: 1180,
+        height: 60,
+        background: 'rgba(17,17,17,0.72)',
+        backdropFilter: 'blur(22px)',
+        WebkitBackdropFilter: 'blur(22px)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 20,
+        boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
         display: 'flex', alignItems: 'center',
-        padding: '0 20px', gap: 20,
+        padding: '0 10px 0 20px', gap: 20,
         direction: isRTL ? 'rtl' : 'ltr',
       }}>
-        {/* orange top rule */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--volt)' }} />
-
         {/* LOGO */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: '#fff', letterSpacing: '0.05em' }}>GYMZ</span>
@@ -133,7 +133,7 @@ export default function Navbar() {
               </Link>
               <Link href="/register">
                 <button className="btn btn-primary" style={{ padding: '6px 18px', fontSize: '0.85rem' }}>
-                  {ar ? 'انضم' : 'JOIN'}
+                  {ar ? 'ابدأ مجاناً' : 'START FREE'}
                 </button>
               </Link>
             </>
@@ -211,7 +211,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-            style={{ position: 'fixed', top: 56, left: 0, right: 0, zIndex: 99, background: '#0D0D0D', borderBottom: '2px solid var(--volt)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
+            style={{ position: 'fixed', top: 84, left: '50%', transform: 'translateX(-50%)', zIndex: 99, width: 'calc(100% - 32px)', maxWidth: 1180, background: 'rgba(17,17,17,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderTop: '2px solid var(--volt)', borderRadius: 20, boxShadow: '0 20px 50px rgba(0,0,0,0.55)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
           >
             {[...publicLinks, ...(user ? privateLinks : [])].map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}>
@@ -229,7 +229,7 @@ export default function Navbar() {
                 </Link>
                 <Link href="/register" style={{ flex: 1 }}>
                   <button className="btn btn-primary" style={{ width: '100%', padding: '10px', fontSize: '0.9rem' }}>
-                    {ar ? 'انضم' : 'JOIN FREE'}
+                    {ar ? 'ابدأ مجاناً' : 'START FREE'}
                   </button>
                 </Link>
               </div>
