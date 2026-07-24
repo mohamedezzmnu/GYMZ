@@ -1,7 +1,7 @@
 // src/pages/nutrition/index.jsx
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle, Camera, X, ScanLine } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -747,20 +747,175 @@ function FoodSearch() {
 }
 
 // ── بحث بالباركود (Open Food Facts + قاعدة بيانات المجتمع) ──
+// ── مسح الباركود بالكاميرا ─────────────────────────────────
+function BarcodeScannerModal({ onDetected, onClose }) {
+  const videoRef = useRef(null);
+  const controlsRef = useRef(null);
+  // starting | scanning | success | denied | notfound | error
+  const [scanState, setScanState] = useState('starting');
+
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      try {
+        const { BrowserMultiFormatReader } = await import('@zxing/browser');
+        const reader = new BrowserMultiFormatReader();
+
+        const controls = await reader.decodeFromConstraints(
+          { video: { facingMode: { ideal: 'environment' } } },
+          videoRef.current,
+          (result) => {
+            if (!alive || !result) return;
+            const text = (result.getText() || '').replace(/\D/g, '');
+            if (text.length >= 8 && text.length <= 14) {
+              setScanState('success');
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([40, 30, 60]);
+              controlsRef.current?.stop();
+              setTimeout(() => { if (alive) onDetected(text); }, 420);
+            }
+          }
+        );
+        if (!alive) { controls.stop(); return; }
+        controlsRef.current = controls;
+        setScanState('scanning');
+      } catch (err) {
+        if (!alive) return;
+        setScanState(err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError' ? 'denied' : 'error');
+      }
+    })();
+
+    return () => {
+      alive = false;
+      controlsRef.current?.stop();
+    };
+  }, [onDetected]);
+
+  const statusText = {
+    starting: 'بنفتح الكاميرا...',
+    scanning: 'وجّه الكاميرا على الباركود',
+    success: 'تمام! اتقرا الباركود ✅',
+    denied: 'محتاجين إذن الكاميرا عشان نقدر نمسح',
+    notfound: 'متقدرش نلاقي كاميرا على الجهاز ده',
+    error: 'حصلت مشكلة في فتح الكاميرا',
+  }[scanState];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(6,8,12,0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.94, opacity: 0 }}
+        onClick={e => e.stopPropagation()}
+        style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative' }}
+      >
+        <button
+          onClick={onClose}
+          aria-label="قفل"
+          style={{ position: 'absolute', top: 10, left: 10, zIndex: 3, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--chalk)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+        >
+          <X size={16} />
+        </button>
+
+        <div style={{ position: 'relative', width: '100%', aspectRatio: '3 / 4', background: '#000', overflow: 'hidden' }}>
+          <video ref={videoRef} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: scanState === 'scanning' || scanState === 'success' ? 'block' : 'none' }} />
+
+          {(scanState === 'starting') && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Loader size={26} color="#38bdf8" style={{ animation: 'spin 1s linear infinite' }} />
+            </div>
+          )}
+
+          {(scanState === 'denied' || scanState === 'notfound' || scanState === 'error') && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 24, textAlign: 'center' }}>
+              <AlertTriangle size={28} color="#f87171" />
+              <span style={{ color: '#f87171', fontFamily: 'var(--font-body)', fontSize: '0.82rem', lineHeight: 1.7 }}>{statusText}</span>
+              {scanState === 'denied' && (
+                <span style={{ color: 'var(--ash-light)', fontFamily: 'var(--font-body)', fontSize: '0.7rem', lineHeight: 1.7 }}>
+                  فعّل إذن الكاميرا من إعدادات المتصفح وجرب تاني.
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* إطار المسح + التغذية البصرية */}
+          {(scanState === 'scanning' || scanState === 'success') && (
+            <>
+              <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 0 2000px rgba(0,0,0,0.28)', maskImage: 'radial-gradient(ellipse 46% 26% at 50% 50%, transparent 60%, black 61%)', pointerEvents: 'none' }} />
+
+              <div style={{
+                position: 'absolute', top: '37%', left: '10%', right: '10%', height: '26%',
+                border: `2px solid ${scanState === 'success' ? '#4ade80' : '#38bdf8'}`,
+                borderRadius: 10, transition: 'border-color 0.25s ease', pointerEvents: 'none',
+              }}>
+                {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(corner => {
+                  const [v, h] = corner.split('-');
+                  return (
+                    <div key={corner} style={{
+                      position: 'absolute', width: 18, height: 18,
+                      [v]: -2, [h]: -2,
+                      borderTop: v === 'top' ? `3px solid ${scanState === 'success' ? '#4ade80' : '#38bdf8'}` : 'none',
+                      borderBottom: v === 'bottom' ? `3px solid ${scanState === 'success' ? '#4ade80' : '#38bdf8'}` : 'none',
+                      borderLeft: h === 'left' ? `3px solid ${scanState === 'success' ? '#4ade80' : '#38bdf8'}` : 'none',
+                      borderRight: h === 'right' ? `3px solid ${scanState === 'success' ? '#4ade80' : '#38bdf8'}` : 'none',
+                      borderRadius: 4,
+                    }} />
+                  );
+                })}
+
+                {scanState === 'scanning' && (
+                  <motion.div
+                    initial={{ top: '6%' }}
+                    animate={{ top: ['6%', '90%', '6%'] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ position: 'absolute', left: '4%', right: '4%', height: 2, background: 'linear-gradient(90deg, transparent, #38bdf8, transparent)', boxShadow: '0 0 8px 1px #38bdf8' }}
+                  />
+                )}
+
+                {scanState === 'success' && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+                    style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(74,222,128,0.15)', borderRadius: 8 }}
+                  >
+                    <Check size={34} color="#4ade80" />
+                  </motion.div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+          <ScanLine size={14} color={scanState === 'success' ? '#4ade80' : '#38bdf8'} />
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: scanState === 'success' ? '#4ade80' : 'var(--chalk)' }}>{statusText}</span>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function BarcodeSearch({ userId }) {
   const [barcode, setBarcode]   = useState('');
   const [status,  setStatus]    = useState('idle'); // idle | loading | found | manual | saving | saved | error
   const [result,  setResult]    = useState(null);
   const [manualErr, setManualErr] = useState('');
   const [manual, setManual] = useState({ name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [fromCamera, setFromCamera] = useState(false);
+  const shakeControls = useAnimation();
 
   const resetManual = () => setManual({ name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
 
-  const handleSearch = async () => {
-    const clean = barcode.replace(/\D/g, '');
+  const handleSearch = async (codeOverride) => {
+    const clean = (codeOverride ?? barcode).replace(/\D/g, '');
     if (!isValidBarcode(clean)) {
       setStatus('error');
       setResult(null);
+      shakeControls.start({ x: [0, -9, 9, -6, 6, -3, 3, 0], transition: { duration: 0.45 } });
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(70);
       return;
     }
     setStatus('loading');
@@ -823,6 +978,13 @@ function BarcodeSearch({ userId }) {
     }
   };
 
+  const handleDetected = (code) => {
+    setScannerOpen(false);
+    setBarcode(code);
+    setFromCamera(true);
+    handleSearch(code);
+  };
+
   const sourceLabel = result?.source === 'openfoodfacts'
     ? { text: 'المصدر: Open Food Facts', color: '#38bdf8' }
     : { text: 'مضاف من مستخدمين — راجع الأرقام من العلبة لو مش متأكد', color: '#a78bfa' };
@@ -839,30 +1001,51 @@ function BarcodeSearch({ userId }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={barcode}
-          onChange={e => { setBarcode(e.target.value.replace(/[^\d]/g, '')); if (status !== 'idle') setStatus('idle'); }}
-          onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
-          placeholder="اكتب رقم الباركود (8-14 رقم)"
-          style={{
-            flex: 1, padding: '12px 14px', background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)',
-            color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
-            outline: 'none', boxSizing: 'border-box', direction: 'ltr', textAlign: 'center',
-          }}
-        />
+        <motion.div animate={shakeControls} style={{ flex: 1 }}>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={barcode}
+            onChange={e => { setBarcode(e.target.value.replace(/[^\d]/g, '')); setFromCamera(false); if (status !== 'idle') setStatus('idle'); }}
+            onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
+            placeholder="اكتب رقم الباركود (8-14 رقم)"
+            style={{
+              width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)',
+              border: `1px solid ${status === 'error' ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 'var(--radius-sm)',
+              color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
+              outline: 'none', boxSizing: 'border-box', direction: 'ltr', textAlign: 'center',
+              transition: 'border-color 0.2s ease',
+            }}
+          />
+        </motion.div>
         <motion.button
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
-          onClick={handleSearch}
+          onClick={() => handleSearch()}
           disabled={status === 'loading'}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 18px', background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.4)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'loading' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
         >
           {status === 'loading' ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Search size={14} />}
           دور
         </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
+          onClick={() => setScannerOpen(true)}
+          disabled={status === 'loading'}
+          title="امسح بالكاميرا"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 46, padding: 0, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'loading' ? 'default' : 'pointer', flexShrink: 0 }}
+        >
+          <Camera size={17} />
+        </motion.button>
       </div>
+
+      <AnimatePresence>
+        {scannerOpen && (
+          <BarcodeScannerModal
+            onDetected={handleDetected}
+            onClose={() => setScannerOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {status === 'error' && (
@@ -880,8 +1063,17 @@ function BarcodeSearch({ userId }) {
         )}
 
         {(status === 'found' || status === 'saved') && result && (
-          <motion.div key="found" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: 'var(--radius-sm)' }}>
+          <motion.div key="found"
+            initial={{ opacity: 0, y: -6, boxShadow: '0 0 0 0 rgba(74,222,128,0)' }}
+            animate={{ opacity: 1, y: 0, boxShadow: fromCamera ? ['0 0 0 0 rgba(74,222,128,0.35)', '0 0 0 8px rgba(74,222,128,0)'] : '0 0 0 0 rgba(74,222,128,0)' }}
+            exit={{ opacity: 0 }}
+            transition={{ boxShadow: { duration: 0.9, ease: 'easeOut' } }}
+            style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(56,189,248,0.05)', border: `1px solid ${fromCamera ? 'rgba(74,222,128,0.35)' : 'rgba(56,189,248,0.2)'}`, borderRadius: 'var(--radius-sm)' }}>
+            {fromCamera && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, color: '#4ade80', fontSize: '0.72rem', fontFamily: 'var(--font-body)' }}>
+                <Camera size={13} /> اتقرا بالكاميرا
+              </div>
+            )}
             {status === 'saved' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, color: '#4ade80', fontSize: '0.75rem', fontFamily: 'var(--font-body)' }}>
                 <Check size={13} /> اتحفظ المنتج — هيظهر لباقي المستخدمين لما يدوروا على نفس الباركود.
