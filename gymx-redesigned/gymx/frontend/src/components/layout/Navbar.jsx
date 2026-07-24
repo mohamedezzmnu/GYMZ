@@ -38,14 +38,14 @@ export default function Navbar() {
   ];
 
   const privateLinks = [
-    { href: '/dashboard', label: ar ? 'داشبورد' : 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard', label: ar ? 'صفحتي' : 'Dashboard', icon: LayoutDashboard },
     { href: '/workout',   label: ar ? 'جلستي'   : 'Workout',   icon: Zap            },
   ];
 
   const bottomLinks = user ? [
     { href: '/',          label: ar ? 'الرئيسية' : 'Home',      icon: Home            },
     { href: '/programs',  label: ar ? 'البرامج'  : 'Programs',  icon: LayoutGrid      },
-    { href: '/dashboard', label: ar ? 'داشبورد'  : 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard', label: ar ? 'صفحتي'  : 'Dashboard', icon: LayoutDashboard },
     { href: '/workout',   label: ar ? 'جلستي'    : 'Workout',   icon: Zap             },
     { href: '/profile',   label: ar ? 'حسابي'    : 'Profile',   icon: User            },
   ] : [
@@ -110,7 +110,7 @@ export default function Navbar() {
               borderBottom: isActive('/dashboard') ? '2px solid var(--volt)' : '2px solid transparent',
               transition: 'all 0.15s', textDecoration: 'none',
             }}>
-              {ar ? 'داشبورد' : 'Dashboard'}
+              {ar ? 'صفحتي' : 'Dashboard'}
             </Link>
           )}
         </nav>
@@ -169,7 +169,7 @@ export default function Navbar() {
 
                     {[
                       { href: '/profile',   icon: User,            label: ar ? 'حسابي'    : 'My Profile'   },
-                      { href: '/dashboard', icon: LayoutDashboard, label: ar ? 'داشبورد'  : 'Dashboard'    },
+                      { href: '/dashboard', icon: LayoutDashboard, label: ar ? 'صفحتي'  : 'Dashboard'    },
                       { href: '/workout',   icon: Zap,             label: ar ? 'جلستي'    : 'My Workout'   },
                       ...(user?.role === 'admin' ? [{ href: '/admin', icon: LayoutGrid, label: ar ? 'الأدمن' : 'Admin Panel' }] : []),
                     ].map(({ href, icon: Icon, label }) => (

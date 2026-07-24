@@ -617,7 +617,7 @@ export default function ExercisesPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)', letterSpacing: '0.03em' }}>مكتبة التمارين المتحركة</span>
                     <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 20, background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.35)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Crown size={9} /> PRO
+                      <Crown size={9} /> مميز
                     </span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--ash-light)' }}>شوف كل تمرين بشكل متحرك قبل ما تأديه</div>

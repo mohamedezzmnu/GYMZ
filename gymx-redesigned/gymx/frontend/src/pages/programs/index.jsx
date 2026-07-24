@@ -13,9 +13,10 @@ import { useAuth } from '../../context/AuthContext';
 const PROGRAMS = [
   {
     id: 1,
-    tag: 'FULL BODY',
+    tag: 'الجسم كله',
     title: 'كامل الجسم',
     subtitle: 'Full Body',
+    subtitleAr: 'تمرن جسمك كله في اليوم الواحد',
     days: '3 أيام أسبوعياً',
     level: 'مبتدئ',
     levelColor: { bg: 'rgba(74,222,128,0.12)', border: 'rgba(74,222,128,0.3)', text: '#4ade80' },
@@ -65,9 +66,10 @@ const PROGRAMS = [
   },
   {
     id: 2,
-    tag: 'PPL',
+    tag: 'دفع سحب رجل',
     title: 'دفع / سحب / أرجل',
     subtitle: 'Push / Pull / Legs',
+    subtitleAr: '3 أنواع أيام: دفع، سحب، رجل',
     days: '3 أو 6 أيام أسبوعياً',
     level: 'متوسط — متقدم',
     levelColor: { bg: 'rgba(250,204,21,0.12)', border: 'rgba(250,204,21,0.3)', text: '#facc15' },
@@ -121,9 +123,10 @@ const PROGRAMS = [
   },
   {
     id: 3,
-    tag: 'UPPER / LOWER',
+    tag: 'علوي / سفلي',
     title: 'علوي / سفلي',
     subtitle: 'Upper / Lower',
+    subtitleAr: 'يوم لأعلى الجسم، يوم لأسفله',
     days: '4 أيام أسبوعياً',
     level: 'جميع المستويات',
     levelColor: { bg: 'rgba(255,255,255,0.12)', border: 'rgba(255,255,255,0.3)', text: '#FFFFFF' },
@@ -188,9 +191,10 @@ const PROGRAMS = [
   },
   {
     id: 4,
-    tag: 'BRO SPLIT',
+    tag: 'عضلة يوميًا',
     title: 'عضلة في اليوم',
     subtitle: 'Bro Split',
+    subtitleAr: 'كل يوم بتمرن عضلة مختلفة',
     days: '5 أيام أسبوعياً',
     level: 'متقدم',
     levelColor: { bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.3)', text: '#f87171' },
@@ -270,10 +274,10 @@ const PROGRAMS = [
 // الهيكل الأساسي لأي يوم تمرين
 // ══════════════════════════════════════════
 const DAY_STRUCTURE = [
-  { step: '01', title: 'الإحماء', subtitle: 'Warm-up', desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.', color: '#4ade80', icon: '🔥' },
-  { step: '02', title: 'التمارين الأساسية', subtitle: 'Compound Exercises', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#FFFFFF', icon: '🏋️' },
-  { step: '03', title: 'التمارين المساعدة', subtitle: 'Isolation Exercises', desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.', color: '#facc15', icon: '🎯' },
-  { step: '04', title: 'التبريد والإطالات', subtitle: 'Cool-down', desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.', color: '#f87171', icon: '❄️' },
+  { step: '01', title: 'الإحماء', subtitle: 'تسخين الجسم', desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.', color: '#4ade80', icon: '🔥' },
+  { step: '02', title: 'التمارين الأساسية', subtitle: 'التمارين الكبيرة', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#FFFFFF', icon: '🏋️' },
+  { step: '03', title: 'التمارين المساعدة', subtitle: 'تمارين عضلة واحدة', desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.', color: '#facc15', icon: '🎯' },
+  { step: '04', title: 'التبريد والإطالات', subtitle: 'تهدئة الجسم', desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.', color: '#f87171', icon: '❄️' },
 ];
 
 // ══════════════════════════════════════════
@@ -382,7 +386,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: '1.4rem' }}>{program.icon}</span>
-              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
+              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-body)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
                 {program.tag}
               </span>
               <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: program.levelColor.bg, border: '1px solid ' + program.levelColor.border, color: program.levelColor.text }}>
@@ -397,8 +401,8 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', color: 'var(--chalk)', margin: '0 0 4px 0', lineHeight: 1.2 }}>
               {program.title}
             </h2>
-            <div style={{ fontSize: '0.8rem', color: program.accentColor, fontFamily: 'var(--font-mono)', marginBottom: 12, opacity: 0.85 }}>
-              {program.subtitle}
+            <div style={{ fontSize: '0.8rem', color: program.accentColor, fontFamily: 'var(--font-body)', marginBottom: 12, opacity: 0.85, direction: 'rtl' }}>
+              {program.subtitleAr || program.subtitle}
             </div>
             <p style={{ fontSize: '0.88rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: '0 0 14px 0', direction: 'rtl', fontFamily: 'var(--font-body)', maxWidth: 600 }}>
               {program.description}

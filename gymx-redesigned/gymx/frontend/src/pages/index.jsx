@@ -199,7 +199,7 @@ export default function HomePage() {
     { num: '01', icon: Dumbbell,    title: 'برامج التدريب',    desc: 'برامج مبنية على هدفك ومستواك — خسارة وزن، بناء عضل، أو قوة. جدول أسبوعي واضح.',      href: '/programs'  },
     { num: '02', icon: Apple,       title: 'التغذية والوجبات', desc: 'خطط غذائية بمكونات مصرية جاهزة. اختار هدفك وعدّل الوجبات بحرية كاملة.',               href: '/nutrition' },
     { num: '03', icon: Activity,    title: 'تتبع التقدم',      desc: 'سجّل وزنك وقياساتك أسبوعياً. شوف كيف جسمك بيتغير بأرقام حقيقية على مدار الوقت.',      href: '/dashboard' },
-    { num: '04', icon: Calculator,  title: 'حاسبات ذكية',     desc: 'TDEE وBMI و1RM والماكروز — كل الحاسبات اللي محتاجها في مكان واحد بدون تعقيد.',          href: '/tools'     },
+    { num: '04', icon: Calculator,  title: 'حاسبات ذكية',     desc: 'احسب احتياجك من الأكل، وزنك المثالي، أقصى قوتك، وتوزيع أكلك — كل حاجة في مكان واحد بدون تعقيد.',          href: '/tools'     },
     { num: '05', icon: ShieldCheck, title: 'مجاني 100%',       desc: 'مفيش اشتراكات ومفيش رسوم مخفية. انشئ حسابك في دقيقة وابدأ رحلتك فوراً.',             href: '/register'  },
   ] : [
     { num: '01', icon: Dumbbell,    title: 'Training Plans',    desc: 'Programs built for your exact goal and level — fat loss, muscle, or strength.',    href: '/programs'  },
@@ -333,7 +333,7 @@ export default function HomePage() {
                 style={{ color: 'var(--ash-light)', fontSize: '0.88rem', lineHeight: 1.75, maxWidth: 380, margin: '20px 0 28px', fontFamily: 'var(--font-body)' }}
               >
                 {user
-                  ? (ar ? 'كمّل رحلتك من حيث وقفت 💪 — الداشبورد فيه كل حاجة محتاجها.' : "Continue your journey 💪 — your dashboard has everything you need.")
+                  ? (ar ? 'كمّل رحلتك من حيث وقفت 💪 — صفحتك فيها كل حاجة محتاجها.' : "Continue your journey 💪 — your dashboard has everything you need.")
                   : (ar ? 'برامج تدريب وغذاء مصممة ليك أنت — مش نسخة من شخص تاني.' : 'Training and nutrition designed for you — not copied from someone else.')}
               </motion.p>
 
@@ -346,7 +346,7 @@ export default function HomePage() {
               >
                 {user ? (
                   <>
-                    <Link href="/dashboard"><div className="btn btn-primary"><BarChart3 size={14} /> {ar ? 'الداشبورد' : 'DASHBOARD'}</div></Link>
+                    <Link href="/dashboard"><div className="btn btn-primary"><BarChart3 size={14} /> {ar ? 'صفحتي' : 'DASHBOARD'}</div></Link>
                     <Link href="/workout"><div className="btn btn-outline"><Zap size={14} /> {ar ? 'ابدأ تمريني' : 'WORKOUT'}</div></Link>
                   </>
                 ) : (

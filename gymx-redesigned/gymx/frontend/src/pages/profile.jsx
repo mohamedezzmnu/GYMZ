@@ -371,7 +371,7 @@ export default function ProfilePage() {
             <StatCard icon={Dumbbell}   label="كل الجلسات"    value={realStats.sessions}  accent="var(--accent)"  delay={0.05} />
             <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"        delay={0.1}  />
             <StatCard icon={Flame}      label="الاستمرارية"    value={realStats.streak ? `${realStats.streak} يوم` : '—'} accent="#facc15" delay={0.15} />
-            <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق', muscle: '💪 ضخامة', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="var(--accent)" delay={0.2} />
+            <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق دهون', muscle: '💪 بناء عضل', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="var(--accent)" delay={0.2} />
           </div>
 
           {/* ── BOTTOM GRID ──────────────────────── */}

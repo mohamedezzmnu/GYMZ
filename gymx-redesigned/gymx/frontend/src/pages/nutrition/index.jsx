@@ -147,7 +147,7 @@ const ALL_FOODS = [
 // ── مكملات مقترحة حسب الهدف ──────────────────────────────
 const SUPPLEMENTS = {
   cut: [
-    { name: 'كرياتين مونوهيدرات', dose: '5g يومياً', reason: 'يحافظ على العضل وانت بتنشف', important: true },
+    { name: 'كرياتين مونوهيدرات', dose: '5g يومياً', reason: 'يحافظ على العضل وانت بتنزل وزن', important: true },
     { name: 'بروتين واي', dose: '1-2 سكوب بعد التمرين', reason: 'لو صعب توصل للبروتين من الأكل', important: false },
     { name: 'أوميجا 3', dose: '2-3 كبسولة مع الأكل', reason: 'يقلل الالتهاب ويحسن حرق الدهون', important: false },
   ],
@@ -253,7 +253,7 @@ function calcTDEE({ weight, height, age, gender, activity }) {
 function generatePlans(tdee) {
   return {
     cut_strong: {
-      label: `${tdee - 600} سعرة`, goal: 'تنشيف قوي', goalType: 'cut',
+      label: `${tdee - 600} سعرة`, goal: 'نزول وزن بسرعة', goalType: 'cut',
       color: '#f87171', icon: '🔥', deficit: -600, targetCal: tdee - 600,
       macros: {
         protein: Math.round(((tdee - 600) * 0.40) / 4),
@@ -263,7 +263,7 @@ function generatePlans(tdee) {
       meals: buildMeals('cut_strong'),
     },
     cut_light: {
-      label: `${tdee - 300} سعرة`, goal: 'تنشيف خفيف', goalType: 'cut',
+      label: `${tdee - 300} سعرة`, goal: 'نزول وزن بالراحة', goalType: 'cut',
       color: '#fb923c', icon: '⚡', deficit: -300, targetCal: tdee - 300,
       macros: {
         protein: Math.round(((tdee - 300) * 0.38) / 4),
@@ -273,7 +273,7 @@ function generatePlans(tdee) {
       meals: buildMeals('cut_light'),
     },
     maintain: {
-      label: `${tdee} سعرة`, goal: 'محافظة', goalType: 'maintain',
+      label: `${tdee} سعرة`, goal: 'ثبات على وزنك', goalType: 'maintain',
       color: '#facc15', icon: '⚖️', deficit: 0, targetCal: tdee,
       macros: {
         protein: Math.round((tdee * 0.30) / 4),
@@ -283,7 +283,7 @@ function generatePlans(tdee) {
       meals: buildMeals('maintain'),
     },
     bulk_lean: {
-      label: `${tdee + 300} سعرة`, goal: 'تضخيم نظيف', goalType: 'bulk',
+      label: `${tdee + 300} سعرة`, goal: 'زيادة عضل بالراحة', goalType: 'bulk',
       color: '#4ade80', icon: '💪', deficit: +300, targetCal: tdee + 300,
       macros: {
         protein: Math.round(((tdee + 300) * 0.30) / 4),
@@ -293,7 +293,7 @@ function generatePlans(tdee) {
       meals: buildMeals('bulk_lean'),
     },
     bulk_strong: {
-      label: `${tdee + 600} سعرة`, goal: 'تضخيم قوي', goalType: 'bulk',
+      label: `${tdee + 600} سعرة`, goal: 'زيادة عضل بسرعة', goalType: 'bulk',
       color: '#a78bfa', icon: '🏆', deficit: +600, targetCal: tdee + 600,
       macros: {
         protein: Math.round(((tdee + 600) * 0.28) / 4),
@@ -776,7 +776,7 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         onClick={handleCalc}
         style={{ width: '100%', padding: '14px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer' }}
       >
-        احسب TDEE وأنا الخطة 🔥
+        احسب احتياجك وشوف خطتك 🔥
       </motion.button>
       {initialData && (
         <motion.button
@@ -873,10 +873,10 @@ export default function NutritionPage() {
   const plan = plans && activePlan ? plans[activePlan] : null;
   const goalBadge = plan
     ? plan.goalType === 'cut'
-      ? { label: 'تنشيف', color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
+      ? { label: 'نزول وزن', color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
       : plan.goalType === 'bulk'
-      ? { label: 'تضخيم', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }
-      : { label: 'محافظة', color: '#facc15', bg: 'rgba(250,204,21,0.1)' }
+      ? { label: 'زيادة عضل', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }
+      : { label: 'ثبات على وزنك', color: '#facc15', bg: 'rgba(250,204,21,0.1)' }
     : null;
 
   return (
@@ -893,7 +893,7 @@ export default function NutritionPage() {
               تغذية<br /><span style={{ color: 'var(--accent)' }}>على قد إيدك</span>
             </h1>
             <p style={{ color: 'var(--ash-light)', marginTop: 12, fontSize: '0.875rem', lineHeight: 1.7 }}>
-              حط بياناتك، هنحسبلك الـ TDEE الخاص بيك ونديك النظام المناسب لهدفك.
+              حط بياناتك، هنحسبلك احتياجك اليومي من السعرات ونديك النظام المناسب لهدفك.
             </p>
           </motion.div>
 
@@ -920,7 +920,7 @@ export default function NutritionPage() {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'rgba(255,77,46,0.06)', border: '1px solid rgba(255,77,46,0.2)', borderRadius: 'var(--radius-md)', marginBottom: 20 }}
               >
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 4 }}>TDEE — حرقك اليومي</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 4 }}>احتياجك اليومي من السعرات</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--accent)', lineHeight: 1 }}>{tdee} <span style={{ fontSize: '0.8rem', color: 'var(--ash-light)' }}>سعرة/يوم</span></div>
                 </div>
                 <motion.button
@@ -965,7 +965,7 @@ export default function NutritionPage() {
                         )}
                       </div>
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', marginTop: 3 }}>
-                        {plan.deficit > 0 ? `+${plan.deficit}` : plan.deficit} سعرة عن TDEE
+                        {plan.deficit > 0 ? `+${plan.deficit}` : plan.deficit} سعرة عن احتياجك اليومي
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>

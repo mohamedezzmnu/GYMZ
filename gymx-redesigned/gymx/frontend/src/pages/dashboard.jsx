@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Head><title>داشبورد — GYMZ</title></Head>
+      <Head><title>صفحتي — GYMZ</title></Head>
       <div style={{ minHeight:'100vh', paddingTop:72, paddingBottom:80, position:'relative' }}>
         <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, rgba(255,77,46,0.06) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(255,77,46,0.04) 0%,transparent 60%)' }} />
 

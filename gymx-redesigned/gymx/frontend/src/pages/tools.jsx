@@ -62,16 +62,16 @@ function TDEECalc() {
       </div>
 
       <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
-        احسب TDEE
+        احسب احتياجك من الأكل
       </motion.button>
 
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16, display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
             {[
-              { label:'المحافظة', value: result.maintenance, color:'var(--accent)', icon:'⚖️' },
-              { label:'التنشيف', value: result.cut,          color:'#f87171',       icon:'🔥' },
-              { label:'التضخيم', value: result.bulk,         color:'#4ade80',       icon:'💪' },
+              { label:'عشان تفضل زي ما انت', value: result.maintenance, color:'var(--accent)', icon:'⚖️' },
+              { label:'عشان تنزل وزن', value: result.cut,          color:'#f87171',       icon:'🔥' },
+              { label:'عشان تزود عضل', value: result.bulk,         color:'#4ade80',       icon:'💪' },
             ].map(({ label, value, color, icon }) => (
               <div key={label} style={{ padding:'14px', background:`${color}0f`, border:`1px solid ${color}25`, borderRadius:'var(--radius-sm)', textAlign:'center' }}>
                 <div style={{ fontSize:'1.2rem', marginBottom:4 }}>{icon}</div>
@@ -123,13 +123,13 @@ function OneRMCalc() {
         </div>
       </div>
       <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
-        احسب الـ 1RM
+        احسب أقصى وزن ليك
       </motion.button>
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16 }}>
             <div style={{ textAlign:'center', padding:'16px', background:'rgba(255,77,46,0.08)', border:'1px solid rgba(255,77,46,0.25)', borderRadius:'var(--radius-sm)', marginBottom:12 }}>
-              <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginBottom:4 }}>أقصى وزن (1RM)</div>
+              <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginBottom:4 }}>أقصى وزن تقدر ترفعه لمرة واحدة</div>
               <div style={{ fontFamily:'var(--font-display)', fontSize:'2.5rem', color:'var(--accent)' }}>{result.max} <span style={{ fontSize:'1rem' }}>kg</span></div>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8 }}>
@@ -162,9 +162,9 @@ function MacroCalc() {
   const [result, setResult] = useState(null);
 
   const goals = [
-    { v:'cut',      l:'تنشيف 🔥', protein:0.40, carbs:0.30, fat:0.30 },
-    { v:'maintain', l:'محافظة ⚖️', protein:0.30, carbs:0.40, fat:0.30 },
-    { v:'bulk',     l:'تضخيم 💪',  protein:0.30, carbs:0.45, fat:0.25 },
+    { v:'cut',      l:'عايز أنزل وزن 🔥', protein:0.40, carbs:0.30, fat:0.30 },
+    { v:'maintain', l:'عايز أفضل زي ما أنا ⚖️', protein:0.30, carbs:0.40, fat:0.30 },
+    { v:'bulk',     l:'عايز أزود عضل 💪',  protein:0.30, carbs:0.45, fat:0.25 },
   ];
 
   const calculate = () => {
@@ -186,7 +186,7 @@ function MacroCalc() {
       <div style={{ marginBottom:12 }}>
         <label style={labelStyle}>السعرات اليومية</label>
         <input type="number" placeholder="2500" value={calories} onChange={e => setCalories(e.target.value)} style={inputStyle} />
-        <p style={{ fontSize:'0.7rem', color:'var(--ash)', marginTop:4 }}>استخدم نتيجة الـ TDEE من فوق</p>
+        <p style={{ fontSize:'0.7rem', color:'var(--ash)', marginTop:4 }}>استخدم رقم السعرات اللي حسبته فوق</p>
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={labelStyle}>الهدف</label>
@@ -198,7 +198,7 @@ function MacroCalc() {
         </div>
       </div>
       <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
-        احسب الماكروز
+        احسب توزيع الأكل
       </motion.button>
       <AnimatePresence>
         {result && (
@@ -254,7 +254,7 @@ function BMICalc() {
   return (
     <div>
       <p style={{ fontSize:'0.8rem', color:'var(--ash-light)', marginBottom:14, direction:'rtl', lineHeight:1.6 }}>
-        مؤشر كتلة الجسم — مقياس تقريبي سريع. للحصول على صورة أدق استخدم حاسبة الـ TDEE.
+        ده مقياس سريع وتقريبي بس لوزنك بالنسبة لطولك. عشان تعرف احتياجك بالظبط من الأكل، استخدم حاسبة "سعراتك اليومية".
       </p>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
         <div>
@@ -270,14 +270,14 @@ function BMICalc() {
       </div>
 
       <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
-        احسب الـ BMI
+        احسب وزنك المثالي
       </motion.button>
 
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16 }}>
             <div style={{ textAlign:'center', padding:'20px', background:`${result.color}10`, border:`1px solid ${result.color}30`, borderRadius:'var(--radius-sm)', marginBottom:12 }}>
-              <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginBottom:4 }}>مؤشر كتلة الجسم</div>
+              <div style={{ fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginBottom:4 }}>نسبة وزنك لطولك</div>
               <div style={{ fontFamily:'var(--font-display)', fontSize:'3rem', color: result.color, lineHeight:1 }}>{result.bmi}</div>
               <div style={{ fontSize:'0.9rem', color: result.color, marginTop:6, fontWeight:600 }}>{result.label}</div>
             </div>
@@ -311,10 +311,10 @@ const toggleActive = { background:'var(--accent-dim)', border:'1px solid rgba(25
 
 // ── TABS ──────────────────────────────────────────────────
 const TABS = [
-  { id:'tdee',  label:'TDEE',  icon:Zap,        desc:'احتياج السعرات',          component: TDEECalc },
-  { id:'1rm',   label:'1RM',   icon:Scale,       desc:'أقصى وزن للتكرار',        component: OneRMCalc },
-  { id:'macro', label:'Macro', icon:Target,      desc:'البروتين والكارب والدهون', component: MacroCalc },
-  { id:'bmi',   label:'BMI',   icon:Activity,    desc:'مؤشر كتلة الجسم',         component: BMICalc },
+  { id:'tdee',  label:'سعراتك اليومية',  icon:Zap,        desc:'احتياج السعرات',          component: TDEECalc },
+  { id:'1rm',   label:'أقصى قوة',   icon:Scale,       desc:'أقصى وزن للتكرار',        component: OneRMCalc },
+  { id:'macro', label:'توزيع الأكل', icon:Target,      desc:'البروتين والكارب والدهون', component: MacroCalc },
+  { id:'bmi',   label:'وزنك المثالي',   icon:Activity,    desc:'نسبة وزنك لطولك',         component: BMICalc },
 ];
 
 export default function ToolsPage() {
@@ -323,18 +323,18 @@ export default function ToolsPage() {
 
   return (
     <>
-      <Head><title>Tools — GYMZ</title></Head>
+      <Head><title>الحاسبات — GYMZ</title></Head>
       <div style={{ minHeight:'100vh', paddingTop:88, paddingBottom:60, position:'relative' }}>
         <div style={{ maxWidth:680, margin:'0 auto', padding:'0 20px', position:'relative', zIndex:1 }}>
 
           {/* header */}
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.3 }} style={{ marginBottom:32 }}>
-            <div className="mono" style={{ color:'var(--ash)', marginBottom:8 }}>Fitness tools</div>
+            <div className="mono" style={{ color:'var(--ash)', marginBottom:8 }}>أدوات ومساعدات</div>
             <h1 style={{ fontFamily:'var(--font-display)', fontWeight: 600, fontSize:'clamp(2rem,4.5vw,3rem)', letterSpacing:'-0.03em', lineHeight:1.05 }}>
               الحاسبات <span style={{ color:'var(--accent)' }}>الرياضية</span>
             </h1>
             <p style={{ color:'var(--ash-light)', marginTop:12, fontSize:'0.9rem', direction:'rtl' }}>
-              احسب سعراتك، أقصى وزن، وماكروزك — كل حاجة في مكان واحد.
+              احسب سعراتك اليومية، أقصى وزن تقدر ترفعه، وتوزيع أكلك — كل حاجة في مكان واحد.
             </p>
           </motion.div>
 
