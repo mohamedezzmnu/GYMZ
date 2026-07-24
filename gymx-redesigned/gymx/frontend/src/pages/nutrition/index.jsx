@@ -763,8 +763,14 @@ function BarcodeScannerModal({ onDetected, onClose }) {
         const reader = new BrowserMultiFormatReader();
 
         const controls = await reader.decodeFromConstraints(
-          { video: { facingMode: { ideal: 'environment' } } },
-          videoRef.current,
+  {
+          video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+                 }
+  },
+  videoRef.current,
           (result) => {
             if (!alive || !result) return;
             const text = (result.getText() || '').replace(/\D/g, '');
