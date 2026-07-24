@@ -211,7 +211,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-            style={{ position: 'fixed', top: 84, left: '50%', transform: 'translateX(-50%)', zIndex: 101, width: 'calc(100% - 32px)', maxWidth: 1180, maxHeight: 'calc(100vh - 84px - 76px - env(safe-area-inset-bottom))', overflowY: 'auto', background: 'rgba(17,17,17,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderTop: '2px solid var(--volt)', borderRadius: 20, boxShadow: '0 20px 50px rgba(0,0,0,0.55)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
+            style={{ position: 'fixed', top: 84, left: 0, right: 0, margin: '0 auto', zIndex: 101, width: 'calc(100% - 32px)', maxWidth: 1180, maxHeight: 'calc(100vh - 84px - 76px - env(safe-area-inset-bottom))', overflowY: 'auto', background: 'rgba(17,17,17,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderTop: '2px solid var(--volt)', borderRadius: 20, boxShadow: '0 20px 50px rgba(0,0,0,0.55)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
           >
             {[...publicLinks, ...(user ? privateLinks : [])].map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}>
