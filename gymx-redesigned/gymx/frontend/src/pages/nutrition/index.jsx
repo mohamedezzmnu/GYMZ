@@ -1,7 +1,7 @@
 // src/pages/nutrition/index.jsx
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -203,6 +203,80 @@ async function clearUserDataFromSupabase(userId) {
     await supabase.from('nutrition_user_data').delete().eq('user_id', userId);
   } catch {
     // تجاهل
+  }
+}
+
+// ── بحث بالباركود ──────────────────────────────────────────
+// الترتيب: 1) Open Food Facts (المصدر العالمي المفتوح)
+//          2) لو مش موجود هناك → قاعدة بياناتنا (منتجات ضافها مستخدمين قبل كده)
+//          3) لو مش موجود في الاتنين → نعرض فورم إدخال يدوي، وبنحفظ النتيجة في
+//             قاعدة بياناتنا عشان تظهر لأي مستخدم تاني يدور على نفس الباركود بعدين.
+function isValidBarcode(str = '') {
+  const digits = str.replace(/\D/g, '');
+  // أشهر مقاسات الباركود العالمية: EAN-8, UPC-A(12), EAN-13, GTIN-14
+  return digits.length >= 8 && digits.length <= 14;
+}
+
+async function lookupOpenFoodFacts(barcode) {
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.status !== 1 || !data.product) return null;
+
+    const p = data.product;
+    const n = p.nutriments || {};
+    // القيم دي بتيجي غالباً لكل 100 جرام من المنتج
+    let cal = n['energy-kcal_100g'];
+    if (cal == null && n['energy_100g'] != null) cal = n['energy_100g'] / 4.184; // كيلوجول → كالوري
+    if (cal == null) return null; // بيانات ناقصة أوي، متنفعش نعرضها
+
+    return {
+      barcode,
+      name: (p.product_name_ar || p.product_name || p.generic_name_ar || p.generic_name || '').trim() || 'منتج بدون اسم',
+      cal: Math.round(cal),
+      protein: Math.round((n['proteins_100g'] ?? 0) * 10) / 10,
+      carbs: Math.round((n['carbohydrates_100g'] ?? 0) * 10) / 10,
+      fat: Math.round((n['fat_100g'] ?? 0) * 10) / 10,
+      serving: '100 جرام',
+      source: 'openfoodfacts',
+    };
+  } catch {
+    return null; // مشكلة نت أو الخدمة واقعة — نكمل نجرب المصادر التانية
+  }
+}
+
+async function lookupCommunityFood(barcode) {
+  try {
+    const { data, error } = await supabase
+      .from('community_foods')
+      .select('barcode, name, cal, protein, carbs, fat, serving')
+      .eq('barcode', barcode)
+      .single();
+    if (error || !data) return null;
+    return { ...data, source: 'community' };
+  } catch {
+    return null;
+  }
+}
+
+async function saveCommunityFood(barcode, food, userId) {
+  try {
+    const { error } = await supabase.from('community_foods').upsert({
+      barcode,
+      name: food.name,
+      cal: food.cal,
+      protein: food.protein,
+      carbs: food.carbs,
+      fat: food.fat,
+      serving: food.serving || '100 جرام',
+      created_by: userId || null,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) return false;
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -672,6 +746,229 @@ function FoodSearch() {
   );
 }
 
+// ── بحث بالباركود (Open Food Facts + قاعدة بيانات المجتمع) ──
+function BarcodeSearch({ userId }) {
+  const [barcode, setBarcode]   = useState('');
+  const [status,  setStatus]    = useState('idle'); // idle | loading | found | manual | saving | saved | error
+  const [result,  setResult]    = useState(null);
+  const [manualErr, setManualErr] = useState('');
+  const [manual, setManual] = useState({ name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+
+  const resetManual = () => setManual({ name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+
+  const handleSearch = async () => {
+    const clean = barcode.replace(/\D/g, '');
+    if (!isValidBarcode(clean)) {
+      setStatus('error');
+      setResult(null);
+      return;
+    }
+    setStatus('loading');
+    setResult(null);
+    setManualErr('');
+
+    // 1) Open Food Facts أولاً
+    const off = await lookupOpenFoodFacts(clean);
+    if (off) {
+      setResult(off);
+      setStatus('found');
+      return;
+    }
+
+    // 2) لو مش موجود هناك، ندور في قاعدة بياناتنا (منتجات ضافها مستخدمين قبل كده)
+    const community = await lookupCommunityFood(clean);
+    if (community) {
+      setResult(community);
+      setStatus('found');
+      return;
+    }
+
+    // 3) مفيش في أي حتة → نعرض فورم الإدخال اليدوي
+    resetManual();
+    setStatus('manual');
+  };
+
+  const handleManualSave = async () => {
+    const name = manual.name.trim();
+    const cal = parseFloat(manual.cal);
+    const protein = parseFloat(manual.protein || 0);
+    const carbs = parseFloat(manual.carbs || 0);
+    const fat = parseFloat(manual.fat || 0);
+
+    if (!name) { setManualErr('اكتب اسم المنتج'); return; }
+    if (!cal || cal <= 0 || cal > 3000) { setManualErr('اكتب سعرات حرارية منطقية (1-3000)'); return; }
+    if ([protein, carbs, fat].some(v => isNaN(v) || v < 0 || v > 500)) {
+      setManualErr('اكتب أرقام موجبة ومنطقية للبروتين/الكارب/الدهون');
+      return;
+    }
+    // ✅ فحص منطقي: السعرات المحسوبة من الماكروز لازم تكون قريبة من السعرات المكتوبة
+    const calcCal = protein * 4 + carbs * 4 + fat * 9;
+    if (calcCal > 0 && Math.abs(calcCal - cal) / cal > 0.35) {
+      setManualErr('الأرقام مش متطابقة منطقياً — السعرات المحسوبة من البروتين/الكارب/الدهون بعيدة عن السعرات اللي كتبتها. راجع الأرقام من العلبة تاني.');
+      return;
+    }
+
+    setManualErr('');
+    setStatus('saving');
+    const clean = barcode.replace(/\D/g, '');
+    const food = { name, cal: Math.round(cal), protein, carbs, fat, serving: manual.serving.trim() || '100 جرام' };
+    const ok = await saveCommunityFood(clean, food, userId);
+    if (ok) {
+      setResult({ ...food, barcode: clean, source: 'community' });
+      setStatus('saved');
+    } else {
+      // حتى لو فشل الحفظ في قاعدة البيانات، نعرضله البيانات محلياً عشان يكمل نظامه
+      setResult({ ...food, barcode: clean, source: 'community' });
+      setStatus('error-save');
+    }
+  };
+
+  const sourceLabel = result?.source === 'openfoodfacts'
+    ? { text: 'المصدر: Open Food Facts', color: '#38bdf8' }
+    : { text: 'مضاف من مستخدمين — راجع الأرقام من العلبة لو مش متأكد', color: '#a78bfa' };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '20px 20px 22px', marginBottom: 24, position: 'relative', overflow: 'hidden' }}
+    >
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#38bdf8,transparent)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <Barcode size={17} color="#38bdf8" />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>دوّر بالباركود</span>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={barcode}
+          onChange={e => { setBarcode(e.target.value.replace(/[^\d]/g, '')); if (status !== 'idle') setStatus('idle'); }}
+          onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
+          placeholder="اكتب رقم الباركود (8-14 رقم)"
+          style={{
+            flex: 1, padding: '12px 14px', background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)',
+            color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
+            outline: 'none', boxSizing: 'border-box', direction: 'ltr', textAlign: 'center',
+          }}
+        />
+        <motion.button
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
+          onClick={handleSearch}
+          disabled={status === 'loading'}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 18px', background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.4)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'loading' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+        >
+          {status === 'loading' ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Search size={14} />}
+          دور
+        </motion.button>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {status === 'error' && (
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 'var(--radius-sm)', color: '#f87171', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={14} /> رقم الباركود مش صح — لازم يكون بين 8 و14 رقم.
+          </motion.div>
+        )}
+
+        {status === 'loading' && (
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ marginTop: 12, fontSize: '0.78rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Loader size={13} style={{ animation: 'spin 1s linear infinite' }} /> بندور على المنتج...
+          </motion.div>
+        )}
+
+        {(status === 'found' || status === 'saved') && result && (
+          <motion.div key="found" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: 'var(--radius-sm)' }}>
+            {status === 'saved' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, color: '#4ade80', fontSize: '0.75rem', fontFamily: 'var(--font-body)' }}>
+                <Check size={13} /> اتحفظ المنتج — هيظهر لباقي المستخدمين لما يدوروا على نفس الباركود.
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)' }}>{result.name}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', direction: 'ltr' }}>{result.barcode}</span>
+            </div>
+            <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginBottom: 10 }}>لكل {result.serving || '100 جرام'}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
+              {[
+                { label: 'سعرات', val: result.cal, unit: '', color: '#38bdf8' },
+                { label: 'بروتين', val: result.protein, unit: 'g', color: '#f87171' },
+                { label: 'كارب', val: result.carbs, unit: 'g', color: '#facc15' },
+                { label: 'دهون', val: result.fat, unit: 'g', color: '#4ade80' },
+              ].map(({ label, val, unit, color }) => (
+                <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: `${color}0a`, border: `1px solid ${color}18`, borderRadius: 6 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color }}>{val}<span style={{ fontSize: '0.6rem' }}>{unit}</span></div>
+                  <div style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2 }}>{label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 10, fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: sourceLabel.color }}>{sourceLabel.text}</div>
+          </motion.div>
+        )}
+
+        {(status === 'manual' || status === 'saving' || status === 'error-save') && (
+          <motion.div key="manual" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: '0.78rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)' }}>
+              <Barcode size={13} color="var(--ash-light)" />
+              المنتج مش موجود — اكتب بياناته من علبة المنتج وهنحفظها عشان تفيد غيرك بعدين.
+            </div>
+
+            {status === 'error-save' && (
+              <div style={{ marginTop: 8, marginBottom: 8, padding: '8px 12px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, color: '#f87171', fontSize: '0.72rem', fontFamily: 'var(--font-body)' }}>
+                <AlertTriangle size={12} style={{ verticalAlign: 'middle', marginLeft: 4 }} />
+                حصلت مشكلة في حفظ المنتج في قاعدة البيانات (ممكن يكون مشكلة نت). البيانات ظاهرة تحت عشان تكمل نظامك دلوقتي، بس ممكن متتحفظش لغيرك.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+              <input type="text" placeholder="اسم المنتج" value={manual.name}
+                onChange={e => setManual(m => ({ ...m, name: e.target.value }))}
+                style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
+
+              <input type="text" placeholder="حجم الحصة (مثلاً: 100 جرام، علبة واحدة)" value={manual.serving}
+                onChange={e => setManual(m => ({ ...m, serving: e.target.value }))}
+                style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
+                {[
+                  { key: 'cal', ph: 'سعرات' },
+                  { key: 'protein', ph: 'بروتين g' },
+                  { key: 'carbs', ph: 'كارب g' },
+                  { key: 'fat', ph: 'دهون g' },
+                ].map(({ key, ph }) => (
+                  <input key={key} type="number" placeholder={ph} value={manual[key]}
+                    onChange={e => setManual(m => ({ ...m, [key]: e.target.value }))}
+                    style={{ padding: '10px 6px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', outline: 'none', textAlign: 'center', direction: 'ltr' }} />
+                ))}
+              </div>
+
+              {manualErr && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f87171', fontSize: '0.72rem', fontFamily: 'var(--font-body)' }}>
+                  <AlertTriangle size={12} /> {manualErr}
+                </div>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
+                onClick={handleManualSave}
+                disabled={status === 'saving'}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.4)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'saving' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem' }}
+              >
+                {status === 'saving' ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />}
+                احفظ المنتج
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 // ── فورم البيانات ─────────────────────────────────────────
 function UserDataForm({ onCalculate, initialData, onClear }) {
   const [weight, setWeight]   = useState('');
@@ -898,6 +1195,8 @@ export default function NutritionPage() {
           </motion.div>
 
           <FoodSearch />
+
+          <BarcodeSearch userId={user?.id} />
 
           <UserDataForm
             onCalculate={handleCalculate}
