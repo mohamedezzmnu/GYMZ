@@ -1,7 +1,7 @@
 // src/pages/nutrition/index.jsx
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle, Camera, X, ScanLine } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle, Camera, X, ScanLine, ShoppingBag } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -1304,8 +1304,11 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
   const [gender, setGender]   = useState('male');
   const [activity, setActivity] = useState('moderate');
   const [error,  setError]    = useState('');
+  // ✅ الفورم يبقى مقفول (ملخص صغير زي السلة) لو فيه بيانات محفوظة، ومفتوح لو أول مرة
+  const [expanded, setExpanded] = useState(!initialData);
+  const autoCollapsedRef = useRef(false);
 
-  // ✅ لو فيه بيانات محفوظة من قبل، نعبي بيها الفورم تلقائياً
+  // ✅ لو فيه بيانات محفوظة من قبل، نعبي بيها الفورم تلقائياً ونقفله (أول مرة بس)
   useEffect(() => {
     if (initialData) {
       setWeight(initialData.weight ?? '');
@@ -1313,6 +1316,10 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
       setAge(initialData.age ?? '');
       setGender(initialData.gender ?? 'male');
       setActivity(initialData.activity ?? 'moderate');
+      if (!autoCollapsedRef.current) {
+        setExpanded(false);
+        autoCollapsedRef.current = true;
+      }
     }
   }, [initialData]);
 
@@ -1343,7 +1350,36 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
     }
     setError('');
     onCalculate({ weight: w, height: h, age: a, gender, activity });
+    setExpanded(false); // ✅ اقفل الفورم واعرض ملخص صغير بعد الحفظ
   };
+
+  // ✅ ملخص صغير (زي السلة) بعد ما البيانات تتحفظ — دوس عليه يفتحلك الفورم تاني للتعديل
+  if (!expanded && initialData) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        onClick={() => setExpanded(true)}
+        style={{ cursor: 'pointer', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}
+      >
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ShoppingBag size={18} color="var(--accent)" />
+          </div>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>بياناتك محفوظة</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash-light)', marginTop: 2, direction: 'ltr', textAlign: 'right' }}>
+              {weight}كجم · {height}سم · {age} سنة
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.66rem' }}>
+          عدّل
+          <ChevronDown size={15} color="var(--ash-light)" />
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -1351,9 +1387,20 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
       style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '28px 24px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}
     >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <Calculator size={18} color="var(--accent)" />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>احسب نظامك</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Calculator size={18} color="var(--accent)" />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>احسب نظامك</span>
+        </div>
+        {initialData && (
+          <motion.button
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
+            onClick={() => setExpanded(false)}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.66rem', fontFamily: 'var(--font-mono)' }}
+          >
+            <ChevronUp size={12} /> اقفل
+          </motion.button>
+        )}
       </div>
       <div style={{ marginBottom: 16 }}>
         <span style={labelStyle}>الجنس</span>
