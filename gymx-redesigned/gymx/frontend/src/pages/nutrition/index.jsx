@@ -80,7 +80,7 @@ const PROTEIN_OPTIONS = [
   { name: '150جم فراخ مفرومة اقتصادية',      protein: 28,   carbs: 0,   fat: 6,    cal: 165 },
 
   // 📋 من الجدول الغذائي
-  { name: "100جم اللانشون الرومي المدخن", protein: 20, carbs: 6, fat: 3, cal: 91 },
+  { name: "100جم اللانشون الرومي المدخن", protein: 20, carbs: 6, fat: 3, cal: 131 },
   { name: "100جم صدر دجاج مطهي", protein: 30, carbs: 0, fat: 4, cal: 165 },
   { name: "100جم شوربة دجاج", protein: 2, carbs: 0.5, fat: 0.6, cal: 16 },
   { name: "100جم صدر بط مطهي", protein: 26.22, carbs: 0, fat: 2.38, cal: 133 },
@@ -94,8 +94,19 @@ const PROTEIN_OPTIONS = [
   { name: "100جم السمك السالمون المطهي", protein: 18, carbs: 0, fat: 4.3, cal: 117 },
   { name: "100جم الجمبرى المطهي", protein: 24.47, carbs: 1.17, fat: 5.03, cal: 154 },
   { name: "100جم جبنة قريش", protein: 12.49, carbs: 2.68, fat: 4.51, cal: 103 },
-  { name: "100جم الجرجير", protein: 2.3, carbs: 1.29, fat: 0.1, cal: 11 },
-  { name: "100جم الترمس المسلوق", protein: 16, carbs: 10, fat: 3, cal: 120 },
+  { name: "100جم اللحم البقرى الصافى المطهي", protein: 25, carbs: 0, fat: 13, cal: 250 },
+  { name: "100جم اللحمة المفرومة 10% دسم مطهي", protein: 20, carbs: 0, fat: 10, cal: 176 },
+  { name: "100جم المرتديلا", protein: 16, carbs: 3, fat: 25, cal: 311 },
+  { name: "100جم ورك دجاج مطهي", protein: 23.68, carbs: 0, fat: 12.28, cal: 212 },
+  { name: "100جم بيض نئ", protein: 12.58, carbs: 0.77, fat: 9.94, cal: 147 },
+  { name: "100جم اللانشون", protein: 18, carbs: 4, fat: 14, cal: 216 },
+  { name: "100جم اللبن الكامل الدسم", protein: 3, carbs: 5, fat: 3, cal: 60 },
+  { name: "100جم الجبنة الرومى", protein: 25, carbs: 1, fat: 30, cal: 374 },
+  { name: "100جم الجبنة الشيدر", protein: 24.9, carbs: 1.28, fat: 33.14, cal: 403 },
+  { name: "100جم اللبن الرائب", protein: 3, carbs: 5, fat: 3, cal: 60 },
+  { name: "100جم اللبن خالى الدسم", protein: 3, carbs: 5, fat: 0.2, cal: 35 },
+  { name: "100جم الزبادى كامل الدسم", protein: 2.9, carbs: 13, fat: 2.7, cal: 95 },
+  { name: "100جم الزبادى خالى الدسم", protein: 5.73, carbs: 7.68, fat: 0.18, cal: 56 },
 ];
 
 const CARB_OPTIONS = [
@@ -123,9 +134,6 @@ const CARB_OPTIONS = [
   { name: '100جم دقيق شوفان اقتصادي',    protein: 6.3, carbs: 68,   fat: 4.4, cal: 335 },
 
   // 📋 من الجدول الغذائي
-  { name: "100جم اللبن خالى الدسم", protein: 3, carbs: 5, fat: 0.2, cal: 35 },
-  { name: "100جم الزبادى كامل الدسم", protein: 2.9, carbs: 13, fat: 2.7, cal: 95 },
-  { name: "100جم الزبادى خالى الدسم", protein: 5.73, carbs: 7.68, fat: 0.18, cal: 56 },
   { name: "100جم الشوفان النئ", protein: 14, carbs: 57, fat: 7, cal: 347 },
   { name: "100جم الفول المسلوق", protein: 7.6, carbs: 19.7, fat: 0.4, cal: 110 },
   { name: "100جم الارز الابيض المسلوق", protein: 2.66, carbs: 27.9, fat: 0.28, cal: 129 },
@@ -149,7 +157,6 @@ const CARB_OPTIONS = [
   { name: "100جم الكورن فلكس", protein: 7.24, carbs: 83.02, fat: 3.38, cal: 376 },
   { name: "100جم نشا الذرة", protein: 0.3, carbs: 91, fat: 0.1, cal: 381 },
   { name: "100جم دبس الرمان", protein: 0, carbs: 45, fat: 0, cal: 180 },
-  { name: "100جم اللب", protein: 19, carbs: 54, fat: 19, cal: 446 },
   { name: "100جم الموز", protein: 1.09, carbs: 22.84, fat: 0.33, cal: 89 },
   { name: "100جم البرتقال", protein: 0.94, carbs: 11.75, fat: 0.12, cal: 47 },
   { name: "100جم التفاح", protein: 0.26, carbs: 13.81, fat: 0.17, cal: 52 },
@@ -200,6 +207,8 @@ const CARB_OPTIONS = [
   { name: "100جم الحمص", protein: 19, carbs: 61, fat: 6, cal: 364 },
   { name: "100جم الباذنجان", protein: 1, carbs: 6, fat: 0.2, cal: 25 },
   { name: "100جم القرنبيط", protein: 1.98, carbs: 5.3, fat: 0.1, cal: 25 },
+  { name: "100جم الجرجير", protein: 2.3, carbs: 1.29, fat: 0.1, cal: 11 },
+  { name: "100جم الترمس المسلوق", protein: 16, carbs: 10, fat: 3, cal: 120 },
 ];
 
 // ✅ إصلاح: FAT_OPTIONS متصلة دلوقتي بالوجبات
@@ -219,17 +228,7 @@ const FAT_OPTIONS = [
   { name: '20جم فول سوداني محمص',              protein: 5.2, carbs: 4.5, fat: 10,  cal: 124 },
 
   // 📋 من الجدول الغذائي
-  { name: "100جم اللحم البقرى الصافى المطهي", protein: 25, carbs: 0, fat: 13, cal: 250 },
-  { name: "100جم اللحمة المفرومة 10% دسم مطهي", protein: 20, carbs: 0, fat: 10, cal: 176 },
-  { name: "100جم المرتديلا", protein: 16, carbs: 3, fat: 25, cal: 311 },
-  { name: "100جم ورك دجاج مطهي", protein: 23.68, carbs: 0, fat: 12.28, cal: 212 },
-  { name: "100جم بيض نئ", protein: 12.58, carbs: 0.77, fat: 9.94, cal: 147 },
-  { name: "100جم اللانشون", protein: 18, carbs: 4, fat: 14, cal: 216 },
-  { name: "100جم اللبن الكامل الدسم", protein: 3, carbs: 5, fat: 3, cal: 60 },
-  { name: "100جم الجبنة الرومى", protein: 25, carbs: 1, fat: 30, cal: 374 },
-  { name: "100جم الجبنة الشيدر", protein: 24.9, carbs: 1.28, fat: 33.14, cal: 403 },
   { name: "100جم جبنة مثلثات", protein: 7.55, carbs: 2.66, fat: 34.87, cal: 349 },
-  { name: "100جم اللبن الرائب", protein: 3, carbs: 5, fat: 3, cal: 60 },
   { name: "100جم البطاطس الشيبسى", protein: 6.56, carbs: 49.74, fat: 37.47, cal: 547 },
   { name: "100جم الحلاوة الطحينية", protein: 11, carbs: 32, fat: 44, cal: 533 },
   { name: "100جم المايونيز عادى", protein: 1.1, carbs: 3.9, fat: 78.2, cal: 717 },
@@ -249,6 +248,7 @@ const FAT_OPTIONS = [
   { name: "100جم زيت السمك", protein: 0, carbs: 0, fat: 100, cal: 902 },
   { name: "100جم الطحينة", protein: 17, carbs: 21, fat: 54, cal: 595 },
   { name: "100جم الافوكادو", protein: 2, carbs: 8.53, fat: 14.66, cal: 160 },
+  { name: "100جم اللب", protein: 19, carbs: 54, fat: 19, cal: 446 },
 ];
 
 // ── تطبيع النص العربي عشان البحث يشتغل صح مهما كتب المستخدم ──
