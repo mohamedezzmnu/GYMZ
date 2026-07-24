@@ -386,8 +386,8 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: '1.4rem' }}>{program.icon}</span>
-              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-body)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
-                {program.tag}
+              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
+                {program.subtitle}
               </span>
               <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: program.levelColor.bg, border: '1px solid ' + program.levelColor.border, color: program.levelColor.text }}>
                 {program.level}
