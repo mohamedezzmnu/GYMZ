@@ -1,9 +1,8 @@
-// ══════════════════════════════════════════
-// بيانات التمارين المشتركة (مصدر واحد يستخدمه كل من صفحة التمارين وصفحة البرامج)
-// ══════════════════════════════════════════
-export const BASE_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises';
+// ✅ ملف مشترك لبيانات التمارين (اسم/صورة/عضلة/نصيحة) — مستخدم في صفحة التمارين وصفحة البرامج
 
-export const EXERCISES = [
+const BASE_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises';
+
+const EXERCISES = [
   { id:1,  name:'Barbell Bench Press',      name_ar:'ضغط بار على البنش',     muscle_group:'Chest',     difficulty:'intermediate', equipment:'Barbell',       img:`${BASE_URL}/Barbell_Bench_Press_-_Medium_Grip/0.jpg`,                       tips:'خلي رجليك ثابتين على الارض، قوس بسيط في ضهرك، والقبضة اعرض شوية من الكتفين.' },
   { id:2,  name:'Incline Dumbbell Press',   name_ar:'ضغط دمبل مائل',         muscle_group:'Chest',     difficulty:'intermediate', equipment:'Dumbbells',     img:`${BASE_URL}/Incline_Dumbbell_Press/0.jpg`,                                  tips:'اضبط البنش من 30 لـ45 درجة، حاول تحس بضغط الصدر العلوي وانت بتطلع.' },
   { id:3,  name:'Push-Up',                  name_ar:'تمرين الضغط',           muscle_group:'Chest',     difficulty:'beginner',     equipment:'Bodyweight',    img:`${BASE_URL}/Pushups/0.jpg`,                                                 tips:'شد بطنك كويس وجسمك يكون مستقيم من دماغك لكعبك.' },
@@ -66,4 +65,4 @@ export const EXERCISES = [
   { id:60, name:'Reverse Curl',             name_ar:'كيرل معكوس',            muscle_group:'Forearms',  difficulty:'beginner',     equipment:'Barbell',       img:`${BASE_URL}/Reverse_Barbell_Curl/0.jpg`,                                    tips:'بيشتغل على عضلات السواعد الخارجية.' },
 ];
 
-export default EXERCISES;
+export { BASE_URL, EXERCISES };

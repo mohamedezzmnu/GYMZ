@@ -1,11 +1,64 @@
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2, ImageIcon, X } from 'lucide-react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
+import { EXERCISES } from '../../data/exercises';
+
+// ══════════════════════════════════════════
+// ربط أسماء تمارين البرامج بصور التمارين (id من EXERCISES)
+// ══════════════════════════════════════════
+const PROGRAM_EXERCISE_MAP = {
+  'أرنولد برس': 19,
+  'أوفر هيد برس': 14,
+  'أوفر هيد برس بار': 14,
+  'بريتشر كيرل': 24,
+  'بنش برس': 1,
+  'بنش برس بار': 1,
+  'تراسبس بوش داون': 31,
+  'ديد ليفت': 7,
+  'ديد ليفت رومانيان': 37,
+  'رفع أمامي': 17,
+  'رفع جانبي': 16,
+  'رفع سمانة': 56,
+  'رفع سمانة جالس': 57,
+  'رفع سمانة واقف': 56,
+  'رومانيان ديد ليفت': 37,
+  'رووينج بار': 9,
+  'سبليت سكوات بلغاري': 41,
+  'سكال كراشر': 30,
+  'سكوات': 35,
+  'سكوات بار': 35,
+  'سيتد رووينج': 11,
+  'ضغط بنش مائل': 2,
+  'ضغط بنش مائل دمبل': 2,
+  'ضغط كتف': 14,
+  'ضغط مائل دمبل': 2,
+  'عقلة': 8,
+  'عقلة أو كيبل': 8,
+  'فلاي دمبل': 5,
+  'فلاي كيبل': 4,
+  'فيس بولز': 13,
+  'كيبل كيك باك': 46,
+  'كيرل بار': 21,
+  'كيرل بايسبس': 22,
+  'لات بول داون': 10,
+  'ليج اكستنشن': 39,
+  'ليج برس': 36,
+  'ليج كيرل': 38,
+  'مط تراسبس فوق الرأس': 32,
+  'هامر كيرل': 23,
+  'هيب ثراست': 44,
+};
+
+function getExerciseImage(name) {
+  const id = PROGRAM_EXERCISE_MAP[name];
+  if (!id) return null;
+  return EXERCISES.find(e => e.id === id) || null;
+}
 
 // ══════════════════════════════════════════
 // بيانات البرامج
@@ -292,6 +345,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
   const [joining, setJoining] = useState(false);
   const [sessionDone, setSessionDone] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
+  const [previewExercise, setPreviewExercise] = useState(null);
   const { user } = useAuth();
 
   // هل البرنامج ده هو المسجل فيه؟
@@ -464,17 +518,36 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                   {program.days_detail[activeDay].day}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {program.days_detail[activeDay].exercises.map((ex, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', direction: 'rtl' }}>
-                      <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: program.accentColor, opacity: 0.7, minWidth: 22, paddingTop: 2 }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)', marginBottom: 2 }}>{ex.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
+                  {program.days_detail[activeDay].exercises.map((ex, i) => {
+                    const exImg = getExerciseImage(ex.name);
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', direction: 'rtl' }}>
+                        <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: program.accentColor, opacity: 0.7, minWidth: 22, paddingTop: 2 }}>
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                          <div>
+                            <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)', marginBottom: 2 }}>{ex.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
+                          </div>
+                          {exImg && (
+                            <motion.button
+                              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
+                              onClick={() => setPreviewExercise(exImg)}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 4, padding: '5px 9px', flexShrink: 0,
+                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: 7, color: 'var(--ash-light)', cursor: 'pointer',
+                                fontFamily: 'var(--font-mono)', fontSize: '0.62rem', whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <ImageIcon size={12} /> صورة
+                            </motion.button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </motion.div>
 
@@ -543,6 +616,57 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                   : <>✅ سجّل جلسة النهارده</>}
               </motion.button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal معاينة صورة التمرين ── */}
+      <AnimatePresence>
+        {previewExercise && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setPreviewExercise(null)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.18 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                width: '100%', maxWidth: 380, background: 'var(--carbon)', border: '1px solid var(--glass-border)',
+                borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative',
+              }}
+            >
+              <button
+                onClick={() => setPreviewExercise(null)}
+                style={{
+                  position: 'absolute', top: 10, left: 10, zIndex: 2,
+                  width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.55)',
+                  border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', cursor: 'pointer',
+                }}
+              >
+                <X size={15} />
+              </button>
+              <img
+                src={previewExercise.img} alt={previewExercise.name_ar} loading="lazy"
+                style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', background: 'var(--iron)' }}
+              />
+              <div style={{ padding: '16px 18px', direction: 'rtl' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)', marginBottom: 6 }}>
+                  {previewExercise.name_ar}
+                </div>
+                {previewExercise.tips && (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
+                    💡 {previewExercise.tips}
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
