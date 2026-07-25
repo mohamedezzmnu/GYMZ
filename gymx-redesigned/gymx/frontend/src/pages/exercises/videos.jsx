@@ -36,9 +36,24 @@ const PAGE_LIMIT = 24;
 const BODYPART_AR = {
   back: 'الظهر', cardio: 'كارديو', chest: 'الصدر', hips: 'الحوض والجلوتس',
   'lower arms': 'أسفل الذراع', 'lower legs': 'أسفل الرجل', shoulders: 'الأكتاف',
-  'upper arms': 'أعلى الذراع', 'upper legs': 'أعلى الرجل', waist: 'الخصر',
+  'upper arms': 'أعلى الذراع', 'upper legs': 'أعلى الرجل', waist: 'البطن',
 };
-const BODYPARTS = Object.keys(BODYPART_AR);
+
+// ✅ فلتر أقسام الجسم: أعلى وأسفل الذراع/الرجل بقوا فلتر واحد بدل ما يبقوا منفصلين
+const BODYPART_FILTER_GROUPS = {
+  back: ['back'], cardio: ['cardio'], chest: ['chest'], hips: ['hips'],
+  arms: ['upper arms', 'lower arms'], legs: ['upper legs', 'lower legs'],
+  shoulders: ['shoulders'], waist: ['waist'],
+};
+const BODYPART_FILTER_AR = {
+  back: 'الظهر', cardio: 'كارديو', chest: 'الصدر', hips: 'الحوض والجلوتس',
+  arms: 'الذراع', legs: 'الرجل', shoulders: 'الأكتاف', waist: 'البطن',
+};
+const BODYPART_FILTER_ICON = {
+  back: BackIcon, cardio: HeartPulse, chest: ChestIcon, hips: HipIcon,
+  arms: ArmIcon, legs: LegsIcon, shoulders: ShoulderIcon, waist: CoreIcon,
+};
+const BODYPARTS = Object.keys(BODYPART_FILTER_AR);
 
 // ── ترجمة المعدات ──────────────────────────────────────────
 const EQUIPMENT_AR = {
@@ -124,11 +139,6 @@ function HipIcon(props) {
 
 // ── أيقونات كروت "أقسام الجسم" — رسمة عضلة مبسّطة لكل قسم، بنفس
 // أسلوب الصورة المرجعية بدل الأيقونات العامة ──────────────────
-const BODYPART_ICON = {
-  back: BackIcon, cardio: HeartPulse, chest: ChestIcon, hips: HipIcon,
-  'lower arms': ArmIcon, 'lower legs': LegsIcon, shoulders: ShoulderIcon,
-  'upper arms': ArmIcon, 'upper legs': LegsIcon, waist: CoreIcon,
-};
 const EQUIPMENT_ICON = {
   band: Waves, barbell: Dumbbell, 'body weight': PersonStanding, cable: Cable,
   dumbbell: Dumbbell, 'ez barbell': Dumbbell, kettlebell: CircleDot,
@@ -530,10 +540,10 @@ function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply
             <FilterSection title="أقسام الجسم" isOpen={openSection === 'bodyPart'} onToggle={() => toggleSection('bodyPart')}>
               <div style={grid}>
                 {BODYPARTS.map(b => {
-                  const Icon = BODYPART_ICON[b] || Target;
+                  const Icon = BODYPART_FILTER_ICON[b] || Target;
                   return (
                     <FilterIconCard
-                      key={b} Icon={Icon} label={BODYPART_AR[b]}
+                      key={b} Icon={Icon} label={BODYPART_FILTER_AR[b]}
                       selected={draftBodyPart === b}
                       onClick={() => setDraftBodyPart(prev => (prev === b ? '' : b))}
                     />
@@ -659,7 +669,7 @@ export default function ExerciseVideosPage() {
         const inAlias = (ex.aliases || []).some(a => a.toLowerCase().includes(debouncedSearch));
         if (!inName && !inAlias) return false;
       }
-      if (bodyPart && ex.bodyPart !== bodyPart) return false;
+      if (bodyPart && !(BODYPART_FILTER_GROUPS[bodyPart] || [bodyPart]).includes(ex.bodyPart)) return false;
       if (equipment && ex.equipment !== equipment) return false;
       if (difficulty && ex.difficulty !== difficulty) return false;
       return true;
