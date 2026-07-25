@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '../context/AuthContext';
 import { LangProvider } from '../context/LangContext';
 import Navbar from '../components/layout/Navbar';
+import ErrorBoundary from '../components/layout/ErrorBoundary';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }) {
@@ -17,7 +18,9 @@ export default function App({ Component, pageProps }) {
       <AuthProvider>
         <Navbar />
         <main className="animate-fade-in" style={{ paddingTop: 92, minHeight: '100vh' }}>
-          <Component {...pageProps} />
+          <ErrorBoundary>
+            <Component {...pageProps} />
+          </ErrorBoundary>
         </main>
 
         <footer style={{

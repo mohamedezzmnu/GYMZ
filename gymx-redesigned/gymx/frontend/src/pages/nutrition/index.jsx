@@ -1260,16 +1260,16 @@ function BarcodeSearch({ userId }) {
                 onChange={e => setManual(m => ({ ...m, serving: e.target.value }))}
                 style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
                 {[
-                  { key: 'cal', ph: 'سعرات' },
-                  { key: 'protein', ph: 'بروتين g' },
-                  { key: 'carbs', ph: 'كارب g' },
-                  { key: 'fat', ph: 'دهون g' },
+                  { key: 'cal', ph: 'السعرات' },
+                  { key: 'protein', ph: 'بروتين (جم)' },
+                  { key: 'carbs', ph: 'كارب (جم)' },
+                  { key: 'fat', ph: 'دهون (جم)' },
                 ].map(({ key, ph }) => (
                   <input key={key} type="number" placeholder={ph} value={manual[key]}
                     onChange={e => setManual(m => ({ ...m, [key]: e.target.value }))}
-                    style={{ padding: '10px 6px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', outline: 'none', textAlign: 'center', direction: 'ltr' }} />
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', outline: 'none', textAlign: 'center', direction: 'ltr' }} />
                 ))}
               </div>
 
