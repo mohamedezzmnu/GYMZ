@@ -62,7 +62,25 @@ const EQUIPMENT_AR = {
   'leverage machine': 'ماشين رافعة', rope: 'حبل', 'sled machine': 'ماشين زلاجة',
   'smith machine': 'سميث ماشين', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
 };
-const EQUIPMENTS = Object.keys(EQUIPMENT_AR);
+
+// ✅ فلتر المعدات: بار + بار EZ بقوا فلتر واحد، وكل أنواع الماشينات بقت فلتر واحد
+const EQUIPMENT_FILTER_GROUPS = {
+  band: ['band'], barbell: ['barbell', 'ez barbell'], 'body weight': ['body weight'],
+  cable: ['cable'], dumbbell: ['dumbbell'], kettlebell: ['kettlebell'],
+  machine: ['leverage machine', 'smith machine', 'sled machine'],
+  rope: ['rope'], 'stability ball': ['stability ball'], weighted: ['weighted'],
+};
+const EQUIPMENT_FILTER_AR = {
+  band: 'رباط مقاومة', barbell: 'بار', 'body weight': 'وزن الجسم', cable: 'كابل',
+  dumbbell: 'دمبل', kettlebell: 'كيتلبل', machine: 'ماشين',
+  rope: 'حبل', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
+};
+const EQUIPMENT_FILTER_ICON = {
+  band: Waves, barbell: Dumbbell, 'body weight': PersonStanding, cable: Cable,
+  dumbbell: Dumbbell, kettlebell: CircleDot, machine: Settings,
+  rope: Link2, 'stability ball': Circle, weighted: Weight,
+};
+const EQUIPMENTS = Object.keys(EQUIPMENT_FILTER_AR);
 
 // ── ترجمة مستوى الصعوبة ─────────────────────────────────────
 const DIFFICULTY_AR = { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' };
@@ -139,12 +157,6 @@ function HipIcon(props) {
 
 // ── أيقونات كروت "أقسام الجسم" — رسمة عضلة مبسّطة لكل قسم، بنفس
 // أسلوب الصورة المرجعية بدل الأيقونات العامة ──────────────────
-const EQUIPMENT_ICON = {
-  band: Waves, barbell: Dumbbell, 'body weight': PersonStanding, cable: Cable,
-  dumbbell: Dumbbell, 'ez barbell': Dumbbell, kettlebell: CircleDot,
-  'leverage machine': Settings, rope: Link2, 'sled machine': Truck,
-  'smith machine': Settings2, 'stability ball': Circle, weighted: Weight,
-};
 const DIFFICULTY_ICON = { beginner: Gauge, intermediate: TrendingUp, advanced: Rocket };
 
 // ── خطوات أداء جاهزة بالعامية المصرية، من غير أي API أو نت ──
@@ -555,10 +567,10 @@ function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply
             <FilterSection title="المعدات" isOpen={openSection === 'equipment'} onToggle={() => toggleSection('equipment')}>
               <div style={grid}>
                 {EQUIPMENTS.map(eq => {
-                  const Icon = EQUIPMENT_ICON[eq] || Dumbbell;
+                  const Icon = EQUIPMENT_FILTER_ICON[eq] || Dumbbell;
                   return (
                     <FilterIconCard
-                      key={eq} Icon={Icon} label={EQUIPMENT_AR[eq]}
+                      key={eq} Icon={Icon} label={EQUIPMENT_FILTER_AR[eq]}
                       selected={draftEquipment === eq}
                       onClick={() => setDraftEquipment(prev => (prev === eq ? '' : eq))}
                     />
@@ -670,7 +682,7 @@ export default function ExerciseVideosPage() {
         if (!inName && !inAlias) return false;
       }
       if (bodyPart && !(BODYPART_FILTER_GROUPS[bodyPart] || [bodyPart]).includes(ex.bodyPart)) return false;
-      if (equipment && ex.equipment !== equipment) return false;
+      if (equipment && !(EQUIPMENT_FILTER_GROUPS[equipment] || [equipment]).includes(ex.equipment)) return false;
       if (difficulty && ex.difficulty !== difficulty) return false;
       return true;
     });
