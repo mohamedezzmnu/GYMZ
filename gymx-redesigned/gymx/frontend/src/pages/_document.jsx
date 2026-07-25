@@ -6,6 +6,9 @@ export default function Document() {
       <Head>
         <meta charSet="utf-8" />
 
+        {/* Google Search Console verification */}
+        <meta name="google-site-verification" content="by3aW1lWpuYXkOO3e2dkCw5LhVDmlaSZ56P6bWxrTsE" />
+
         {/* Tell the browser this site is dark-only — prevents Chrome light mode override */}
         <meta name="color-scheme" content="dark" />
         <meta name="supported-color-schemes" content="dark" />
