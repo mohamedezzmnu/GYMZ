@@ -4,6 +4,7 @@ import {
   Users, Dumbbell, LayoutGrid, ShieldAlert,
   TrendingUp, Trash2, Search, RefreshCw, Crown,
   UserCheck, UserX, ChevronDown, Activity, Apple, Plus, Play,
+  Barcode, Pencil,
 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -54,6 +55,14 @@ function StatBox({ icon: Icon, label, value, accent = 'var(--accent)', delay = 0
   );
 }
 
+// ── ستايل موحد لخانات فورم المنتجات ─────────────────────────
+const foodInputStyle = {
+  padding: '10px 12px', background: 'rgba(255,255,255,0.04)',
+  border: '1px solid var(--glass-border)', borderRadius: 8,
+  color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+  fontSize: '0.75rem', outline: 'none',
+};
+
 // ── role badge ────────────────────────────────────────────
 function RoleBadge({ role }) {
   const isAdmin = role === 'admin';
@@ -96,6 +105,15 @@ export default function AdminPage() {
   const [addingExerciseEmail, setAddingExerciseEmail] = useState(false);
   const [removingExerciseEmail, setRemovingExerciseEmail] = useState(null);
 
+  // ── منتجات الباركود المحلية ────────────────────────────────
+  const [communityFoods, setCommunityFoods] = useState([]);
+  const [foodSearch, setFoodSearch] = useState('');
+  const [showFoodForm, setShowFoodForm] = useState(false);
+  const [editingBarcode, setEditingBarcode] = useState(null);
+  const [foodForm, setFoodForm] = useState({ barcode: '', name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+  const [savingFood, setSavingFood] = useState(false);
+  const [deletingFoodBarcode, setDeletingFoodBarcode] = useState(null);
+
   // ── guard ────────────────────────────────────────────────
   useEffect(() => {
     if (!loading) {
@@ -128,6 +146,7 @@ export default function AdminPage() {
 
       fetchPremiumEmails();
       fetchExercisePremiumEmails();
+      fetchCommunityFoods();
     } catch (e) {
       toast.error('خطأ في جلب البيانات');
     }
@@ -246,10 +265,83 @@ export default function AdminPage() {
     setRemovingExerciseEmail(null);
   }
 
+  // ── منتجات الباركود المحلية ────────────────────────────────
+  async function fetchCommunityFoods() {
+    const { data } = await supabase
+      .from('community_foods')
+      .select('barcode, name, cal, protein, carbs, fat, serving, updated_at')
+      .order('updated_at', { ascending: false });
+    setCommunityFoods(data || []);
+  }
+
+  function resetFoodForm() {
+    setFoodForm({ barcode: '', name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+    setEditingBarcode(null);
+  }
+
+  function startEditFood(f) {
+    setFoodForm({
+      barcode: f.barcode, name: f.name,
+      cal: String(f.cal ?? ''), protein: String(f.protein ?? ''),
+      carbs: String(f.carbs ?? ''), fat: String(f.fat ?? ''),
+      serving: f.serving || '100 جرام',
+    });
+    setEditingBarcode(f.barcode);
+    setShowFoodForm(true);
+  }
+
+  async function saveFoodEntry() {
+    const barcode = foodForm.barcode.trim();
+    const name = foodForm.name.trim();
+    const cal = parseFloat(foodForm.cal);
+    if (!barcode || !name || !cal) {
+      toast.error('اكتب الباركود والاسم والسعرات على الأقل');
+      return;
+    }
+    setSavingFood(true);
+    const { error } = await supabase.from('community_foods').upsert({
+      barcode,
+      name,
+      cal,
+      protein: parseFloat(foodForm.protein) || 0,
+      carbs: parseFloat(foodForm.carbs) || 0,
+      fat: parseFloat(foodForm.fat) || 0,
+      serving: foodForm.serving.trim() || '100 جرام',
+      created_by: user.id,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) toast.error('فشل الحفظ');
+    else {
+      toast.success(editingBarcode ? 'تم التعديل ✅' : 'تم إضافة المنتج ✅');
+      resetFoodForm();
+      setShowFoodForm(false);
+      fetchCommunityFoods();
+    }
+    setSavingFood(false);
+  }
+
+  async function deleteFoodEntry(barcode) {
+    if (!confirm('متأكد إنك عايز تحذف المنتج ده؟')) return;
+    setDeletingFoodBarcode(barcode);
+    const { error } = await supabase.from('community_foods').delete().eq('barcode', barcode);
+    if (error) toast.error('فشل الحذف');
+    else {
+      toast.success('تم الحذف');
+      setCommunityFoods(prev => prev.filter(f => f.barcode !== barcode));
+    }
+    setDeletingFoodBarcode(null);
+  }
+
   // ── filter ───────────────────────────────────────────────
   const filtered = users.filter(u =>
     u.name?.toLowerCase().includes(search.toLowerCase()) ||
     u.email?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredFoods = communityFoods.filter(f =>
+    !foodSearch.trim() ||
+    f.barcode?.includes(foodSearch.trim()) ||
+    f.name?.toLowerCase().includes(foodSearch.trim().toLowerCase())
   );
 
   // ── loading / guard states ────────────────────────────────
@@ -457,6 +549,148 @@ export default function AdminPage() {
                     >
                       {removingExerciseEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
                     </motion.button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── منتجات الباركود المحلية ── */}
+        <Reveal delay={0.19}>
+          <GlassCard accent="#22d3ee" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Barcode size={16} color="#22d3ee" />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                  منتجات الباركود المحلية ({communityFoods.length})
+                </span>
+              </div>
+              <motion.button
+                onClick={() => { if (showFoodForm) resetFoodForm(); setShowFoodForm(v => !v); }}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+                  background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)',
+                  borderRadius: 8, color: '#22d3ee', fontFamily: 'var(--font-mono)', fontSize: '0.72rem',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                }}
+              >
+                <Plus size={13} /> منتج جديد
+              </motion.button>
+            </div>
+
+            {/* فورم إضافة/تعديل */}
+            {showFoodForm && (
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px,1fr))', gap: 8,
+                marginBottom: 18, padding: 14, background: 'rgba(34,211,238,0.05)',
+                border: '1px solid rgba(34,211,238,0.15)', borderRadius: 10,
+              }}>
+                <input
+                  placeholder="الباركود" value={foodForm.barcode} disabled={!!editingBarcode}
+                  onChange={e => setFoodForm(f => ({ ...f, barcode: e.target.value }))}
+                  style={{ ...foodInputStyle, direction: 'ltr', textAlign: 'right', opacity: editingBarcode ? 0.6 : 1 }}
+                />
+                <input
+                  placeholder="اسم المنتج" value={foodForm.name}
+                  onChange={e => setFoodForm(f => ({ ...f, name: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="السعرات" type="number" value={foodForm.cal}
+                  onChange={e => setFoodForm(f => ({ ...f, cal: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="بروتين (جم)" type="number" value={foodForm.protein}
+                  onChange={e => setFoodForm(f => ({ ...f, protein: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="كارب (جم)" type="number" value={foodForm.carbs}
+                  onChange={e => setFoodForm(f => ({ ...f, carbs: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="دهون (جم)" type="number" value={foodForm.fat}
+                  onChange={e => setFoodForm(f => ({ ...f, fat: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="الكمية (مثلاً 100 جرام)" value={foodForm.serving}
+                  onChange={e => setFoodForm(f => ({ ...f, serving: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <motion.button
+                  onClick={saveFoodEntry} disabled={savingFood} whileTap={{ scale: 0.96 }}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px',
+                    background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.4)',
+                    borderRadius: 8, color: '#22d3ee', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                    cursor: savingFood ? 'not-allowed' : 'pointer', opacity: savingFood ? 0.5 : 1,
+                  }}
+                >
+                  {savingFood ? <RefreshCw size={13} /> : <Plus size={13} />}
+                  {editingBarcode ? 'حفظ التعديل' : 'إضافة'}
+                </motion.button>
+              </div>
+            )}
+
+            {/* بحث */}
+            <input
+              placeholder="دوّر بالباركود أو الاسم..."
+              value={foodSearch}
+              onChange={e => setFoodSearch(e.target.value)}
+              style={{
+                width: '100%', padding: '9px 14px', marginBottom: 14, boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem', outline: 'none',
+              }}
+            />
+
+            {/* لستة المنتجات */}
+            {filteredFoods.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                {communityFoods.length === 0 ? 'مفيش منتجات لسه — ضيف أول منتج محلي' : 'مفيش نتايج للبحث ده'}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 420, overflowY: 'auto' }}>
+                {filteredFoods.map(f => (
+                  <div key={f.barcode} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+                    padding: '10px 14px', background: 'rgba(34,211,238,0.05)',
+                    border: '1px solid rgba(34,211,238,0.12)', borderRadius: 8,
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--chalk)' }}>{f.name}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', marginTop: 2, direction: 'ltr', textAlign: 'right' }}>
+                        {f.barcode} · {f.cal} سعرة · {f.serving}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <motion.button
+                        onClick={() => startEditFood(f)} whileTap={{ scale: 0.9 }}
+                        style={{
+                          width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)',
+                          borderRadius: 6, color: 'var(--ash-light)', cursor: 'pointer',
+                        }}
+                      >
+                        <Pencil size={12} />
+                      </motion.button>
+                      <motion.button
+                        onClick={() => deleteFoodEntry(f.barcode)} disabled={deletingFoodBarcode === f.barcode} whileTap={{ scale: 0.9 }}
+                        style={{
+                          width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+                          borderRadius: 6, color: '#f87171', cursor: 'pointer',
+                        }}
+                      >
+                        {deletingFoodBarcode === f.barcode ? <RefreshCw size={12} /> : <Trash2 size={12} />}
+                      </motion.button>
+                    </div>
                   </div>
                 ))}
               </div>
