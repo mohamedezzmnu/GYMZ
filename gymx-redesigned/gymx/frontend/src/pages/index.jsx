@@ -224,6 +224,32 @@ export default function HomePage() {
       <Head>
         <title>GYMZ — {ar ? 'ابنِ جسمك بخطة مخصصة' : 'Build Your Body. No Excuses.'}</title>
         <meta name="description" content={ar ? 'برامج تدريب وغذاء مخصصة لك — مجاناً.' : 'Custom training and nutrition plans — free.'} />
+        <meta name="keywords" content="GYMZ, Gymez, جيمز, جيمس, جيم, gym app, تمارين, نظام غذائي, برامج تدريب, جيم مصر, fitness app Egypt" />
+        <link rel="canonical" href="https://gymez.vercel.app/" />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="GYMZ" />
+        <meta property="og:title" content="GYMZ — ابنِ جسمك بخطة مخصصة" />
+        <meta property="og:description" content="برامج تدريب وغذاء مخصصة لك — مجاناً." />
+        <meta property="og:url" content="https://gymez.vercel.app/" />
+        <meta property="og:locale" content="ar_EG" />
+
+        {/* ✅ بيانات منظمة تساعد جوجل يفهم إن GYMZ / Gymez / جيمز كلهم نفس الموقع */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'GYMZ',
+              alternateName: ['Gymez', 'Gymz', 'جيمز', 'جيمس', 'جيم زد'],
+              url: 'https://gymez.vercel.app/',
+              description: 'برامج تدريب وغذاء مخصصة — مجاناً',
+              inLanguage: 'ar',
+            }),
+          }}
+        />
       </Head>
 
       {/* ══════════════════════════════════════

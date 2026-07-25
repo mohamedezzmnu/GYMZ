@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /workout
+Disallow: /profile
+Disallow: /onboarding
+
+Sitemap: https://gymez.vercel.app/sitemap.xml
