@@ -347,12 +347,12 @@ export default function WorkoutPage() {
       {/* خلفية */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,77,46,0.07) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(74,222,128,0.04) 0%,transparent 60%)' }} />
 
-      <div style={{ minHeight: '100vh', paddingTop: 72, paddingBottom: 100, position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 20px' }}>
+      <div className="page-shell" style={{ paddingBottom: 100 }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 20px' }}>
 
           {/* ── HEADER ── */}
           <Reveal>
-            <div style={{ marginBottom: 24, direction: 'rtl' }}>
+            <div className="section" style={{ direction: 'rtl' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,77,46,0.7)', letterSpacing: '0.02em', marginBottom: 6 }}>
                 — جلسة اليوم
               </div>
@@ -365,16 +365,121 @@ export default function WorkoutPage() {
             </div>
           </Reveal>
 
+          {/* ── ثنائي الأعمدة على الديسكتوب: المحتوى الرئيسي + سايدبار — بيمنع الفراغ اللي كان بيحصل من عمود واحد ضيق وسط شاشة عريضة ── */}
+          <div className="workout-grid">
+          <div className="workout-grid__main">
+
+          {/* ── أيام البرنامج ── */}
+          <Reveal delay={0.15}>
+            <div className="section">
+              <div className="section-header" style={{ direction: 'rtl' }}>
+                <span className="section-header__label">
+                  {programDays ? 'اختار يوم تمرينك' : 'سجل جلسة سريعة'}
+                </span>
+              </div>
+
+            {programDays ? (
+              Object.entries(programDays).map(([dayLabel, exercises], i) => (
+                <DayCard
+                  key={dayLabel}
+                  dayLabel={dayLabel}
+                  exercises={exercises}
+                  isOpen={openDay === dayLabel}
+                  onToggle={() => setOpenDay(prev => prev === dayLabel ? null : dayLabel)}
+                  onSave={saveSession}
+                  isSaving={savingDay === dayLabel}
+                  savedToday={savedTodayLabels.has(dayLabel)}
+                />
+              ))
+            ) : (
+              /* لو البرنامج مش في القائمة أو مش مسجل — سجل جلسة سريعة */
+              <GlassCard style={{ padding: 20 }}>
+                <div style={{ direction: 'rtl' }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ash-light)', marginBottom: 14, lineHeight: 1.6 }}>
+                    {userPrograms.length === 0
+                      ? 'مش مسجل في برنامج لسه — روح صفحة البرامج واختار برنامجك أولاً.'
+                      : 'تمارين برنامجك مش متاحة في القائمة، بس قدر تسجل الجلسة.'}
+                  </p>
+                  {userPrograms.length === 0 ? (
+                    <Link href="/programs" style={{ textDecoration: 'none' }}>
+                      <motion.div
+                        whileHover={{ x: -4 }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.02em', cursor: 'pointer' }}
+                      >
+                        اختار برنامج <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} />
+                      </motion.div>
+                    </Link>
+                  ) : (
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => saveSession(activeProgramName || 'جلسة', true)}
+                      disabled={!!savingDay}
+                      style={{
+                        padding: '11px 20px', borderRadius: 10, border: '1px solid rgba(255,77,46,0.3)',
+                        background: 'rgba(255,77,46,0.1)', color: 'var(--accent)',
+                        fontFamily: 'var(--font-display)', fontSize: '0.9rem', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                    >
+                      <CheckCircle2 size={16} />
+                      سجل جلسة اليوم
+                    </motion.button>
+                  )}
+                </div>
+              </GlassCard>
+            )}
+            </div>
+          </Reveal>
+
+          {/* ── آخر الجلسات ── */}
+          {sessions.length > 0 && (
+            <Reveal delay={0.2}>
+              <div className="section">
+                <div className="section-header" style={{ direction: 'rtl' }}>
+                  <span className="section-header__label">آخر الجلسات</span>
+                </div>
+                {sessions.slice(0, 5).map((s, i) => (
+                  <GlassCard key={s.id} style={{ padding: '14px 18px', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', direction: 'rtl' }}>
+                      <div className="no-shrink-text" style={{ minWidth: 0 }}>
+                        <div className="truncate-1" style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', marginBottom: 3 }}>
+                          {s.day_label || s.program_title}
+                        </div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', letterSpacing: '0.05em' }}>
+                          {new Date(s.created_at).toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        {s.duration_min > 0 && (
+                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>
+                            ⏱ {s.duration_min} دقيقة
+                          </span>
+                        )}
+                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : 'var(--ash)' }}>
+                          {s.done ? '✓' : '~'}
+                        </span>
+                      </div>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            </Reveal>
+          )}
+
+          </div>{/* /workout-grid__main */}
+
+          <div className="workout-grid__side">
+
           {/* ── STATS QUICK ── */}
           <Reveal delay={0.05}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
+            <div className="section-tight workout-stats-grid">
               {[
                 { icon: Flame,    label: 'النهارده',   value: todaySessions.length, color: 'var(--accent)' },
                 { icon: Calendar, label: 'الشهر',       value: sessions.filter(s => new Date(s.created_at).getMonth() === new Date().getMonth()).length, color: '#FFFFFF' },
                 { icon: Scale,    label: 'الوزن',       value: currentWeight ? `${currentWeight}kg` : '—', color: '#4ade80' },
               ].map(({ icon: Icon, label, value, color }) => (
-                <GlassCard key={label} style={{ padding: '14px 16px', textAlign: 'center' }}>
-                  <Icon size={18} color={color} style={{ marginBottom: 6 }} />
+                <GlassCard key={label} style={{ padding: '16px', textAlign: 'center' }}>
+                  <Icon size={22} color={color} style={{ marginBottom: 8 }} />
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--chalk)', lineHeight: 1 }}>{value}</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--ash)', letterSpacing: '0.07em', marginTop: 4 }}>{label}</div>
                 </GlassCard>
@@ -384,7 +489,7 @@ export default function WorkoutPage() {
 
           {/* ── تسجيل الوزن ── */}
           <Reveal delay={0.1}>
-            <GlassCard style={{ padding: '20px', marginBottom: 20 }} accent="#4ade80">
+            <GlassCard className="section-tight" style={{ padding: '20px' }} accent="#4ade80">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, direction: 'rtl' }}>
                 <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Scale size={16} color="#4ade80" />
@@ -455,7 +560,7 @@ export default function WorkoutPage() {
           {/* ── اختيار البرنامج ── */}
           {userPrograms.length > 0 && (
             <Reveal delay={0.12}>
-              <div style={{ marginBottom: 16, direction: 'rtl' }}>
+              <div className="section-tight" style={{ direction: 'rtl' }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 10 }}>
                   برنامجك
                 </div>
@@ -482,103 +587,20 @@ export default function WorkoutPage() {
             </Reveal>
           )}
 
-          {/* ── أيام البرنامج ── */}
-          <Reveal delay={0.15}>
-            <div style={{ marginBottom: 8, direction: 'rtl' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 12 }}>
-                {programDays ? 'اختار يوم تمرينك' : 'سجل جلسة سريعة'}
-              </div>
-            </div>
-
-            {programDays ? (
-              Object.entries(programDays).map(([dayLabel, exercises], i) => (
-                <DayCard
-                  key={dayLabel}
-                  dayLabel={dayLabel}
-                  exercises={exercises}
-                  isOpen={openDay === dayLabel}
-                  onToggle={() => setOpenDay(prev => prev === dayLabel ? null : dayLabel)}
-                  onSave={saveSession}
-                  isSaving={savingDay === dayLabel}
-                  savedToday={savedTodayLabels.has(dayLabel)}
-                />
-              ))
-            ) : (
-              /* لو البرنامج مش في القائمة أو مش مسجل — سجل جلسة سريعة */
-              <GlassCard style={{ padding: 20 }}>
-                <div style={{ direction: 'rtl' }}>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ash-light)', marginBottom: 14, lineHeight: 1.6 }}>
-                    {userPrograms.length === 0
-                      ? 'مش مسجل في برنامج لسه — روح صفحة البرامج واختار برنامجك أولاً.'
-                      : 'تمارين برنامجك مش متاحة في القائمة، بس قدر تسجل الجلسة.'}
-                  </p>
-                  {userPrograms.length === 0 ? (
-                    <Link href="/programs" style={{ textDecoration: 'none' }}>
-                      <motion.div
-                        whileHover={{ x: -4 }}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.02em', cursor: 'pointer' }}
-                      >
-                        اختار برنامج <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} />
-                      </motion.div>
-                    </Link>
-                  ) : (
-                    <motion.button
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => saveSession(activeProgramName || 'جلسة', true)}
-                      disabled={!!savingDay}
-                      style={{
-                        padding: '11px 20px', borderRadius: 10, border: '1px solid rgba(255,77,46,0.3)',
-                        background: 'rgba(255,77,46,0.1)', color: 'var(--accent)',
-                        fontFamily: 'var(--font-display)', fontSize: '0.9rem', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: 8,
-                      }}
-                    >
-                      <CheckCircle2 size={16} />
-                      سجل جلسة اليوم
-                    </motion.button>
-                  )}
-                </div>
-              </GlassCard>
-            )}
-          </Reveal>
-
-          {/* ── آخر الجلسات ── */}
-          {sessions.length > 0 && (
-            <Reveal delay={0.2}>
-              <div style={{ marginTop: 28, direction: 'rtl' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.02em', marginBottom: 12 }}>
-                  آخر الجلسات
-                </div>
-                {sessions.slice(0, 5).map((s, i) => (
-                  <GlassCard key={s.id} style={{ padding: '14px 18px', marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', direction: 'rtl' }}>
-                      <div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', marginBottom: 3 }}>
-                          {s.day_label || s.program_title}
-                        </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', letterSpacing: '0.05em' }}>
-                          {new Date(s.created_at).toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {s.duration_min > 0 && (
-                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
-                            ⏱ {s.duration_min} دقيقة
-                          </span>
-                        )}
-                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : 'var(--ash)' }}>
-                          {s.done ? '✓' : '~'}
-                        </span>
-                      </div>
-                    </div>
-                  </GlassCard>
-                ))}
-              </div>
-            </Reveal>
-          )}
+          </div>{/* /workout-grid__side */}
+          </div>{/* /workout-grid */}
 
         </div>
       </div>
+
+      <style>{`
+        .workout-grid { display: block; }
+        .workout-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        @media (min-width: 900px) {
+          .workout-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--space-7); align-items: start; }
+          .workout-grid__side { position: sticky; top: calc(var(--page-top-desktop) + 4px); display: flex; flex-direction: column; }
+        }
+      `}</style>
     </>
   );
 }

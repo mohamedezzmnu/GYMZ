@@ -62,17 +62,17 @@ export default function Navbar() {
   return (
     <>
       <header style={{
-        position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
+        position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
         width: 'calc(100% - 32px)', maxWidth: 1180,
-        height: 60,
+        height: 52,
         background: 'rgba(17,17,17,0.72)',
         backdropFilter: 'blur(22px)',
         WebkitBackdropFilter: 'blur(22px)',
         border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 20,
+        borderRadius: 16,
         boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
         display: 'flex', alignItems: 'center',
-        padding: '0 10px 0 20px', gap: 20,
+        padding: '0 8px 0 18px', gap: 20,
         direction: isRTL ? 'rtl' : 'ltr',
       }}>
         {/* LOGO */}
@@ -178,7 +178,7 @@ export default function Navbar() {
                           onMouseEnter={e => { if (!isActive(href)) { e.currentTarget.style.color = 'var(--chalk)'; e.currentTarget.style.background = 'var(--iron)'; } }}
                           onMouseLeave={e => { if (!isActive(href)) { e.currentTarget.style.color = 'var(--ash)'; e.currentTarget.style.background = 'transparent'; } }}
                         >
-                          <Icon size={13} /> {label}
+                          <Icon size={15} /> {label}
                         </div>
                       </Link>
                     ))}
@@ -189,7 +189,7 @@ export default function Navbar() {
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                       >
-                        <LogOut size={13} /> {ar ? 'خروج' : 'LOGOUT'}
+                        <LogOut size={15} /> {ar ? 'خروج' : 'LOGOUT'}
                       </motion.button>
                     </div>
                   </motion.div>
@@ -202,7 +202,7 @@ export default function Navbar() {
           <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setMobileOpen(o => !o)} className="mobile-menu-btn"
             style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--chalk)', width: 30, height: 30, borderRadius: 'var(--radius-sm)', display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
-            {mobileOpen ? <X size={15} /> : <Menu size={15} />}
+            {mobileOpen ? <X size={17} /> : <Menu size={17} />}
           </motion.button>
         </div>
       </header>
@@ -211,12 +211,12 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-            style={{ position: 'fixed', top: 84, left: 0, right: 0, margin: '0 auto', zIndex: 101, width: 'calc(100% - 32px)', maxWidth: 1180, maxHeight: 'calc(100vh - 84px - 76px - env(safe-area-inset-bottom))', overflowY: 'auto', background: 'rgba(17,17,17,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderTop: '2px solid var(--volt)', borderRadius: 20, boxShadow: '0 20px 50px rgba(0,0,0,0.55)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
+            style={{ position: 'fixed', top: 72, left: 0, right: 0, margin: '0 auto', zIndex: 101, width: 'calc(100% - 32px)', maxWidth: 1180, maxHeight: 'calc(100vh - 72px - 76px - env(safe-area-inset-bottom))', overflowY: 'auto', background: 'rgba(17,17,17,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderTop: '2px solid var(--volt)', borderRadius: 20, boxShadow: '0 20px 50px rgba(0,0,0,0.55)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
           >
             {[...publicLinks, ...(user ? privateLinks : [])].map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', marginBottom: 2, borderRadius: 'var(--radius-sm)', background: isActive(href) ? 'var(--volt-dim)' : 'transparent', color: isActive(href) ? 'var(--volt)' : 'var(--ash)', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em' }}>
-                  <Icon size={16} /> {label}
+                  <Icon size={18} /> {label}
                 </div>
               </Link>
             ))}
@@ -239,14 +239,20 @@ export default function Navbar() {
       </AnimatePresence>
 
       {/* BOTTOM NAV */}
-      <nav style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid #1A1A1A', padding: '6px 0 calc(6px + env(safe-area-inset-bottom))', direction: isRTL ? 'rtl' : 'ltr' }} className={`bottom-nav${mobileOpen ? ' bottom-nav-hidden' : ''}`}>
+      <nav style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid #1A1A1A', padding: '8px 8px calc(8px + env(safe-area-inset-bottom))', direction: isRTL ? 'rtl' : 'ltr' }} className={`bottom-nav${mobileOpen ? ' bottom-nav-hidden' : ''}`}>
         {bottomLinks.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
-            <Link key={href} href={href} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '4px 0', textDecoration: 'none' }}>
-              <Icon size={19} color={active ? 'var(--volt)' : 'var(--ash)'} />
-              <span style={{ fontSize: '0.55rem', color: active ? 'var(--volt)' : 'var(--ash)', fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
-              {active && <div style={{ width: 20, height: 2, background: 'var(--volt)', borderRadius: 1, position: 'absolute', bottom: 'calc(6px + env(safe-area-inset-bottom))' }} />}
+            <Link key={href} href={href} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '6px 2px', textDecoration: 'none', position: 'relative' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 40, height: 26, borderRadius: 12,
+                background: active ? 'var(--volt-dim)' : 'transparent',
+                transition: 'background var(--transition-base)',
+              }}>
+                <Icon size={22} color={active ? 'var(--volt)' : 'var(--ash)'} strokeWidth={active ? 2.4 : 2} />
+              </div>
+              <span style={{ fontSize: '0.58rem', color: active ? 'var(--volt)' : 'var(--ash)', fontFamily: 'var(--font-mono)', fontWeight: active ? 800 : 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
             </Link>
           );
         })}

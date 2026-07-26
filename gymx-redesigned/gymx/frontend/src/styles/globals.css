@@ -94,6 +94,25 @@ html {
   --glass-blur:         22px;
   --glass-shadow:       0 20px 60px rgba(0, 0, 0, 0.55);
   --glass-shadow-hover: 0 28px 80px rgba(0, 0, 0, 0.6), 0 0 40px var(--volt-glow);
+
+  /* ── SPACING SCALE — 8px base. use these everywhere instead of random px values ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  56px;
+  --space-10: 72px;
+  --space-11: 96px;
+
+  /* ── SECTION RHYTHM — vertical gap between major page sections ── */
+  --section-gap-mobile:  var(--space-8);   /* 40px  */
+  --section-gap-desktop: var(--space-9);   /* 56px  */
+  --page-top-mobile:     var(--space-9);   /* 56px  */
+  --page-top-desktop:    var(--space-10);  /* 72px  */
 }
 
 /* =============================================
@@ -465,3 +484,151 @@ input, textarea, select { font-family: inherit; }
    SELECTION
    ============================================= */
 ::selection { background: var(--volt); color: #fff; }
+
+/* =============================================
+   PAGE / SECTION RHYTHM
+   use on every page instead of one-off paddingTop/marginBottom values
+   ============================================= */
+.page-shell {
+  min-height: 100vh;
+  padding-top: var(--page-top-mobile);
+  padding-bottom: calc(var(--space-9) + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 1;
+}
+@media (min-width: 769px) {
+  .page-shell { padding-top: var(--page-top-desktop); }
+}
+
+/* a "section" = one distinct block of a page (header, stats, list, etc.)
+   consistent gap below every section -> kills the "20 / 32 / 16" chaos */
+.section { margin-bottom: var(--section-gap-mobile); }
+.section:last-child { margin-bottom: 0; }
+@media (min-width: 769px) {
+  .section { margin-bottom: var(--section-gap-desktop); }
+}
+.section-tight  { margin-bottom: var(--space-5); }
+.section-loose  { margin-bottom: var(--space-11); }
+
+/* editorial section header — breaks up "card over card" monotony by
+   giving each block of content its own labeled header + divider,
+   instead of yet another floating card */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.section-header__label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.section-band {
+  border-top: 1px solid var(--iron-light);
+  border-bottom: 1px solid var(--iron-light);
+  padding: var(--space-7) 0;
+}
+
+/* =============================================
+   ANIMATION UTILITIES — fade / slide / ripple / skeleton
+   apply as className, no JS required
+   ============================================= */
+@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown{ from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rippleAnim {
+  from { transform: scale(0); opacity: 0.45; }
+  to   { transform: scale(2.6); opacity: 0; }
+}
+@keyframes skeletonShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.anim-fade-in   { animation: fadeIn var(--transition-slow) both; }
+.anim-slide-up  { animation: slideUp var(--transition-slow) both; }
+.anim-slide-down{ animation: slideDown var(--transition-slow) both; }
+
+/* stagger helper — pair with inline style `--i: 0/1/2...` on children */
+.anim-stagger > * {
+  animation: slideUp var(--transition-slow) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* ripple — add a <span class="ripple" style={{left,top}} /> on pointerdown */
+.ripple-container { position: relative; overflow: hidden; }
+.ripple {
+  position: absolute;
+  width: 12px; height: 12px;
+  margin-left: -6px; margin-top: -6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+  animation: rippleAnim 550ms ease-out forwards;
+}
+
+/* skeleton loading — use instead of a spinner while data is fetching */
+.skeleton {
+  position: relative;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--iron) 25%, var(--iron-light) 37%, var(--iron) 63%);
+  background-size: 400% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+.skeleton-text     { height: 0.9em; width: 100%; border-radius: 4px; }
+.skeleton-title    { height: 1.4em; width: 60%; border-radius: 6px; }
+.skeleton-avatar   { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-card     { height: 120px; width: 100%; border-radius: var(--radius-card); }
+.skeleton-thumb    { aspect-ratio: 4 / 3; width: 100%; border-radius: var(--radius-md); }
+
+/* =============================================
+   IMAGE ASPECT RATIOS — keep every thumbnail/card image consistent
+   wrap <img>/<video> in one of these instead of ad-hoc heights
+   ============================================= */
+.img-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--iron);
+}
+.img-frame > img,
+.img-frame > video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.img-frame--square   { aspect-ratio: 1 / 1; }
+.img-frame--portrait { aspect-ratio: 3 / 4; }
+.img-frame--video    { aspect-ratio: 16 / 9; }
+.img-frame--card     { aspect-ratio: 4 / 3; }
+
+/* =============================================
+   TEXT OVERFLOW — stop labels/numbers from spilling out of cards
+   ============================================= */
+.truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.no-shrink-text { min-width: 0; }
+.no-shrink-text * { min-width: 0; }
