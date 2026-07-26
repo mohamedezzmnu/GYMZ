@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   User, Mail, Calendar, Target, Dumbbell, TrendingUp,
   Award, Clock, ChevronRight, Edit3, LogOut, Shield,
@@ -78,7 +78,137 @@ function StatCard({ icon: Icon, label, value, accent = 'var(--accent)', delay })
   );
 }
 
-// ── mock data (replace with real API calls) ──────────────────
+// ── الإنجازات: تعريف موحّد + مقدار التقدم لكل واحد ────────────
+// (المفتاح "key" لازم يفضل زي ما هو — ده اللي بيتسجل في جدول user_achievements)
+const ACHIEVEMENT_DEFS = [
+  { key: 'first_workout', icon: '🔥', label: 'أول تمرين',       target: 1,  getCurrent: (d) => d.length },
+  { key: 'streak_7',      icon: '💪', label: '7 أيام متتالية',  target: 7,  getCurrent: (d, streak) => streak },
+  { key: 'sessions_10',   icon: '⚡', label: '10 جلسات',         target: 10, getCurrent: (d) => d.length },
+  { key: 'sessions_30',   icon: '🏆', label: '30 جلسة',          target: 30, getCurrent: (d) => d.length },
+  { key: 'full_session',  icon: '🎯', label: 'أكملت جلسة كاملة', target: 1,  getCurrent: (d) => d.filter(s => s.done).length },
+  { key: 'sessions_50',   icon: '🌟', label: 'محترف (50 جلسة)',  target: 50, getCurrent: (d) => d.length },
+];
+
+// ── كونفيتي خفيف بدون أي مكتبة خارجية ─────────────────────────
+function ConfettiBurst() {
+  const colors = ['#FF5500', '#FF7A30', '#4ade80', '#facc15', '#F5F0E8'];
+  const pieces = Array.from({ length: 26 }, (_, i) => ({
+    id: i,
+    x: (Math.random() - 0.5) * 260,
+    rotate: Math.random() * 360,
+    delay: Math.random() * 0.15,
+    color: colors[i % colors.length],
+    size: 5 + Math.random() * 5,
+    round: Math.random() > 0.5,
+  }));
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {pieces.map(p => (
+        <motion.span
+          key={p.id}
+          initial={{ opacity: 1, x: '50%', y: '30%', rotate: 0, scale: 0 }}
+          animate={{ opacity: 0, x: `calc(50% + ${p.x}px)`, y: '120%', rotate: p.rotate, scale: 1 }}
+          transition={{ duration: 1.1 + Math.random() * 0.4, delay: p.delay, ease: [0.15, 0.6, 0.4, 1] }}
+          style={{
+            position: 'absolute', top: 0, left: 0,
+            width: p.size, height: p.size,
+            background: p.color,
+            borderRadius: p.round ? '50%' : 2,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── مودال احتفال بإنجاز جديد ──────────────────────────────────
+function AchievementCelebration({ achievement, onClose }) {
+  if (!achievement) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 300,
+        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, cursor: 'pointer',
+      }}
+    >
+      <motion.div
+        initial={{ scale: 0.7, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'relative', overflow: 'hidden',
+          background: 'linear-gradient(180deg, #161616, #0c0c0c)',
+          border: '1px solid rgba(255,85,0,0.35)',
+          borderRadius: 24, padding: '40px 32px 32px',
+          maxWidth: 340, width: '100%', textAlign: 'center',
+          boxShadow: '0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255,85,0,0.15)',
+        }}
+      >
+        <ConfettiBurst />
+        <motion.div
+          initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ duration: 0.6, delay: 0.1 }}
+          style={{ fontSize: '3.4rem', marginBottom: 10 }}
+        >
+          {achievement.icon}
+        </motion.div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--volt)', letterSpacing: '0.14em', marginBottom: 8 }}>
+          إنجاز جديد! 🎉
+        </div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', letterSpacing: '0.03em', marginBottom: 20 }}>
+          {achievement.label}
+        </div>
+        <button
+          onClick={onClose}
+          className="btn btn-primary"
+          style={{ width: '100%', padding: '12px' }}
+        >
+          تمام 🔥
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── Calendar Heatmap للاستمرارية (زي GitHub) ──────────────────
+function CalendarHeatmap({ sessions }) {
+  const days = 84; // 12 أسبوع
+  const dateSet = new Set(sessions.map(s => new Date(s.created_at).toDateString()));
+  const cells = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    cells.push({ date: d, active: dateSet.has(d.toDateString()) });
+  }
+  // رتّبهم في أعمدة أسبوعية (7 صفوف × 12 عمود)
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+
+  return (
+    <div dir="ltr" style={{ display: 'flex', gap: 3, overflowX: 'auto', padding: '2px 0' }}>
+      {weeks.map((week, wi) => (
+        <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {week.map((cell, di) => (
+            <div
+              key={di}
+              title={cell.date.toLocaleDateString('ar-EG')}
+              style={{
+                width: 11, height: 11, borderRadius: 3,
+                background: cell.active ? 'var(--volt)' : 'rgba(255,255,255,0.06)',
+                boxShadow: cell.active ? '0 0 6px rgba(255,85,0,0.5)' : 'none',
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 
 // ── CHANGE PASSWORD MODAL ────────────────────────────────────
 function ChangePasswordModal({ onClose }) {
@@ -205,6 +335,8 @@ export default function ProfilePage() {
   const [onboarding, setOnboarding]             = useState(null);
   const [realStats, setRealStats]               = useState({ sessions: 0, streak: 0, programs: 0 });
   const [achievements, setAchievements]         = useState([]);
+  const [allSessions, setAllSessions]           = useState([]);
+  const [celebrationQueue, setCelebrationQueue] = useState([]); // إنجازات جديدة لسه ما اتعرضتش
   const [showPassModal, setShowPassModal]        = useState(false);
 
   useEffect(() => {
@@ -222,9 +354,10 @@ export default function ProfilePage() {
     // كل الجلسات — للإحصائيات الحقيقية
     supabase.from('workout_sessions').select('*').eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         if (!data) return;
         setRecentActivity(data.slice(0, 4));
+        setAllSessions(data);
         setRealStats(s => ({ ...s, sessions: data.length }));
 
         // ── streak حقيقي ─────────────────────────────────────────────
@@ -238,16 +371,27 @@ export default function ProfilePage() {
         }
         setRealStats(s => ({ ...s, streak }));
 
-        // ── إنجازات حقيقية ───────────────────────────────────────────
-        const completedPrograms = data.filter(s => s.done).length;
-        setAchievements([
-          { icon: '🔥', label: 'أول تمرين',       earned: data.length >= 1 },
-          { icon: '💪', label: '7 أيام متتالية',  earned: streak >= 7 },
-          { icon: '⚡', label: '10 جلسات',         earned: data.length >= 10 },
-          { icon: '🏆', label: '30 جلسة',          earned: data.length >= 30 },
-          { icon: '🎯', label: 'أكملت جلسة كاملة', earned: completedPrograms >= 1 },
-          { icon: '🌟', label: 'محترف (50 جلسة)',  earned: data.length >= 50 },
-        ]);
+        // ── احسب حالة كل إنجاز + مقدار التقدم ─────────────────────────
+        const computed = ACHIEVEMENT_DEFS.map(def => {
+          const current = def.getCurrent(data, streak);
+          return { ...def, current: Math.min(current, def.target), earned: current >= def.target };
+        });
+        setAchievements(computed);
+
+        // ── قارن بالمسجل فعليًا في الداتابيز — سجل أي إنجاز جديد واحتفل بيه ──
+        const { data: savedRows } = await supabase
+          .from('user_achievements')
+          .select('achievement_key')
+          .eq('user_id', user.id);
+        const savedKeys = new Set((savedRows || []).map(r => r.achievement_key));
+
+        const newlyEarned = computed.filter(a => a.earned && !savedKeys.has(a.key));
+        if (newlyEarned.length > 0) {
+          await supabase.from('user_achievements').insert(
+            newlyEarned.map(a => ({ user_id: user.id, achievement_key: a.key }))
+          );
+          setCelebrationQueue(q => [...q, ...newlyEarned]);
+        }
       });
 
     // بيانات الـ onboarding
@@ -299,6 +443,14 @@ export default function ProfilePage() {
     <>
       <Head><title>حسابي — GYMZ</title></Head>
       {showPassModal && <ChangePasswordModal onClose={() => setShowPassModal(false)} />}
+      <AnimatePresence>
+        {celebrationQueue.length > 0 && (
+          <AchievementCelebration
+            achievement={celebrationQueue[0]}
+            onClose={() => setCelebrationQueue(q => q.slice(1))}
+          />
+        )}
+      </AnimatePresence>
 
       <div style={{ minHeight: '100vh', paddingTop: 80, paddingBottom: 60, position: 'relative' }}>
         {/* Ambient */}
@@ -367,12 +519,31 @@ export default function ProfilePage() {
           </Reveal>
 
           {/* ── STATS ROW ────────────────────────── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 16 }}>
             <StatCard icon={Dumbbell}   label="كل الجلسات"    value={realStats.sessions}  accent="var(--accent)"  delay={0.05} />
             <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"        delay={0.1}  />
             <StatCard icon={Flame}      label="الاستمرارية"    value={realStats.streak ? `${realStats.streak} يوم` : '—'} accent="#facc15" delay={0.15} />
             <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق دهون', muscle: '💪 بناء عضل', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="var(--accent)" delay={0.2} />
           </div>
+
+          {/* ── CONSISTENCY HEATMAP ──────────────── */}
+          {allSessions.length > 0 && (
+            <Reveal delay={0.22}>
+              <GlassCard hover={false} style={{ padding: '20px 22px', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <p style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em' }}>
+                    خريطة الاستمرارية — آخر 12 أسبوع
+                  </p>
+                  {realStats.streak > 0 && (
+                    <p style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--volt)', letterSpacing: '0.02em' }}>
+                      🔥 {realStats.streak} يوم متتالي
+                    </p>
+                  )}
+                </div>
+                <CalendarHeatmap sessions={allSessions} />
+              </GlassCard>
+            </Reveal>
+          )}
 
           {/* ── BOTTOM GRID ──────────────────────── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
@@ -510,18 +681,27 @@ export default function ProfilePage() {
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                     {achievements.map((ach, i) => (
-                      <div key={i} style={{
+                      <div key={ach.key || i} style={{
                         padding: '14px 12px', borderRadius: 10, textAlign: 'center',
                         background: ach.earned ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
                         border: `1px solid ${ach.earned ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)'}`,
-                        opacity: ach.earned ? 1 : 0.35,
+                        opacity: ach.earned ? 1 : 0.55,
                         transition: 'opacity 200ms',
                       }}>
-                        <div style={{ fontSize: '1.4rem', marginBottom: 6 }}>{ach.icon}</div>
+                        <div style={{ fontSize: '1.4rem', marginBottom: 6, filter: ach.earned ? 'none' : 'grayscale(1)' }}>{ach.icon}</div>
                         <p style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: ach.earned ? 'var(--chalk)' : 'var(--ash)', letterSpacing: '0.05em' }}>
                           {ach.label}
                         </p>
-                        {ach.earned && <div style={{ fontSize: '0.55rem', color: '#4ade80', marginTop: 4, fontFamily: 'var(--font-mono)' }}>✓ محقق</div>}
+                        {ach.earned ? (
+                          <div style={{ fontSize: '0.55rem', color: '#4ade80', marginTop: 4, fontFamily: 'var(--font-mono)' }}>✓ محقق</div>
+                        ) : (
+                          <div style={{ marginTop: 6 }}>
+                            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                              <div style={{ width: `${Math.round((ach.current / ach.target) * 100)}%`, height: '100%', background: 'var(--volt)', borderRadius: 2 }} />
+                            </div>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--ash)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>{ach.current}/{ach.target}</div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
