@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutGrid, Dumbbell, Calculator, Apple,
   LayoutDashboard, User, LogOut,
-  Menu, X, Home, Zap, ChevronDown,
+  Menu, X, Home, Zap, ChevronDown, Bell,
 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function Navbar() {
   const { lang, toggleLang, isRTL } = useLang();
@@ -19,6 +20,50 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+
+  const [notifications, setNotifications]     = useState([]);
+  const [notifOpen, setNotifOpen]              = useState(false);
+  const notifRef = useRef(null);
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  useEffect(() => {
+    if (!user?.id) { setNotifications([]); return; }
+
+    let active = true;
+    supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(30)
+      .then(({ data }) => { if (active && data) setNotifications(data); });
+
+    const channel = supabase
+      .channel(`notifications-${user.id}`)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => setNotifications(prev => [payload.new, ...prev])
+      )
+      .subscribe();
+
+    return () => { active = false; supabase.removeChannel(channel); };
+  }, [user?.id]);
+
+  useEffect(() => {
+    const fn = (e) => { if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false); };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, []);
+
+  const toggleNotifPanel = async () => {
+    const opening = !notifOpen;
+    setNotifOpen(opening);
+    if (!opening) return;
+    const unread = notifications.filter(n => !n.is_read);
+    if (unread.length === 0) return;
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
+  };
 
   useEffect(() => {
     const fn = (e) => { if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false); };
@@ -137,6 +182,51 @@ export default function Navbar() {
                 </button>
               </Link>
             </>
+          )}
+
+          {/* NOTIFICATIONS */}
+          {user && (
+            <div ref={notifRef} style={{ position: 'relative' }}>
+              <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={toggleNotifPanel}
+                style={{ position: 'relative', background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 34, height: 34, borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Bell size={17} color={notifOpen ? 'var(--volt)' : 'var(--ash)'} />
+                {unreadCount > 0 && (
+                  <span style={{ position: 'absolute', top: -3, right: isRTL ? 'auto' : -3, left: isRTL ? -3 : 'auto', minWidth: 15, height: 15, padding: '0 3px', borderRadius: 8, background: 'var(--volt)', color: '#fff', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0c0c0c' }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </motion.button>
+
+              <AnimatePresence>
+                {notifOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    style={{ position: 'absolute', top: 42, right: isRTL ? 'auto' : 0, left: isRTL ? 0 : 'auto', background: '#111', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', width: 300, maxHeight: 360, overflowY: 'auto', boxShadow: '0 8px 40px rgba(0,0,0,0.8)', zIndex: 200, direction: isRTL ? 'rtl' : 'ltr' }}
+                  >
+                    <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--iron)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em', color: 'var(--ash)', textTransform: 'uppercase' }}>
+                      {ar ? 'الإشعارات' : 'Notifications'}
+                    </div>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '24px 14px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--ash)', fontFamily: 'var(--font-body)' }}>
+                        {ar ? 'مفيش إشعارات لسه' : 'No notifications yet'}
+                      </div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.04)', background: n.is_read ? 'transparent' : 'rgba(255,85,0,0.06)' }}>
+                          <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--chalk)', marginBottom: 2 }}>{n.title}</div>
+                          {n.body && <div style={{ fontSize: '0.72rem', color: 'var(--ash-light)', lineHeight: 1.5 }}>{n.body}</div>}
+                          <div style={{ fontSize: '0.6rem', color: 'var(--ash)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+                            {new Date(n.created_at).toLocaleDateString(ar ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
 
           {/* LOGGED IN — user dropdown */}

@@ -612,6 +612,13 @@ export default function ProfilePage() {
           await supabase.from('user_achievements').insert(
             newlyEarned.map(a => ({ user_id: user.id, achievement_key: a.key, earned_at: nowIso }))
           );
+          await supabase.from('notifications').insert(
+            newlyEarned.map(a => ({
+              user_id: user.id,
+              title: `${a.icon} إنجاز جديد!`,
+              body: `فتحت إنجاز "${a.label}"`,
+            }))
+          );
           newlyEarned.forEach(a => savedMap.set(a.key, nowIso));
           setCelebrationQueue(q => [...q, ...newlyEarned]);
         }
