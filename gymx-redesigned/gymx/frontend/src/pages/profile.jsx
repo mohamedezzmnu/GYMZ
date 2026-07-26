@@ -324,6 +324,226 @@ function ChangePasswordModal({ onClose }) {
   );
 }
 
+// ── مودال الإحصائيات التفصيلية ────────────────────────────────
+const WEEKDAY_AR = ['الأحد', 'الاتنين', 'التلات', 'الأربع', 'الخميس', 'الجمعة', 'السبت'];
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
+function StatsModal({ sessions, onClose }) {
+  const now = new Date();
+
+  const inRange = (s, from, to) => {
+    const t = new Date(s.created_at);
+    return t >= from && t < to;
+  };
+
+  const last7  = sessions.filter(s => inRange(s, daysAgo(6), new Date(now.getTime() + 86400000)));
+  const prev7  = sessions.filter(s => inRange(s, daysAgo(13), daysAgo(6)));
+  const last30 = sessions.filter(s => inRange(s, daysAgo(29), new Date(now.getTime() + 86400000)));
+  const prev30 = sessions.filter(s => inRange(s, daysAgo(59), daysAgo(29)));
+
+  const pctChange = (curr, prev) => {
+    if (prev === 0) return curr > 0 ? 100 : 0;
+    return Math.round(((curr - prev) / prev) * 100);
+  };
+  const weekChange  = pctChange(last7.length, prev7.length);
+  const monthChange = pctChange(last30.length, prev30.length);
+
+  // أكتر يوم بتتمرن فيه
+  const weekdayCounts = new Array(7).fill(0);
+  sessions.forEach(s => weekdayCounts[new Date(s.created_at).getDay()]++);
+  const bestDayIdx = weekdayCounts.reduce((best, v, i) => v > weekdayCounts[best] ? i : best, 0);
+  const hasAnyDay = weekdayCounts.some(v => v > 0);
+
+  // متوسط مدة الجلسة
+  const withDuration = sessions.filter(s => s.duration_min > 0);
+  const avgDuration = withDuration.length
+    ? Math.round(withDuration.reduce((sum, s) => sum + s.duration_min, 0) / withDuration.length)
+    : null;
+
+  // آخر 8 أسابيع — عدد جلسات كل أسبوع
+  const tomorrowStart = new Date(now); tomorrowStart.setHours(24, 0, 0, 0);
+  const weeklyBars = Array.from({ length: 8 }, (_, i) => {
+    const weeksFromNow = 7 - i; // 7 = أقدم أسبوع، 0 = الأسبوع الحالي
+    const bucketEnd   = new Date(tomorrowStart.getTime() - weeksFromNow * 7 * 86400000);
+    const bucketStart = new Date(bucketEnd.getTime() - 7 * 86400000);
+    return sessions.filter(s => {
+      const t = new Date(s.created_at);
+      return t >= bucketStart && t < bucketEnd;
+    }).length;
+  });
+  const maxBar = Math.max(1, ...weeklyBars);
+
+  const Row = ({ icon: Icon, label, value, sub, subColor }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Icon size={16} color="var(--volt)" />
+        <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--chalk)' }}>{label}</span>
+      </div>
+      <div style={{ textAlign: 'left' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)' }}>{value}</div>
+        {sub && <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: subColor || 'var(--ash)' }}>{sub}</div>}
+      </div>
+    </div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+    >
+      <motion.div
+        initial={{ scale: 0.94, opacity: 0, y: 12 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.96, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'linear-gradient(180deg, #161616, #0c0c0c)',
+          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+          padding: 26, maxWidth: 420, width: '100%', maxHeight: '85vh', overflowY: 'auto',
+          direction: 'rtl',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
+            📊 إحصائياتي
+          </h2>
+          <button onClick={onClose} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer' }}>✕</button>
+        </div>
+
+        {sessions.length === 0 ? (
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ash-light)', textAlign: 'center', padding: '30px 0' }}>
+            لسه معملتش أي جلسة — سجل أول جلسة عشان تبدأ تشوف إحصائياتك هنا.
+          </p>
+        ) : (
+          <>
+            <Row
+              icon={Calendar} label="الأسبوع ده"
+              value={`${last7.length} جلسة`}
+              sub={prev7.length > 0 || last7.length > 0 ? `${weekChange >= 0 ? '↑' : '↓'} ${Math.abs(weekChange)}% عن الأسبوع اللي فات` : null}
+              subColor={weekChange >= 0 ? '#4ade80' : '#f87171'}
+            />
+            <Row
+              icon={TrendingUp} label="الشهر ده"
+              value={`${last30.length} جلسة`}
+              sub={prev30.length > 0 || last30.length > 0 ? `${monthChange >= 0 ? '↑' : '↓'} ${Math.abs(monthChange)}% عن الشهر اللي فات` : null}
+              subColor={monthChange >= 0 ? '#4ade80' : '#f87171'}
+            />
+            {hasAnyDay && (
+              <Row icon={Flame} label="أكتر يوم بتتمرن فيه" value={WEEKDAY_AR[bestDayIdx]} sub={`${weekdayCounts[bestDayIdx]} جلسة إجمالي`} />
+            )}
+            {avgDuration && (
+              <Row icon={Clock} label="متوسط مدة الجلسة" value={`${avgDuration} دقيقة`} />
+            )}
+
+            {/* Bar chart — آخر 8 أسابيع */}
+            <div style={{ marginTop: 20 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.05em', marginBottom: 10 }}>
+                جلسات آخر 8 أسابيع
+              </p>
+              <div dir="ltr" style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 70 }}>
+                {weeklyBars.map((count, i) => (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <div style={{
+                      width: '100%', minHeight: 3,
+                      height: `${(count / maxBar) * 54}px`,
+                      background: i === weeklyBars.length - 1 ? 'var(--volt)' : 'rgba(255,85,0,0.35)',
+                      borderRadius: 3,
+                    }} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--ash)' }}>{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── مودال كل الإنجازات ─────────────────────────────────────────
+function daysSince(isoDate) {
+  if (!isoDate) return null;
+  const diff = Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000);
+  if (diff <= 0) return 'النهارده';
+  if (diff === 1) return 'من يوم';
+  return `من ${diff} يوم`;
+}
+
+function AllAchievementsModal({ achievements, onClose }) {
+  const earnedCount = achievements.filter(a => a.earned).length;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+    >
+      <motion.div
+        initial={{ scale: 0.94, opacity: 0, y: 12 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.96, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'linear-gradient(180deg, #161616, #0c0c0c)',
+          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+          padding: 26, maxWidth: 460, width: '100%', maxHeight: '85vh', overflowY: 'auto',
+          direction: 'rtl',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
+            🏆 كل الإنجازات
+          </h2>
+          <button onClick={onClose} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer' }}>✕</button>
+        </div>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.05em', marginBottom: 18 }}>
+          فتحت {earnedCount} من {achievements.length}
+        </p>
+
+        {achievements.length === 0 ? (
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ash-light)', textAlign: 'center', padding: '30px 0' }}>
+            جاري تحميل إنجازاتك...
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {achievements.map(ach => (
+              <div key={ach.key} style={{
+                display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 12,
+                background: ach.earned ? 'rgba(74,222,128,0.06)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${ach.earned ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.06)'}`,
+              }}>
+                <div style={{ fontSize: '1.6rem', filter: ach.earned ? 'none' : 'grayscale(1)', opacity: ach.earned ? 1 : 0.5 }}>{ach.icon}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: ach.earned ? 'var(--chalk)' : 'var(--ash-light)' }}>
+                    {ach.label}
+                  </div>
+                  {ach.earned ? (
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#4ade80', marginTop: 3 }}>
+                      ✓ فتحته {daysSince(ach.earnedAt) || ''}
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                        <div style={{ width: `${Math.round((ach.current / ach.target) * 100)}%`, height: '100%', background: 'var(--volt)', borderRadius: 2 }} />
+                      </div>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', whiteSpace: 'nowrap' }}>{ach.current}/{ach.target}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════
 // PROFILE PAGE
 // ═══════════════════════════════════════════════════════════
@@ -338,6 +558,8 @@ export default function ProfilePage() {
   const [allSessions, setAllSessions]           = useState([]);
   const [celebrationQueue, setCelebrationQueue] = useState([]); // إنجازات جديدة لسه ما اتعرضتش
   const [showPassModal, setShowPassModal]        = useState(false);
+  const [showStatsModal, setShowStatsModal]      = useState(false);
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -376,22 +598,26 @@ export default function ProfilePage() {
           const current = def.getCurrent(data, streak);
           return { ...def, current: Math.min(current, def.target), earned: current >= def.target };
         });
-        setAchievements(computed);
 
         // ── قارن بالمسجل فعليًا في الداتابيز — سجل أي إنجاز جديد واحتفل بيه ──
         const { data: savedRows } = await supabase
           .from('user_achievements')
-          .select('achievement_key')
+          .select('achievement_key, earned_at')
           .eq('user_id', user.id);
-        const savedKeys = new Set((savedRows || []).map(r => r.achievement_key));
+        const savedMap = new Map((savedRows || []).map(r => [r.achievement_key, r.earned_at]));
 
-        const newlyEarned = computed.filter(a => a.earned && !savedKeys.has(a.key));
+        const newlyEarned = computed.filter(a => a.earned && !savedMap.has(a.key));
         if (newlyEarned.length > 0) {
+          const nowIso = new Date().toISOString();
           await supabase.from('user_achievements').insert(
-            newlyEarned.map(a => ({ user_id: user.id, achievement_key: a.key }))
+            newlyEarned.map(a => ({ user_id: user.id, achievement_key: a.key, earned_at: nowIso }))
           );
+          newlyEarned.forEach(a => savedMap.set(a.key, nowIso));
           setCelebrationQueue(q => [...q, ...newlyEarned]);
         }
+
+        // ── حدّث الإنجازات بتاريخ الفتح الحقيقي من الداتابيز ──────────
+        setAchievements(computed.map(a => ({ ...a, earnedAt: savedMap.get(a.key) || null })));
       });
 
     // بيانات الـ onboarding
@@ -443,6 +669,10 @@ export default function ProfilePage() {
     <>
       <Head><title>حسابي — GYMZ</title></Head>
       {showPassModal && <ChangePasswordModal onClose={() => setShowPassModal(false)} />}
+      <AnimatePresence>
+        {showStatsModal && <StatsModal sessions={allSessions} onClose={() => setShowStatsModal(false)} />}
+        {showAchievementsModal && <AllAchievementsModal achievements={achievements} onClose={() => setShowAchievementsModal(false)} />}
+      </AnimatePresence>
       <AnimatePresence>
         {celebrationQueue.length > 0 && (
           <AchievementCelebration
@@ -717,8 +947,8 @@ export default function ProfilePage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
                       { icon: Shield, label: 'تغيير الباسورد', onClick: () => setShowPassModal(true), accent: 'var(--accent)' },
-                      { icon: BarChart2, label: 'إحصائياتي', onClick: () => toast('قريباً! 📊'), accent: '#facc15' },
-                      { icon: Award, label: 'كل الإنجازات', onClick: () => toast('قريباً! 🏆'), accent: '#4ade80' },
+                      { icon: BarChart2, label: 'إحصائياتي', onClick: () => setShowStatsModal(true), accent: '#facc15' },
+                      { icon: Award, label: 'كل الإنجازات', onClick: () => setShowAchievementsModal(true), accent: '#4ade80' },
                     ].map(({ icon: Icon, label, onClick, accent }) => (
                       <motion.button
                         key={label}
