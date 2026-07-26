@@ -203,7 +203,7 @@ export default function Navbar() {
                   <motion.div
                     initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    style={{ position: 'absolute', top: 42, right: isRTL ? 'auto' : 0, left: isRTL ? 0 : 'auto', background: '#111', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', width: 300, maxHeight: 360, overflowY: 'auto', boxShadow: '0 8px 40px rgba(0,0,0,0.8)', zIndex: 200, direction: isRTL ? 'rtl' : 'ltr' }}
+                    style={{ position: 'fixed', top: 72, left: 0, right: 0, margin: '0 auto', width: 'calc(100% - 32px)', maxWidth: 320, background: '#111', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', maxHeight: 360, overflowY: 'auto', boxShadow: '0 20px 50px rgba(0,0,0,0.7)', zIndex: 200, direction: isRTL ? 'rtl' : 'ltr' }}
                   >
                     <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--iron)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em', color: 'var(--ash)', textTransform: 'uppercase' }}>
                       {ar ? 'الإشعارات' : 'Notifications'}
