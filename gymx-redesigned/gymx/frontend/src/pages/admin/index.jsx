@@ -4,7 +4,7 @@ import {
   Users, Dumbbell, LayoutGrid, ShieldAlert,
   TrendingUp, Trash2, Search, RefreshCw, Crown,
   UserCheck, UserX, ChevronDown, Activity, Apple, Plus, Play,
-  Barcode, Pencil,
+  Barcode, Pencil, Send,
 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -92,6 +92,9 @@ export default function AdminPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
+  const [broadcastTitle, setBroadcastTitle] = useState('');
+  const [broadcastBody, setBroadcastBody]   = useState('');
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
   // ── nutrition premium ─────────────────────────────────────
   const [premiumEmails, setPremiumEmails] = useState([]);
@@ -393,6 +396,59 @@ export default function AdminPage() {
           <StatBox icon={Dumbbell}    label="جلسات التدريب"        value={loadingData ? '—' : stats.totalSessions}  accent="#4ade80" delay={0.1} />
           <StatBox icon={TrendingUp}  label="مسجلين اليوم"         value={loadingData ? '—' : stats.newToday}       accent="#facc15" delay={0.15} />
         </div>
+
+        {/* ── Nutrition Premium ── */}
+        <Reveal delay={0.15}>
+          <GlassCard accent="var(--accent)" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <Send size={16} color="var(--accent)" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                بث إشعار لكل العملاء ({users.length})
+              </span>
+            </div>
+
+            <input
+              type="text"
+              placeholder="عنوان الإشعار (مثال: عرض جديد 🔥)"
+              value={broadcastTitle}
+              onChange={e => setBroadcastTitle(e.target.value)}
+              style={{ ...foodInputStyle, width: '100%', marginBottom: 10, direction: 'rtl' }}
+            />
+            <textarea
+              placeholder="اكتب الرسالة اللي هتوصل لكل مستخدم..."
+              value={broadcastBody}
+              onChange={e => setBroadcastBody(e.target.value)}
+              rows={3}
+              style={{ ...foodInputStyle, width: '100%', marginBottom: 12, direction: 'rtl', resize: 'vertical', fontFamily: 'var(--font-body)' }}
+            />
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              disabled={sendingBroadcast || !broadcastTitle.trim() || users.length === 0}
+              onClick={async () => {
+                if (!broadcastTitle.trim()) return;
+                setSendingBroadcast(true);
+                const rows = users.map(u => ({
+                  user_id: u.id,
+                  title: broadcastTitle.trim(),
+                  body: broadcastBody.trim() || null,
+                }));
+                const { error } = await supabase.from('notifications').insert(rows);
+                setSendingBroadcast(false);
+                if (error) {
+                  toast.error('فشل الإرسال — تأكد إن policy الأدمن مضافة في Supabase');
+                } else {
+                  toast.success(`اتبعت لـ ${rows.length} مستخدم ✅`);
+                  setBroadcastTitle('');
+                  setBroadcastBody('');
+                }
+              }}
+              className="btn btn-primary"
+              style={{ padding: '10px 22px', fontSize: '0.82rem', opacity: sendingBroadcast || !broadcastTitle.trim() ? 0.5 : 1 }}
+            >
+              {sendingBroadcast ? 'جاري الإرسال...' : `إرسال للكل (${users.length})`}
+            </motion.button>
+          </GlassCard>
+        </Reveal>
 
         {/* ── Nutrition Premium ── */}
         <Reveal delay={0.15}>
