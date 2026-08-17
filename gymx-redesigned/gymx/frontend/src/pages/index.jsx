@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import Head from 'next/head';
 import Link from 'next/link';
 import {
@@ -155,25 +155,54 @@ function ServiceRow({ s, i, ar }) {
 }
 
 /* ─────────────────────────────────────────────
-   STEP CARD ITEM
+   STEP ITEM — timeline marker on a connecting rail
 ───────────────────────────────────────────── */
-function StepItem({ s, i }) {
+function StepItem({ s, i, ar }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   return (
     <motion.div ref={ref}
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: i * 0.1 }}
-      style={{ padding: '32px 28px', borderLeft: i > 0 ? '1px solid var(--iron-light)' : 'none', position: 'relative' }}
+      transition={{ duration: 0.5, delay: i * 0.12 }}
+      style={{ position: 'relative', paddingTop: 50 }}
     >
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '5rem', color: 'var(--volt)', lineHeight: 1, marginBottom: 16, opacity: 0.9 }}>{s.num}</div>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.05em', color: 'var(--chalk)', textTransform: 'uppercase', marginBottom: 10 }}>{s.title}</h3>
-      <p style={{ color: 'var(--ash-light)', fontSize: '0.85rem', lineHeight: 1.7 }}>{s.desc}</p>
-      <div style={{ position: 'absolute', bottom: 0, left: 28, width: 24, height: 2, background: 'var(--volt)' }} />
+      <div style={{
+        position: 'absolute', top: 0,
+        left: ar ? 'auto' : 0, right: ar ? 0 : 'auto',
+        width: 68, height: 68, borderRadius: '50%',
+        background: 'var(--carbon)', border: '2px solid var(--volt)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--volt)',
+        zIndex: 2,
+      }}>
+        {s.num}
+      </div>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', letterSpacing: '0.04em', color: 'var(--chalk)', textTransform: 'uppercase', marginBottom: 10 }}>{s.title}</h3>
+      <p style={{ color: 'var(--ash-light)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: 260 }}>{s.desc}</p>
     </motion.div>
   );
 }
+
+/* ─────────────────────────────────────────────
+   MARQUEE STRIP — editorial ticker texture
+───────────────────────────────────────────── */
+function MarqueeStrip({ items, style, itemStyle, duration = '26s' }) {
+  const doubled = [...items, ...items];
+  return (
+    <div className="marquee-strip" style={style}>
+      <div className="marquee-track" style={{ animationDuration: duration }}>
+        {doubled.map((t, i) => (
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', ...itemStyle }}>
+            {t}
+            <span style={{ margin: '0 24px', opacity: 0.5 }}>✦</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { lang } = useLang();
   const { user } = useAuth();
@@ -219,6 +248,10 @@ export default function HomePage() {
     { num: '02', title: 'Set Your Goal',  desc: 'Tell us your level and weekly schedule.' },
     { num: '03', title: 'Start Today',    desc: 'Full custom training and nutrition plan immediately.' },
   ];
+
+  const valueProps = ar
+    ? ['بدون اشتراكات نهائي', 'بدون إعلانات', 'مبني في مصر', 'تتبع حقيقي أسبوعي', 'خطط أكل مصرية']
+    : ['NO SUBSCRIPTIONS', 'NO ADS', 'BUILT IN EGYPT', 'REAL WEEKLY TRACKING', 'EGYPTIAN MEAL PLANS'];
 
   return (
     <>
@@ -325,7 +358,7 @@ export default function HomePage() {
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--volt)', animation: 'dotBlink 1.4s ease-in-out infinite' }} />
               </motion.div>
 
-              {/* HERO HEADLINE — massive Bebas Neue */}
+              {/* HERO HEADLINE */}
               {(() => {
                 const lines = user
                   ? (ar ? ['أهلاً', `يا ${userName}`] : ['BACK,', userName.toUpperCase()])
@@ -432,58 +465,31 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            {/* PHONE + CARDS SIDE */}
+            {/* PHONE + CARDS SIDE — one strong anchor, not a card pile */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.7 }}
               style={{ position: 'relative', flexShrink: 0, margin: '24px auto 0', paddingBottom: 20 }}
             >
-              {/* STAT CARD: programs */}
-              <FloatCard className="hero-side-card" animDelay={0} animDuration={4.5} style={{ top: -10, right: ar ? 'auto' : -90, left: ar ? -90 : 'auto', minWidth: 138 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', color: 'var(--ash)', textTransform: 'uppercase', marginBottom: 4 }}>
-                  {ar ? 'البرامج المتاحة' : 'PROGRAMS'}
+              {/* accent badge — replaces the old repeated stat cards, single punch instead */}
+              <FloatCard className="hero-side-card" animDelay={0} animDuration={4.2}
+                style={{
+                  top: -14, right: ar ? 'auto' : -40, left: ar ? -40 : 'auto',
+                  minWidth: 118, background: 'var(--volt)', border: 'none',
+                  boxShadow: '0 16px 40px rgba(255,85,0,0.35)', transform: 'rotate(-4deg)',
+                }}
+              >
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: '#fff', letterSpacing: '0.06em', lineHeight: 1.2 }}>
+                  {ar ? 'مجاناً 100%' : '100% FREE'}
                 </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--volt)', lineHeight: 1 }}>
-                  {stats.programs || 15}<span style={{ fontSize: 14, color: 'var(--ash)' }}>+</span>
-                </div>
-                <div style={{ height: 2, background: 'var(--iron)', marginTop: 8, borderRadius: 1 }}>
-                  <div style={{ height: '100%', background: 'var(--volt)', width: '80%', borderRadius: 1 }} />
-                </div>
-              </FloatCard>
-
-              {/* STAT CARD: members */}
-              <FloatCard className="hero-side-card" animDelay={0.8} animDuration={5} style={{ bottom: 50, right: ar ? 'auto' : -95, left: ar ? -95 : 'auto', minWidth: 130 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', color: 'var(--ash)', textTransform: 'uppercase', marginBottom: 4 }}>
-                  {ar ? 'متدرب نشط' : 'MEMBERS'}
-                </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--chalk)', lineHeight: 1 }}>
-                  {stats.members > 999 ? `${(stats.members / 1000).toFixed(1)}K` : (stats.members || '5.2K')}
-                </div>
-                <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
-                  {['#FF5500', '#FF7A30', '#FF9960', '#FFC0A0'].map((c, i) => (
-                    <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: '#fff', fontFamily: 'var(--font-display)' }}>
-                      {['م', 'أ', 'ك', '+'][i]}
-                    </div>
-                  ))}
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'rgba(255,255,255,0.8)', marginTop: 3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  {ar ? 'مفيش بطاقة' : 'NO CARD NEEDED'}
                 </div>
               </FloatCard>
 
-              {/* STAT CARD: exercises */}
-              <FloatCard className="hero-side-card" animDelay={0.4} animDuration={3.8} style={{ top: 30, left: ar ? 'auto' : -105, right: ar ? -105 : 'auto', minWidth: 130 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', color: 'var(--ash)', textTransform: 'uppercase', marginBottom: 4 }}>
-                  {ar ? 'مكتبة التمارين' : 'EXERCISES'}
-                </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--chalk)', lineHeight: 1 }}>
-                  {stats.exercises || 120}<span style={{ fontSize: 14, color: 'var(--volt)' }}>+</span>
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--ash)', marginTop: 6, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  {ar ? 'بالفيديو والشرح' : 'with video guides'}
-                </div>
-              </FloatCard>
-
-              {/* STAT CARD: streak — identity: gamified, not a plain dashboard */}
-              <FloatCard animDelay={1.2} animDuration={4.2} style={{ bottom: -18, left: 'calc(50% - 64px)', minWidth: 128 }}>
+              {/* STAT CARD: streak — gamified identity, kept because it's not repeated anywhere else */}
+              <FloatCard animDelay={1.1} animDuration={4.2} style={{ bottom: -18, left: 'calc(50% - 64px)', minWidth: 128 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Flame size={14} color="var(--volt)" />
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--chalk)', lineHeight: 1 }}>
@@ -524,6 +530,17 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════
+          VALUE STRIP — thin editorial marquee, the kind
+          of texture that separates "designed" from "templated"
+      ══════════════════════════════════════ */}
+      <MarqueeStrip
+        items={valueProps}
+        style={{ background: 'var(--carbon)', borderTop: '1px solid var(--iron)', borderBottom: '1px solid var(--iron)', padding: '16px 0' }}
+        itemStyle={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ash-light)', padding: '0 8px' }}
+        duration="30s"
+      />
 
       {/* ══════════════════════════════════════
           SERVICES — editorial rows, not card grid
@@ -588,7 +605,7 @@ export default function HomePage() {
       </section>
       )}
 
-      {/* HOW IT WORKS — for new visitors only */}
+      {/* HOW IT WORKS — for new visitors only, horizontal rail instead of bordered columns */}
       {!user && (
       <section style={{ padding: 'clamp(64px,10vw,120px) 32px', background: 'var(--carbon)', direction: ar ? 'rtl' : 'ltr', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-display)', fontSize: 'clamp(200px,30vw,300px)', color: 'rgba(255,85,0,0.03)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
@@ -599,11 +616,14 @@ export default function HomePage() {
             <div className="rule-orange" />
             <span className="label-tag">{ar ? 'كيف تبدأ' : 'HOW IT WORKS'}</span>
           </div>
-          <h2 className="display-lg" style={{ color: 'var(--chalk)', marginBottom: 56, whiteSpace: 'pre-line' }}>
+          <h2 className="display-lg" style={{ color: 'var(--chalk)', marginBottom: 64, whiteSpace: 'pre-line' }}>
             {ar ? '٣ خطوات\nبس وانت جاهز' : 'THREE STEPS.\nTHATS IT.'}
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2 }}>
-            {steps.map((s, i) => <StepItem key={s.num} s={s} i={i} />)}
+          <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 34, left: 0, right: 0, height: 1, background: 'var(--iron-light)', zIndex: 0 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 40, position: 'relative' }}>
+              {steps.map((s, i) => <StepItem key={s.num} s={s} i={i} ar={ar} />)}
+            </div>
           </div>
         </div>
       </section>
@@ -621,6 +641,14 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             style={{ maxWidth: 800, margin: '0 auto', position: 'relative', zIndex: 1 }}
           >
+            {/* ticker — energy above the headline instead of one more static line */}
+            <MarqueeStrip
+              items={[ar ? 'مفيش أعذار' : 'NO EXCUSES']}
+              style={{ marginBottom: 24, opacity: 0.5 }}
+              itemStyle={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.7)', textTransform: 'uppercase', padding: '0 8px' }}
+              duration="14s"
+            />
+
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32 }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>

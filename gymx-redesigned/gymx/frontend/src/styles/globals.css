@@ -405,6 +405,26 @@ input, textarea, select { font-family: inherit; }
 }
 
 /* =============================================
+   MARQUEE — editorial ticker strip
+   ============================================= */
+.marquee-strip {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+.marquee-track {
+  display: inline-flex;
+  width: max-content;
+  animation-name: marqueeScroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* =============================================
    PROGRESS BAR
    ============================================= */
 .progress-bar { height: 4px; background: var(--iron); border-radius: 2px; overflow: hidden; }
