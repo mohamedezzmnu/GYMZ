@@ -35,9 +35,10 @@ function AnimatedCounter({ target, suffix = '', duration = 1600 }) {
 /* ─────────────────────────────────────────────
    FLOATING CARD
 ───────────────────────────────────────────── */
-function FloatCard({ style, animDelay = 0, animDuration = 4, children }) {
+function FloatCard({ style, className, animDelay = 0, animDuration = 4, children }) {
   return (
     <motion.div
+      className={className}
       animate={{ y: [0, -12, 0], rotate: [0, 0.5, 0] }}
       transition={{ duration: animDuration, delay: animDelay, repeat: Infinity, ease: 'easeInOut' }}
       style={{
@@ -340,7 +341,7 @@ export default function HomePage() {
                         <div style={{
                           fontFamily: 'var(--font-display)',
                           fontWeight: 800,
-                          fontSize: user ? 'clamp(3.5rem, 9vw, 7rem)' : 'clamp(1.9rem, 5vw, 3.4rem)',
+                          fontSize: user ? 'clamp(2.6rem, 6vw, 4.6rem)' : 'clamp(3.6rem, 9vw, 7.4rem)',
                           lineHeight: 1.08,
                           color: i === 2 ? 'transparent' : i === 1 ? 'var(--volt)' : 'var(--chalk)',
                           WebkitTextStroke: i === 2 ? '2px var(--volt)' : '0',
@@ -439,7 +440,7 @@ export default function HomePage() {
               style={{ position: 'relative', flexShrink: 0, margin: '24px auto 0', paddingBottom: 20 }}
             >
               {/* STAT CARD: programs */}
-              <FloatCard animDelay={0} animDuration={4.5} style={{ top: -10, right: ar ? 'auto' : -90, left: ar ? -90 : 'auto', minWidth: 138 }}>
+              <FloatCard className="hero-side-card" animDelay={0} animDuration={4.5} style={{ top: -10, right: ar ? 'auto' : -90, left: ar ? -90 : 'auto', minWidth: 138 }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', color: 'var(--ash)', textTransform: 'uppercase', marginBottom: 4 }}>
                   {ar ? 'البرامج المتاحة' : 'PROGRAMS'}
                 </div>
@@ -452,7 +453,7 @@ export default function HomePage() {
               </FloatCard>
 
               {/* STAT CARD: members */}
-              <FloatCard animDelay={0.8} animDuration={5} style={{ bottom: 50, right: ar ? 'auto' : -95, left: ar ? -95 : 'auto', minWidth: 130 }}>
+              <FloatCard className="hero-side-card" animDelay={0.8} animDuration={5} style={{ bottom: 50, right: ar ? 'auto' : -95, left: ar ? -95 : 'auto', minWidth: 130 }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', color: 'var(--ash)', textTransform: 'uppercase', marginBottom: 4 }}>
                   {ar ? 'متدرب نشط' : 'MEMBERS'}
                 </div>
@@ -469,7 +470,7 @@ export default function HomePage() {
               </FloatCard>
 
               {/* STAT CARD: exercises */}
-              <FloatCard animDelay={0.4} animDuration={3.8} style={{ top: 30, left: ar ? 'auto' : -105, right: ar ? -105 : 'auto', minWidth: 130 }}>
+              <FloatCard className="hero-side-card" animDelay={0.4} animDuration={3.8} style={{ top: 30, left: ar ? 'auto' : -105, right: ar ? -105 : 'auto', minWidth: 130 }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', color: 'var(--ash)', textTransform: 'uppercase', marginBottom: 4 }}>
                   {ar ? 'مكتبة التمارين' : 'EXERCISES'}
                 </div>
@@ -537,7 +538,7 @@ export default function HomePage() {
                 <div className="rule-orange" />
                 <span className="label-tag">{ar ? 'الخدمات' : 'FEATURES'}</span>
               </div>
-              <h2 className="display-lg" style={{ color: 'var(--chalk)' }}>
+              <h2 className="display-lg" style={{ color: 'var(--chalk)', whiteSpace: 'pre-line' }}>
                 {ar ? 'كل اللي\nمحتاجه' : 'EVERYTHING\nYOU NEED'}
               </h2>
             </div>
@@ -598,7 +599,7 @@ export default function HomePage() {
             <div className="rule-orange" />
             <span className="label-tag">{ar ? 'كيف تبدأ' : 'HOW IT WORKS'}</span>
           </div>
-          <h2 className="display-lg" style={{ color: 'var(--chalk)', marginBottom: 56 }}>
+          <h2 className="display-lg" style={{ color: 'var(--chalk)', marginBottom: 56, whiteSpace: 'pre-line' }}>
             {ar ? '٣ خطوات\nبس وانت جاهز' : 'THREE STEPS.\nTHATS IT.'}
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2 }}>
@@ -628,7 +629,7 @@ export default function HomePage() {
                     {ar ? 'مجاناً تماماً' : 'COMPLETELY FREE'}
                   </span>
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem,8vw,7rem)', lineHeight: 0.9, color: '#fff', textTransform: 'uppercase', marginBottom: 16 }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem,8vw,7rem)', lineHeight: 0.9, color: '#fff', textTransform: 'uppercase', marginBottom: 16, whiteSpace: 'pre-line' }}>
                   {ar ? 'ابدأ\nرحلتك\nدلوقتي' : 'START\nYOUR\nJOURNEY'}
                 </h2>
                 <p style={{ color: 'rgba(0,0,0,0.65)', fontSize: '0.9rem', lineHeight: 1.7, maxWidth: 380 }}>

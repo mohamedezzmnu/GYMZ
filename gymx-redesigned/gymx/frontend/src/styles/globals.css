@@ -396,6 +396,14 @@ input, textarea, select { font-family: inherit; }
   border-radius: 20px;
 }
 
+/* the three offset stat cards next to the hero phone need real side-space
+   to sit off-canvas without overlapping the headline — below that width
+   they'd just collide with the text column, so they step aside and let
+   the phone + core stats carry the hero on tablet/mobile */
+@media (max-width: 980px) {
+  .hero-side-card { display: none; }
+}
+
 /* =============================================
    PROGRESS BAR
    ============================================= */
