@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
-  TrendingUp, Dumbbell, Flame, Target, ChevronRight,
-  Plus, BarChart2, Clock, CheckCircle, Zap, Scale, Activity
+  Dumbbell, Flame, Target, ChevronRight,
+  Plus, BarChart2, Clock, CheckCircle, Zap, Scale
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
@@ -23,15 +24,17 @@ function Reveal({ children, delay = 0 }) {
   );
 }
 
+// Reuses the site's own glass-card tokens (--glass-bg/--glass-border/--glass-shadow)
+// instead of re-inventing hand-rolled rgba values that drift from the design system.
 function GlassCard({ children, style = {}, accentColor }) {
   return (
     <motion.div
-      whileHover={{ borderColor: accentColor ? `${accentColor}44` : 'rgba(255,77,46,0.25)', y: -2 }}
+      whileHover={{ borderColor: accentColor ? `${accentColor}44` : 'var(--glass-border-hover)', y: -2 }}
       transition={{ duration: 0.2 }}
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        background: 'var(--glass-bg)',
+        border: '1px solid var(--glass-border)',
+        borderRadius: 16, boxShadow: 'var(--glass-shadow)',
         position: 'relative', overflow: 'hidden',
         ...style,
       }}
@@ -41,7 +44,7 @@ function GlassCard({ children, style = {}, accentColor }) {
   );
 }
 
-function StatBox({ icon: Icon, label, value, sub, accent = 'var(--accent)', delay = 0 }) {
+function StatBox({ icon: Icon, label, value, sub, accent = 'var(--volt)', delay = 0 }) {
   return (
     <Reveal delay={delay}>
       <GlassCard accentColor={accent} style={{ padding: '20px 22px' }}>
@@ -78,16 +81,16 @@ function WeightChart({ data }) {
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:80, overflow:'visible' }}>
         <defs>
           <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--volt)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--volt)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={areaPath} fill="url(#wg)" />
-        <path d={path} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={path} fill="none" stroke="var(--volt)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {weights.map((w, i) => {
           const x = (i / (weights.length - 1)) * W;
           const y = H - ((w - min) / (max - min)) * H;
-          return <circle key={i} cx={x} cy={y} r="3" fill="var(--accent)" />;
+          return <circle key={i} cx={x} cy={y} r="3" fill="var(--volt)" />;
         })}
       </svg>
     </div>
@@ -97,7 +100,7 @@ function WeightChart({ data }) {
 function WeightEntry({ date, weight, change }) {
   const positive = change > 0;
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 0', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 0', borderBottom:'1px solid var(--glass-border)' }}>
       <span style={{ fontSize:'0.75rem', color:'var(--ash-light)', fontFamily:'var(--font-mono)' }}>{date}</span>
       <span style={{ fontSize:'0.92rem', fontFamily:'var(--font-display)', letterSpacing:'0.05em', color:'var(--chalk)' }}>{weight} kg</span>
       {change !== 0 && (
@@ -111,6 +114,8 @@ function WeightEntry({ date, weight, change }) {
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const { lang } = useLang();
+  const ar = lang === 'ar';
   const router   = useRouter();
   const [programs,   setPrograms]   = useState([]);
   const [sessions,   setSessions]   = useState([]);
@@ -120,6 +125,8 @@ export default function DashboardPage() {
   const [weekDays,   setWeekDays]   = useState([]);
   const [streak,     setStreak]     = useState(0);
   const [goalWeight, setGoalWeight] = useState(null);
+
+  const dateLocale = ar ? 'ar-EG' : 'en-US';
 
   useEffect(() => {
     if (authLoading) return;
@@ -151,6 +158,21 @@ export default function DashboardPage() {
           }
         }
         setStreak(count);
+
+        // ── week strip reflects REAL trained days, not "any day before today" ──
+        const daysAr = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        const daysEn = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+        const todayIdx = new Date().getDay();
+        const trainedSet = sessionDates;
+        setWeekDays((ar ? daysAr : daysEn).map((label, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (todayIdx - i));
+          return {
+            label,
+            today: i === todayIdx,
+            done: i <= todayIdx && trainedSet.includes(d.toDateString()),
+          };
+        }));
       });
 
     supabase.from('weight_log').select('*').eq('user_id', user.id)
@@ -162,22 +184,18 @@ export default function DashboardPage() {
       .then(({ data }) => {
         if (data?.goal_weight) setGoalWeight(data.goal_weight);
       });
-
-    const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    const today = new Date().getDay();
-    setWeekDays(days.map((d, i) => ({ label: d, done: i < today, today: i === today })));
-  }, [user, authLoading]);
+  }, [user, authLoading, ar]);
 
   const logWeight = async () => {
-    if (!newWeight || isNaN(newWeight)) { toast.error('أدخل وزن صحيح'); return; }
+    if (!newWeight || isNaN(newWeight)) { toast.error(ar ? 'أدخل وزن صحيح' : 'Enter a valid weight'); return; }
     setLoadingWeight(true);
     const { error } = await supabase.from('weight_log').insert({ user_id: user.id, weight: parseFloat(newWeight), logged_at: new Date().toISOString() });
-    if (error) { toast.error('حصل خطأ، جرب تاني'); setLoadingWeight(false); return; }
+    if (error) { toast.error(ar ? 'حصل خطأ، جرب تاني' : 'Something went wrong, try again'); setLoadingWeight(false); return; }
     const { data } = await supabase.from('weight_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(10);
     if (data) setWeightLog(data);
     setNewWeight('');
     setLoadingWeight(false);
-    toast.success('✅ اتسجل الوزن');
+    toast.success(ar ? '✅ اتسجل الوزن' : '✅ Weight logged');
   };
 
   const thisMonth = new Date().getMonth();
@@ -198,24 +216,32 @@ export default function DashboardPage() {
 
   const lastSession = sessions[0];
 
+  const quickLinks = [
+    { href: '/exercises', label: ar ? 'التمارين'  : 'Exercises',    icon: '🏋️', color: 'var(--volt)' },
+    { href: '/programs',  label: ar ? 'البرامج'   : 'Programs',     icon: '📋', color: '#FFFFFF'     },
+    { href: '/nutrition', label: ar ? 'التغذية'   : 'Nutrition',    icon: '🥗', color: '#4ade80'     },
+    { href: '/tools',     label: ar ? 'الحاسبات'  : 'Calculators',  icon: '🧮', color: '#FFFFFF'     },
+  ];
+
   if (!user) return null;
 
   return (
     <>
-      <Head><title>صفحتي — GYMZ</title></Head>
-      <div style={{ minHeight:'100vh', paddingTop:72, paddingBottom:80, position:'relative' }}>
-        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, rgba(255,77,46,0.06) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, rgba(255,77,46,0.04) 0%,transparent 60%)' }} />
+      <Head><title>{ar ? 'صفحتي' : 'My Dashboard'} — GYMZ</title></Head>
+      <div style={{ minHeight:'100vh', paddingTop:72, paddingBottom:80, position:'relative', direction: ar ? 'rtl' : 'ltr' }}>
+        <div style={{ position:'fixed', inset:0, zIndex:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 35% at 15% 25%, var(--volt-glow) 0%,transparent 60%), radial-gradient(ellipse 40% 40% at 85% 75%, var(--volt-glow) 0%,transparent 60%)' }} />
 
         <div style={{ maxWidth:960, margin:'0 auto', padding:'0 20px', position:'relative', zIndex:1 }}>
 
           {/* ── GREETING ── */}
           <Reveal>
-            <div style={{ marginBottom:24, direction:'rtl' }}>
-              <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.62rem', color:'rgba(255,77,46,0.7)', letterSpacing: '0.02em', marginBottom:6 }}>
-                — أهلاً بك
-              </div>
-              <h1 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2rem,5vw,3rem)', letterSpacing:'0.03em', color:'var(--chalk)', lineHeight:1 }}>
-                {user.email?.split('@')[0] || 'بطل'} <span style={{ color:'var(--accent)' }}>💪</span>
+            <div style={{ marginBottom:24, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="rule-orange" />
+              <span className="label-tag">{ar ? 'أهلاً بك' : 'WELCOME BACK'}</span>
+            </div>
+            <div style={{ marginBottom: 24, marginTop: -12 }}>
+              <h1 style={{ fontFamily:'var(--font-display)', fontWeight: 800, fontSize:'clamp(2rem,5vw,3rem)', letterSpacing:'0.01em', textTransform: 'uppercase', color:'var(--chalk)', lineHeight:1 }}>
+                {user.email?.split('@')[0] || (ar ? 'بطل' : 'CHAMP')} <span style={{ color:'var(--volt)' }}>💪</span>
               </h1>
             </div>
           </Reveal>
@@ -224,17 +250,17 @@ export default function DashboardPage() {
           <Reveal delay={0.05}>
             <GlassCard style={{ padding:'18px 22px', marginBottom:20 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-                <span style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', letterSpacing:'0.05em' }}>أيام الأسبوع</span>
-                <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.6rem', color:'rgba(255,77,46,0.7)', letterSpacing: '0.02em' }}>{streak} أيام متتالية 🔥</span>
+                <span style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', letterSpacing:'0.05em' }}>{ar ? 'أيام الأسبوع' : 'THIS WEEK'}</span>
+                <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.6rem', color:'var(--volt)', letterSpacing: '0.05em' }}>{streak} {ar ? 'أيام متتالية' : 'DAY STREAK'} 🔥</span>
               </div>
               <div style={{ display:'flex', gap:8, justifyContent:'space-between' }}>
                 {weekDays.map((d, i) => (
                   <div key={i} style={{ textAlign:'center', flex:1 }}>
-                    <div style={{ width:'100%', aspectRatio:'1', borderRadius:8, border:`1px solid ${d.today ? 'var(--accent)' : d.done ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)'}`, background: d.today ? 'rgba(255,77,46,0.15)' : d.done ? 'rgba(74,222,128,0.08)' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:5 }}>
+                    <div style={{ width:'100%', aspectRatio:'1', borderRadius:8, border:`1px solid ${d.today ? 'var(--volt)' : d.done ? 'rgba(74,222,128,0.4)' : 'var(--iron-light)'}`, background: d.today ? 'var(--volt-dim)' : d.done ? 'rgba(74,222,128,0.08)' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:5 }}>
                       {d.done && !d.today && <span style={{ fontSize:'0.6rem', color:'#4ade80' }}>✓</span>}
-                      {d.today && <span style={{ fontSize:'0.6rem', color:'var(--accent)' }}>●</span>}
+                      {d.today && <span style={{ fontSize:'0.6rem', color:'var(--volt)' }}>●</span>}
                     </div>
-                    <span style={{ fontSize:'0.5rem', fontFamily:'var(--font-mono)', color: d.today ? 'var(--accent)' : d.done ? '#4ade80' : 'var(--ash)', letterSpacing:'0.04em' }}>
+                    <span style={{ fontSize:'0.5rem', fontFamily:'var(--font-mono)', color: d.today ? 'var(--volt)' : d.done ? '#4ade80' : 'var(--ash)', letterSpacing:'0.04em' }}>
                       {d.label.slice(0,3)}
                     </span>
                   </div>
@@ -245,28 +271,28 @@ export default function DashboardPage() {
 
           {/* ── STATS GRID ── */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
-            <StatBox icon={Flame}    label="الاستمرارية"     value={streak ? `${streak} يوم` : '—'} sub={trainedToday ? '+1 اليوم 🔥' : null} accent="var(--accent)"  delay={0.05} />
-            <StatBox icon={Dumbbell} label="جلسات الشهر"     value={totalSessions || '—'}   accent="#FFFFFF"  delay={0.1}  />
-            <StatBox icon={Scale}    label="الوزن الحالي"    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
-            <StatBox icon={Target}   label="برامج نشطة"      value={programs.length || '—'} accent="#FFFFFF"  delay={0.2}  />
+            <StatBox icon={Flame}    label={ar ? 'الاستمرارية' : 'STREAK'}     value={streak ? `${streak} ${ar ? 'يوم' : 'd'}` : '—'} sub={trainedToday ? (ar ? '+1 اليوم 🔥' : '+1 today 🔥') : null} accent="var(--volt)"  delay={0.05} />
+            <StatBox icon={Dumbbell} label={ar ? 'جلسات الشهر' : 'SESSIONS/MO'}   value={totalSessions || '—'}   accent="#FFFFFF"  delay={0.1}  />
+            <StatBox icon={Scale}    label={ar ? 'الوزن الحالي' : 'CURRENT WEIGHT'}    value={currentWeight !== '—' ? `${currentWeight}` : '—'} accent="#4ade80" delay={0.15} />
+            <StatBox icon={Target}   label={ar ? 'برامج نشطة' : 'ACTIVE PROGRAMS'}      value={programs.length || '—'} accent="#FFFFFF"  delay={0.2}  />
           </div>
 
           {/* ── LAST WORKOUT ── */}
           {lastSession && (
             <Reveal delay={0.08}>
               <GlassCard style={{ padding:'18px 22px', marginBottom:20 }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', direction:'rtl' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <div style={{ width:36, height:36, borderRadius:10, background:'rgba(255,77,46,0.12)', border:'1px solid rgba(255,77,46,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      <Dumbbell size={16} color="var(--accent)" />
+                    <div style={{ width:36, height:36, borderRadius:10, background:'var(--volt-dim)', border:'1px solid rgba(255,85,0,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <Dumbbell size={16} color="var(--volt)" />
                     </div>
                     <div>
-                      <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.58rem', color:'var(--ash)', letterSpacing: '0.02em', marginBottom:3 }}>آخر تمرين</div>
-                      <div style={{ fontFamily:'var(--font-display)', fontSize:'1rem', color:'var(--chalk)' }}>{lastSession.name || lastSession.program_name || 'جلسة تمرين'}</div>
+                      <div style={{ fontFamily:'var(--font-mono)', fontSize:'0.58rem', color:'var(--ash)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom:3 }}>{ar ? 'آخر تمرين' : 'LAST WORKOUT'}</div>
+                      <div style={{ fontFamily:'var(--font-display)', fontSize:'1rem', color:'var(--chalk)' }}>{lastSession.name || lastSession.program_name || (ar ? 'جلسة تمرين' : 'Workout session')}</div>
                     </div>
                   </div>
                   <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.65rem', color:'var(--ash-light)' }}>
-                    {new Date(lastSession.created_at).toLocaleDateString('ar-EG', { month:'short', day:'numeric' })}
+                    {new Date(lastSession.created_at).toLocaleDateString(dateLocale, { month:'short', day:'numeric' })}
                   </span>
                 </div>
               </GlassCard>
@@ -280,20 +306,21 @@ export default function DashboardPage() {
             <Reveal delay={0.1}>
               <GlassCard style={{ padding:'24px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                  <Scale size={15} color="var(--accent)" />
-                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>سجل الوزن</h2>
+                  <Scale size={15} color="var(--volt)" />
+                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>{ar ? 'سجل الوزن' : 'WEIGHT LOG'}</h2>
                 </div>
 
                 <div style={{ display:'flex', gap:8, marginBottom:4 }}>
                   <input
-                    type="number" placeholder="وزنك اليوم (kg)"
+                    className="input"
+                    type="number" placeholder={ar ? 'وزنك اليوم (kg)' : "Today's weight (kg)"}
                     value={newWeight} onChange={e => setNewWeight(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && logWeight()}
-                    style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'var(--chalk)', fontFamily:'var(--font-body)', fontSize:'0.875rem', outline:'none', direction:'rtl' }}
+                    style={{ flex:1, padding:'9px 12px', fontSize:'0.875rem' }}
                   />
                   <motion.button onClick={logWeight} disabled={loadingWeight} whileTap={{ scale:0.95 }}
-                    style={{ padding:'9px 14px', background:'var(--accent)', border:'none', borderRadius:8, color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:'0.8rem', fontFamily:'var(--font-mono)' }}>
-                    <Plus size={14} /> سجل
+                    style={{ padding:'9px 14px', background:'var(--volt)', border:'none', borderRadius:8, color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:'0.8rem', fontFamily:'var(--font-mono)' }}>
+                    <Plus size={14} /> {ar ? 'سجل' : 'LOG'}
                   </motion.button>
                 </div>
 
@@ -304,24 +331,24 @@ export default function DashboardPage() {
                 {currentWeight !== '—' && (
                   <div style={{ marginBottom:14 }}>
                     <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em' }}>تقدم نحو الهدف</span>
-                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--accent)' }}>{progressPct}%</span>
+                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em' }}>{ar ? 'تقدم نحو الهدف' : 'PROGRESS TO GOAL'}</span>
+                      <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--volt)' }}>{progressPct}%</span>
                     </div>
-                    <div style={{ height:4, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
+                    <div style={{ height:4, borderRadius:2, background:'var(--iron-light)', overflow:'hidden' }}>
                       <motion.div initial={{ width:0 }} animate={{ width:`${Math.max(progressPct,0)}%` }} transition={{ duration:1, delay:0.3 }}
-                        style={{ height:'100%', borderRadius:2, background:'var(--accent)' }} />
+                        style={{ height:'100%', borderRadius:2, background:'var(--volt)' }} />
                     </div>
                   </div>
                 )}
 
                 {weightLog.length === 0 ? (
-                  <p style={{ color:'var(--ash)', fontSize:'0.78rem', textAlign:'center', padding:'16px 0', direction:'rtl' }}>
-                    سجّل وزنك اليوم وابدأ تتابع!
+                  <p style={{ color:'var(--ash)', fontSize:'0.78rem', textAlign:'center', padding:'16px 0' }}>
+                    {ar ? 'سجّل وزنك اليوم وابدأ تتابع!' : 'Log your weight today and start tracking!'}
                   </p>
                 ) : weightLog.slice(0,5).map((entry, i) => (
                   <WeightEntry
                     key={entry.id || i}
-                    date={new Date(entry.logged_at).toLocaleDateString('ar-EG', { month:'short', day:'numeric' })}
+                    date={new Date(entry.logged_at).toLocaleDateString(dateLocale, { month:'short', day:'numeric' })}
                     weight={entry.weight}
                     change={i < weightLog.length - 1 ? entry.weight - weightLog[i + 1].weight : 0}
                   />
@@ -337,28 +364,28 @@ export default function DashboardPage() {
                 <GlassCard style={{ padding:'24px' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <BarChart2 size={15} color="var(--accent)" />
-                      <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>برامجي</h2>
+                      <BarChart2 size={15} color="var(--volt)" />
+                      <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>{ar ? 'برامجي' : 'MY PROGRAMS'}</h2>
                     </div>
-                    <Link href="/programs" style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--accent)', textDecoration:'none', display:'flex', alignItems:'center', gap:3 }}>
-                      كل البرامج <ChevronRight size={11} />
+                    <Link href="/programs" style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--volt)', textDecoration:'none', display:'flex', alignItems:'center', gap:3 }}>
+                      {ar ? 'كل البرامج' : 'ALL PROGRAMS'} <ChevronRight size={11} />
                     </Link>
                   </div>
 
                   {programs.length === 0 ? (
-                    <Link href="/programs" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'14px', background:'rgba(255,77,46,0.06)', border:'1px dashed rgba(255,77,46,0.2)', borderRadius:10, color:'var(--accent)', fontSize:'0.8rem', textDecoration:'none' }}>
-                      <Zap size={13} /> انضم لأول برنامج
+                    <Link href="/programs" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'14px', background:'var(--volt-dim)', border:'1px dashed rgba(255,85,0,0.3)', borderRadius:10, color:'var(--volt)', fontSize:'0.8rem', textDecoration:'none' }}>
+                      <Zap size={13} /> {ar ? 'انضم لأول برنامج' : 'Join your first program'}
                     </Link>
                   ) : programs.slice(0, 2).map((p, i) => (
-                    <div key={i} style={{ padding:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, marginBottom:8 }}>
-                      <div style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', marginBottom:10, direction:'rtl' }}>{p.program_name || 'برنامج'}</div>
+                    <div key={i} style={{ padding:'14px', background:'var(--iron)', border:'1px solid var(--iron-light)', borderRadius:10, marginBottom:8 }}>
+                      <div style={{ fontFamily:'var(--font-display)', fontSize:'0.95rem', marginBottom:10 }}>{p.program_name || (ar ? 'برنامج' : 'Program')}</div>
                       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em' }}>التقدم</span>
-                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--accent)' }}>{p.progress || 20}%</span>
+                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', letterSpacing:'0.07em' }}>{ar ? 'التقدم' : 'PROGRESS'}</span>
+                        <span style={{ fontSize:'0.6rem', fontFamily:'var(--font-mono)', color:'var(--volt)' }}>{p.progress || 20}%</span>
                       </div>
-                      <div style={{ height:4, borderRadius:2, background:'rgba(255,255,255,0.07)', overflow:'hidden' }}>
+                      <div style={{ height:4, borderRadius:2, background:'var(--iron-light)', overflow:'hidden' }}>
                         <motion.div initial={{ width:0 }} animate={{ width:`${p.progress || 20}%` }} transition={{ duration:0.8, delay:0.3 }}
-                          style={{ height:'100%', borderRadius:2, background:'var(--accent)' }} />
+                          style={{ height:'100%', borderRadius:2, background:'var(--volt)' }} />
                       </div>
                     </div>
                   ))}
@@ -370,23 +397,23 @@ export default function DashboardPage() {
                 <GlassCard style={{ padding:'24px' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
                     <Clock size={15} color="#FFFFFF" />
-                    <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>آخر الجلسات</h2>
+                    <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', letterSpacing:'0.05em' }}>{ar ? 'آخر الجلسات' : 'RECENT SESSIONS'}</h2>
                   </div>
 
                   {sessions.length === 0 ? (
-                    <p style={{ color:'var(--ash)', fontSize:'0.78rem', textAlign:'center', padding:'16px 0', direction:'rtl' }}>
-                      ما عندكش جلسات مسجلة لسه
+                    <p style={{ color:'var(--ash)', fontSize:'0.78rem', textAlign:'center', padding:'16px 0' }}>
+                      {ar ? 'ما عندكش جلسات مسجلة لسه' : "No sessions logged yet"}
                     </p>
                   ) : sessions.map((s, i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 0', borderBottom:'1px solid rgba(255,255,255,0.05)', direction:'rtl' }}>
+                    <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 0', borderBottom:'1px solid var(--glass-border)' }}>
                       <CheckCircle size={14} color="#4ade80" style={{ flexShrink:0 }} />
                       <div style={{ flex:1 }}>
-                        <div style={{ fontSize:'0.8rem', color:'var(--chalk)' }}>{s.name || s.program_name || 'جلسة تمرين'}</div>
+                        <div style={{ fontSize:'0.8rem', color:'var(--chalk)' }}>{s.name || s.program_name || (ar ? 'جلسة تمرين' : 'Workout session')}</div>
                         <div style={{ fontSize:'0.62rem', color:'var(--ash)', fontFamily:'var(--font-mono)', marginTop:2 }}>
-                          {new Date(s.created_at).toLocaleDateString('ar-EG', { month:'short', day:'numeric' })}
+                          {new Date(s.created_at).toLocaleDateString(dateLocale, { month:'short', day:'numeric' })}
                         </div>
                       </div>
-                      {s.duration_min && <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', flexShrink:0 }}>{s.duration_min}d</span>}
+                      {s.duration_min && <span style={{ fontSize:'0.62rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', flexShrink:0 }}>{s.duration_min}{ar ? 'د' : 'm'}</span>}
                     </div>
                   ))}
                 </GlassCard>
@@ -395,15 +422,10 @@ export default function DashboardPage() {
               {/* QUICK ACTIONS */}
               <Reveal delay={0.25}>
                 <GlassCard style={{ padding:'20px 24px' }}>
-                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1rem', letterSpacing:'0.05em', marginBottom:14 }}>روابط سريعة</h2>
+                  <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1rem', letterSpacing:'0.05em', marginBottom:14 }}>{ar ? 'روابط سريعة' : 'QUICK LINKS'}</h2>
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-                    {[
-                      { href:'/exercises', label:'التمارين', icon:'🏋️', color:'var(--accent)' },
-                      { href:'/programs',  label:'البرامج',  icon:'📋', color:'#FFFFFF' },
-                      { href:'/tools',     label:'الحاسبات', icon:'🧮', color:'#4ade80' },
-                      { href:'/tools',      label:'الحاسبات', icon:'🧮', color:'#FFFFFF' },
-                    ].map(({ href, label, icon, color }) => (
-                      <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'all 150ms' }}>
+                    {quickLinks.map(({ href, label, icon, color }) => (
+                      <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', background:'var(--iron)', border:'1px solid var(--iron-light)', borderRadius:10, textDecoration:'none', color:'var(--chalk)', fontSize:'0.8rem', fontFamily:'var(--font-body)', transition:'all 150ms' }}>
                         <span>{icon}</span>
                         <span style={{ color }}>{label}</span>
                       </Link>
