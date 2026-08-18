@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 import { PROTEIN_OPTIONS, CARB_OPTIONS, FAT_OPTIONS } from '../../data/foods';
+import { normalizeArabic } from '../../utils/arabic';
 
 
 // ── شاشة غير مشترك ────────────────────────────────────────
@@ -51,21 +52,6 @@ function PremiumGate({ user }) {
   );
 }
 
-
-// ── تطبيع النص العربي عشان البحث يشتغل صح مهما كتب المستخدم ──
-function normalizeArabic(str = '') {
-  return str
-    .replace(/[\u064B-\u0652]/g, '')   // شكل/تشكيل
-    .replace(/[إأآا]/g, 'ا')
-    .replace(/ى/g, 'ي')
-    .replace(/ة/g, 'ه')
-    .replace(/ؤ/g, 'و')
-    .replace(/ئ/g, 'ي')
-    .replace(/^ال/, '')                 // شيل "ال" التعريف من الأول
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
 
 // ── كل الأكلات مجمّعة (للبحث السريع) ──────────────────────
 const ALL_FOODS = [

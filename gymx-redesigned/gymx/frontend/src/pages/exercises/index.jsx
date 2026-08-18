@@ -5,6 +5,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Search, ChevronRight, X, Crown, Play, SlidersHorizontal, ChevronDown, ChevronUp, Check, Dumbbell, Cable, PersonStanding, Settings, Gauge, TrendingUp, Rocket } from 'lucide-react';
 import Head from 'next/head';
 import { EXERCISES, BASE_URL } from '../../data/exercises';
+import { normalizeArabic } from '../../utils/arabic';
 
 const MUSCLE_GROUPS = ['Chest','Back','Shoulders','Biceps','Triceps','Legs','Glutes','Abs','Calves','Forearms'];
 const EQUIPMENT_TYPES = ['Barbell','Dumbbells','Cable Machine','Bodyweight','Machine'];
@@ -512,9 +513,9 @@ export default function ExercisesPage() {
   }, [router.isReady, router.query.muscle_group]);
 
   const filtered = EXERCISES.filter(ex => {
-    const s = search.toLowerCase();
+    const nq = normalizeArabic(search);
     return (
-      (!search      || ex.name.toLowerCase().includes(s) || ex.name_ar.includes(search)) &&
+      (!search      || ex.name.toLowerCase().includes(search.toLowerCase()) || normalizeArabic(ex.name_ar).includes(nq)) &&
       (!muscleGroup || ex.muscle_group === muscleGroup) &&
       (!difficulty  || ex.difficulty === difficulty) &&
       (!equipment   || ex.equipment === equipment)
