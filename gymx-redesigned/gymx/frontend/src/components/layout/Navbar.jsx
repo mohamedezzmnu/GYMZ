@@ -107,23 +107,18 @@ export default function Navbar() {
   return (
     <>
       <header style={{
-        position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
-        width: 'calc(100% - 32px)', maxWidth: 1180,
-        height: 52,
-        background: 'rgba(17,17,17,0.72)',
-        backdropFilter: 'blur(22px)',
-        WebkitBackdropFilter: 'blur(22px)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 16,
-        boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        width: '100%',
+        height: 56,
+        background: 'var(--bg)',
+        borderBottom: '1px solid var(--iron-light)',
         display: 'flex', alignItems: 'center',
-        padding: '0 8px 0 18px', gap: 20,
+        padding: '0 20px', gap: 20,
         direction: isRTL ? 'rtl' : 'ltr',
       }}>
         {/* LOGO */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: '#fff', letterSpacing: '0.05em' }}>GYMZ</span>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--volt)', animation: 'glowPulse 2s ease-in-out infinite' }} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800, color: 'var(--chalk)', letterSpacing: '0.02em' }}>GYMZ</span>
         </Link>
 
         {/* PUBLIC LINKS — desktop */}
@@ -203,7 +198,7 @@ export default function Navbar() {
                   <motion.div
                     initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    style={{ position: 'fixed', top: 72, left: 0, right: 0, margin: '0 auto', width: 'calc(100% - 32px)', maxWidth: 320, background: '#111', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', maxHeight: 360, overflowY: 'auto', boxShadow: '0 20px 50px rgba(0,0,0,0.7)', zIndex: 200, direction: isRTL ? 'rtl' : 'ltr' }}
+                    style={{ position: 'fixed', top: 64, left: isRTL ? 20 : 'auto', right: isRTL ? 'auto' : 20, width: 'calc(100% - 40px)', maxWidth: 320, background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', maxHeight: 360, overflowY: 'auto', zIndex: 200, direction: isRTL ? 'rtl' : 'ltr' }}
                   >
                     <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--iron)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em', color: 'var(--ash)', textTransform: 'uppercase' }}>
                       {ar ? 'الإشعارات' : 'Notifications'}
@@ -247,7 +242,7 @@ export default function Navbar() {
                   <motion.div
                     initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    style={{ position: 'absolute', top: 42, right: isRTL ? 'auto' : 0, left: isRTL ? 0 : 'auto', background: '#111', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', padding: 6, minWidth: 180, boxShadow: '0 8px 40px rgba(0,0,0,0.8)', zIndex: 200 }}
+                    style={{ position: 'absolute', top: 42, right: isRTL ? 'auto' : 0, left: isRTL ? 0 : 'auto', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', borderRadius: 'var(--radius-md)', padding: 6, minWidth: 180, zIndex: 200 }}
                   >
                     <div style={{ padding: '8px 12px 10px', borderBottom: '1px solid var(--iron)', marginBottom: 4 }}>
                       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.05em', color: 'var(--chalk)' }}>{userName}</div>
@@ -301,7 +296,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-            style={{ position: 'fixed', top: 72, left: 0, right: 0, margin: '0 auto', zIndex: 101, width: 'calc(100% - 32px)', maxWidth: 1180, maxHeight: 'calc(100vh - 72px - 76px - env(safe-area-inset-bottom))', overflowY: 'auto', background: 'rgba(17,17,17,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderTop: '2px solid var(--volt)', borderRadius: 20, boxShadow: '0 20px 50px rgba(0,0,0,0.55)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
+            style={{ position: 'fixed', top: 56, left: 0, right: 0, zIndex: 101, width: '100%', maxHeight: 'calc(100vh - 56px - 76px - env(safe-area-inset-bottom))', overflowY: 'auto', background: 'var(--carbon)', borderBottom: '1px solid var(--iron-light)', borderTop: '2px solid var(--volt)', padding: '12px 16px 16px', direction: isRTL ? 'rtl' : 'ltr' }}
           >
             {[...publicLinks, ...(user ? privateLinks : [])].map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}>
@@ -329,19 +324,13 @@ export default function Navbar() {
       </AnimatePresence>
 
       {/* BOTTOM NAV */}
-      <nav style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid #1A1A1A', padding: '8px 8px calc(8px + env(safe-area-inset-bottom))', direction: isRTL ? 'rtl' : 'ltr' }} className={`bottom-nav${mobileOpen ? ' bottom-nav-hidden' : ''}`}>
+      <nav style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: 'var(--bg)', borderTop: '1px solid var(--iron-light)', padding: '8px 8px calc(8px + env(safe-area-inset-bottom))', direction: isRTL ? 'rtl' : 'ltr' }} className={`bottom-nav${mobileOpen ? ' bottom-nav-hidden' : ''}`}>
         {bottomLinks.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
-            <Link key={href} href={href} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '6px 2px', textDecoration: 'none', position: 'relative' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: 40, height: 26, borderRadius: 12,
-                background: active ? 'var(--volt-dim)' : 'transparent',
-                transition: 'background var(--transition-base)',
-              }}>
-                <Icon size={22} color={active ? 'var(--volt)' : 'var(--ash)'} strokeWidth={active ? 2.4 : 2} />
-              </div>
+            <Link key={href} href={href} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '6px 2px 4px', textDecoration: 'none', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: -8, width: 18, height: 2, background: active ? 'var(--volt)' : 'transparent', transition: 'background var(--transition-base)' }} />
+              <Icon size={20} color={active ? 'var(--volt)' : 'var(--ash)'} strokeWidth={active ? 2.4 : 1.8} />
               <span style={{ fontSize: '0.58rem', color: active ? 'var(--volt)' : 'var(--ash)', fontFamily: 'var(--font-mono)', fontWeight: active ? 800 : 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
             </Link>
           );

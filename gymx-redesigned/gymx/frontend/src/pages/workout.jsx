@@ -61,7 +61,7 @@ function GlassCard({ children, style = {}, accent }) {
     <div style={{
       background: 'rgba(255,255,255,0.04)',
       border: `1px solid ${accent ? accent + '30' : 'rgba(255,255,255,0.08)'}`,
-      borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
       position: 'relative', overflow: 'hidden',
       ...style,
     }}>

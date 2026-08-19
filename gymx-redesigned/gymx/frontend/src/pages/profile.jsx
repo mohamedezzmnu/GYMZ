@@ -144,7 +144,7 @@ function AchievementCelebration({ achievement, onClose }) {
           position: 'relative', overflow: 'hidden',
           background: 'linear-gradient(180deg, #161616, #0c0c0c)',
           border: '1px solid rgba(255,85,0,0.35)',
-          borderRadius: 24, padding: '40px 32px 32px',
+          borderRadius: 12, padding: '40px 32px 32px',
           maxWidth: 340, width: '100%', textAlign: 'center',
           boxShadow: '0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255,85,0,0.15)',
         }}
@@ -265,7 +265,7 @@ function ChangePasswordModal({ onClose }) {
           position: 'relative',
         }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)', borderRadius: '22px 22px 0 0' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)', borderRadius: '10px 22px 0 0' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,77,46,0.12)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -404,7 +404,7 @@ function StatsModal({ sessions, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{
           background: 'linear-gradient(180deg, #161616, #0c0c0c)',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
           padding: 26, maxWidth: 420, width: '100%', maxHeight: '85vh', overflowY: 'auto',
           direction: 'rtl',
         }}
@@ -490,7 +490,7 @@ function AllAchievementsModal({ achievements, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{
           background: 'linear-gradient(180deg, #161616, #0c0c0c)',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
           padding: 26, maxWidth: 460, width: '100%', maxHeight: '85vh', overflowY: 'auto',
           direction: 'rtl',
         }}

@@ -248,7 +248,7 @@ function PremiumGate({ user }) {
         style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#facc15,transparent)' }} />
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+        <div style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
           <Crown size={26} color="#facc15" />
         </div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 8 }}>للمشتركين فقط</h2>
@@ -316,7 +316,7 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
       whileHover={{ borderColor: 'rgba(250,204,21,0.4)', y: -3 }}
       whileTap={{ scale: 0.9 }}
       onClick={() => onOpen(exercise)}
-      style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden', transition: 'border-color 250ms' }}
+      style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, overflow: 'hidden', transition: 'border-color 250ms' }}
     >
       <div style={{ position: 'relative', height: 170, background: 'rgba(255,255,255,0.03)' }}>
         {poster && (
@@ -326,7 +326,7 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
             onError={e => { e.currentTarget.style.opacity = 0.15; }}
           />
         )}
-        <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 20, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 10, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Crown size={9} /> مميز
         </span>
         <span style={{ position: 'absolute', bottom: 10, left: 10, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -377,7 +377,7 @@ function ExerciseModal({ exercise, onClose }) {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
           onClick={e => e.stopPropagation()}
-          style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, direction: 'rtl' }}
+          style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, direction: 'rtl' }}
         >
           <div style={{ position: 'relative', background: '#000' }}>
             {videoSrc ? (
@@ -400,16 +400,16 @@ function ExerciseModal({ exercise, onClose }) {
               <X size={16} />
             </button>
             {hasBothGenders && (
-              <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.6)', borderRadius: 20, padding: 3 }}>
+              <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.6)', borderRadius: 10, padding: 3 }}>
                 <button
                   onClick={() => setGender('male')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 16, border: 'none', cursor: 'pointer', background: gender === 'male' ? '#facc15' : 'transparent', color: gender === 'male' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', background: gender === 'male' ? '#facc15' : 'transparent', color: gender === 'male' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
                 >
                   <User size={12} /> راجل
                 </button>
                 <button
                   onClick={() => setGender('female')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 16, border: 'none', cursor: 'pointer', background: gender === 'female' ? '#facc15' : 'transparent', color: gender === 'female' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', background: gender === 'female' ? '#facc15' : 'transparent', color: gender === 'female' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
                 >
                   <UserRound size={12} /> ست
                 </button>
@@ -423,16 +423,16 @@ function ExerciseModal({ exercise, onClose }) {
             </div>
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
                 {BODYPART_AR[exercise.bodyPart] || exercise.bodyPart}
               </span>
-              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
                 {muscleAr(exercise.target)}
               </span>
-              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)' }}>
                 {EQUIPMENT_AR[exercise.equipment] || exercise.equipment}
               </span>
-              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 20, background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.25)', color: '#facc15' }}>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: 10, background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.25)', color: '#facc15' }}>
                 {DIFFICULTY_AR[exercise.difficulty] || exercise.difficulty}
               </span>
             </div>
@@ -539,7 +539,7 @@ function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply
         <motion.div
           initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 28, stiffness: 260 }}
           onClick={e => e.stopPropagation()}
-          style={{ width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', direction: 'rtl', padding: '20px 18px 96px' }}
+          style={{ width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px 20px 0 0', direction: 'rtl', padding: '20px 18px 96px' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.03em', color: 'var(--chalk)' }}>الفلاتر</h2>
@@ -777,7 +777,7 @@ export default function ExerciseVideosPage() {
           {loadingList ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)' }}>
+                <div key={i} style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)' }}>
                   <div className="skeleton-shimmer" style={{ height: 170 }} />
                   <div style={{ padding: '14px 16px 16px' }}>
                     <div className="skeleton-shimmer" style={{ height: 10, width: '50%', borderRadius: 4, marginBottom: 8 }} />

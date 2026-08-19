@@ -30,7 +30,7 @@ class ErrorBoundary extends Component {
           alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 24px',
         }}>
           <div style={{
-            width: 56, height: 56, borderRadius: 16, background: 'rgba(248,113,113,0.1)',
+            width: 56, height: 56, borderRadius: 12, background: 'rgba(248,113,113,0.1)',
             border: '1px solid rgba(248,113,113,0.3)', display: 'flex', alignItems: 'center',
             justifyContent: 'center', marginBottom: 20,
           }}>

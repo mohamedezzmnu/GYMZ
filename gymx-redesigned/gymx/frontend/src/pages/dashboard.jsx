@@ -34,7 +34,7 @@ function GlassCard({ children, style = {}, accentColor }) {
       style={{
         background: 'var(--glass-bg)',
         border: '1px solid var(--glass-border)',
-        borderRadius: 16, boxShadow: 'var(--glass-shadow)',
+        borderRadius: 12, boxShadow: 'var(--glass-shadow)',
         position: 'relative', overflow: 'hidden',
         ...style,
       }}

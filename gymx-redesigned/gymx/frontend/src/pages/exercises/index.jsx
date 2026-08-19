@@ -174,7 +174,7 @@ function ExerciseModal({ exercise, onClose }) {
             width:'100%', maxWidth:560,
             background:'#0f0f1a',
             border:'1px solid rgba(255,255,255,0.1)',
-            borderRadius:20, overflow:'hidden',
+            borderRadius:10, overflow:'hidden',
             maxHeight:'90vh', overflowY:'auto',
           }}
         >
@@ -203,7 +203,7 @@ function ExerciseModal({ exercise, onClose }) {
             <span style={{
               position:'absolute', top:14, left:14,
               fontSize:'0.6rem', fontFamily:'var(--font-mono)',
-              padding:'4px 10px', borderRadius:20,
+              padding:'4px 10px', borderRadius:10,
               background:diff.bg, border:'1px solid '+diff.border, color:diff.text,
             }}>
               {diff.label}
@@ -268,7 +268,7 @@ function ExerciseCard({ exercise, index, onOpen }) {
           position:'relative', overflow:'hidden',
           background:'rgba(255,255,255,0.04)',
           border:'1px solid rgba(255,255,255,0.08)',
-          borderRadius:16, transition:'all 300ms ease',
+          borderRadius:12, transition:'all 300ms ease',
           height:'100%', display:'flex', flexDirection:'column',
         }}
       >
@@ -283,7 +283,7 @@ function ExerciseCard({ exercise, index, onOpen }) {
             onError={e => { e.currentTarget.style.display='none'; }}
           />
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(8,8,16,0.85) 100%)' }} />
-          <span style={{ position:'absolute', top:12, right:12, fontSize:'0.6rem', fontFamily:'var(--font-mono)', padding:'3px 9px', borderRadius:20, background:diff.bg, border:'1px solid '+diff.border, color:diff.text, }}>
+          <span style={{ position:'absolute', top:12, right:12, fontSize:'0.6rem', fontFamily:'var(--font-mono)', padding:'3px 9px', borderRadius:10, background:diff.bg, border:'1px solid '+diff.border, color:diff.text, }}>
             {diff.label}
           </span>
           <span style={{ position:'absolute', bottom:10, left:12, fontSize:'0.7rem', fontFamily:'var(--font-mono)', color:'rgba(255,255,255,0.7)', display:'flex', alignItems:'center', gap:5 }}>
@@ -417,7 +417,7 @@ function FiltersDrawer({ open, onClose, muscleGroup, equipment, difficulty, onAp
         <motion.div
           initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 28, stiffness: 260 }}
           onClick={e => e.stopPropagation()}
-          style={{ width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', background: '#0f0f1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', direction: 'rtl', padding: '20px 18px 96px' }}
+          style={{ width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', background: '#0f0f1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px 20px 0 0', direction: 'rtl', padding: '20px 18px 96px' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.03em', color: 'var(--chalk)' }}>الفلاتر</h2>
@@ -555,7 +555,7 @@ export default function ExercisesPage() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)', letterSpacing: '0.03em' }}>مكتبة التمارين المتحركة</span>
-                    <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 20, background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.35)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 10, background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.35)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Crown size={9} /> مميز
                     </span>
                   </div>

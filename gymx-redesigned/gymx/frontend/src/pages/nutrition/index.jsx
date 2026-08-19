@@ -20,7 +20,7 @@ function PremiumGate({ user }) {
         style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 26 }}>🔒</div>
+        <div style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 26 }}>🔒</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 8 }}>للمشتركين فقط</h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 24 }}>
           الأنظمة الغذائية متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش واتفتحلك فوراً.
@@ -1419,7 +1419,7 @@ export default function NutritionPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)' }}>{plan.label} — {plan.goal}</div>
                         {goalBadge && (
-                          <span style={{ padding: '2px 10px', background: goalBadge.bg, border: `1px solid ${goalBadge.color}40`, borderRadius: 20, fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: goalBadge.color, letterSpacing: '0.06em' }}>
+                          <span style={{ padding: '2px 10px', background: goalBadge.bg, border: `1px solid ${goalBadge.color}40`, borderRadius: 10, fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: goalBadge.color, letterSpacing: '0.06em' }}>
                             {goalBadge.label}
                           </span>
                         )}

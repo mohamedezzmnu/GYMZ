@@ -316,7 +316,7 @@ export default function OnboardingPage() {
               transition={{ duration: 0.5 }}
               style={{
                 background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,77,46,0.3)', borderRadius: 20,
+                border: '1px solid rgba(255,77,46,0.3)', borderRadius: 10,
                 padding: '40px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden',
               }}
             >
