@@ -1,7 +1,7 @@
 // src/pages/nutrition/index.jsx
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle, Camera, X, ScanLine, ShoppingBag } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp, Loader, Calculator, Droplets, Zap, Barcode, Search, Check, AlertTriangle, Camera, X, ScanLine, ShoppingBag, Trash2, Dumbbell, Lightbulb, CheckCircle2, Beef, Wheat, Nut, Lock, MessageCircle } from 'lucide-react';
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -20,7 +20,7 @@ function PremiumGate({ user }) {
         style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
-        <div style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 26 }}>🔒</div>
+        <div style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}><Lock size={24} color="var(--accent)" /></div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 8 }}>للمشتركين فقط</h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 24 }}>
           الأنظمة الغذائية متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش واتفتحلك فوراً.
@@ -41,7 +41,7 @@ function PremiumGate({ user }) {
           rel="noopener noreferrer"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: 'var(--radius-sm)', marginBottom: 12, textDecoration: 'none', color: '#25D166', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em' }}
         >
-          📲 ابعت السكرين شوت على واتساب
+          <MessageCircle size={16} /> ابعت السكرين شوت على واتساب
         </a>
         <p style={{ fontSize: '0.72rem', color: 'var(--ash)', textAlign: 'center', lineHeight: 1.6 }}>
           بعد التأكيد هيتفتحلك الاشتراك على إيميلك<br />
@@ -302,32 +302,32 @@ function buildMeals(type) {
       { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 3,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: false },
       { name: 'سناك',                     time: '11:00 ص', proteinKey: 1,    carbKey: null, fatKey: 0,    preWorkout: false, postWorkout: false },
       { name: 'الغداء',                   time: '2:00 م',  proteinKey: 0,    carbKey: 0,    fatKey: null, preWorkout: false, postWorkout: false },
-      { name: '🏋️ قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
-      { name: '✅ بعد التمرين',           time: '7:30 م',  proteinKey: 0,    carbKey: 3,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: 'بعد التمرين',           time: '7:30 م',  proteinKey: 0,    carbKey: 3,    fatKey: null, preWorkout: false, postWorkout: true  },
       { name: 'العشاء',                   time: '9:00 م',  proteinKey: 2,    carbKey: null, fatKey: 0,    preWorkout: false, postWorkout: false },
     ],
     cut_light: [
       { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 2,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: false },
       { name: 'سناك صباحي',              time: '11:00 ص', proteinKey: 3,    carbKey: 6,    fatKey: 0,    preWorkout: false, postWorkout: false },
       { name: 'الغداء',                   time: '2:00 م',  proteinKey: 0,    carbKey: 0,    fatKey: null, preWorkout: false, postWorkout: false },
-      { name: '🏋️ قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 3,    fatKey: null, preWorkout: true,  postWorkout: false },
-      { name: '✅ بعد التمرين',           time: '7:00 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 3,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: 'بعد التمرين',           time: '7:00 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: true  },
       { name: 'العشاء',                   time: '9:00 م',  proteinKey: 5,    carbKey: null, fatKey: 0,    preWorkout: false, postWorkout: false },
     ],
     maintain: [
       { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 2,    carbKey: 2,    fatKey: 1,    preWorkout: false, postWorkout: false },
       { name: 'سناك',                     time: '11:00 ص', proteinKey: 3,    carbKey: 3,    fatKey: null, preWorkout: false, postWorkout: false },
       { name: 'الغداء',                   time: '2:00 م',  proteinKey: 0,    carbKey: 0,    fatKey: 0,    preWorkout: false, postWorkout: false },
-      { name: '🏋️ قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
-      { name: '✅ بعد التمرين',           time: '7:00 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'قبل التمرين (بساعة)', time: '5:00 م',  proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: 'بعد التمرين',           time: '7:00 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: true  },
       { name: 'العشاء',                   time: '9:00 م',  proteinKey: 6,    carbKey: 1,    fatKey: 0,    preWorkout: false, postWorkout: false },
     ],
     bulk_lean: [
       { name: 'الفطار',                   time: '8:00 ص',  proteinKey: 2,    carbKey: 2,    fatKey: 1,    preWorkout: false, postWorkout: false },
       { name: 'سناك صباحي',              time: '10:30 ص', proteinKey: 3,    carbKey: 6,    fatKey: null, preWorkout: false, postWorkout: false },
       { name: 'الغداء',                   time: '1:00 م',  proteinKey: 4,    carbKey: 0,    fatKey: 0,    preWorkout: false, postWorkout: false },
-      { name: '🏋️ قبل التمرين (بساعة)', time: '4:30 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: true,  postWorkout: false },
-      { name: '✅ بعد التمرين',           time: '6:30 م',  proteinKey: 0,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'قبل التمرين (بساعة)', time: '4:30 م',  proteinKey: 1,    carbKey: 4,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: 'بعد التمرين',           time: '6:30 م',  proteinKey: 0,    carbKey: 2,    fatKey: null, preWorkout: false, postWorkout: true  },
       { name: 'العشاء',                   time: '8:30 م',  proteinKey: 5,    carbKey: 1,    fatKey: 1,    preWorkout: false, postWorkout: false },
       { name: 'قبل النوم',                time: '11:00 م', proteinKey: 3,    carbKey: null, fatKey: 3,    preWorkout: false, postWorkout: false },
     ],
@@ -335,8 +335,8 @@ function buildMeals(type) {
       { name: 'الفطار',                   time: '7:30 ص',  proteinKey: 2,    carbKey: 2,    fatKey: 1,    preWorkout: false, postWorkout: false },
       { name: 'سناك 1',                  time: '10:00 ص', proteinKey: 3,    carbKey: 4,    fatKey: null, preWorkout: false, postWorkout: false },
       { name: 'الغداء',                   time: '1:00 م',  proteinKey: 4,    carbKey: 0,    fatKey: 0,    preWorkout: false, postWorkout: false },
-      { name: '🏋️ قبل التمرين (بساعة)', time: '4:00 م',  proteinKey: 1,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
-      { name: '✅ بعد التمرين',           time: '6:00 م',  proteinKey: 0,    carbKey: 1,    fatKey: null, preWorkout: false, postWorkout: true  },
+      { name: 'قبل التمرين (بساعة)', time: '4:00 م',  proteinKey: 1,    carbKey: 6,    fatKey: null, preWorkout: true,  postWorkout: false },
+      { name: 'بعد التمرين',           time: '6:00 م',  proteinKey: 0,    carbKey: 1,    fatKey: null, preWorkout: false, postWorkout: true  },
       { name: 'سناك 2',                  time: '8:00 م',  proteinKey: 3,    carbKey: 4,    fatKey: 1,    preWorkout: false, postWorkout: false },
       { name: 'العشاء',                   time: '9:30 م',  proteinKey: 5,    carbKey: 2,    fatKey: 0,    preWorkout: false, postWorkout: false },
       { name: 'قبل النوم',                time: '11:30 م', proteinKey: 3,    carbKey: null, fatKey: 3,    preWorkout: false, postWorkout: false },
@@ -359,40 +359,30 @@ function MealCard({ meal, planColor, mealIndex }) {
 
   const mealCal = (currentProtein?.cal || 0) + (currentCarb?.cal || 0) + (currentFat?.cal || 0);
 
-  // لون خاص لوجبة قبل/بعد التمرين
+  // لون خاص لوجبة قبل/بعد التمرين — subtle جدًا زي ما طلب
   const cardBorderColor = meal.preWorkout
-    ? 'rgba(250,204,21,0.25)'
+    ? 'rgba(250,204,21,0.2)'
     : meal.postWorkout
-    ? 'rgba(74,222,128,0.25)'
-    : 'var(--glass-border)';
-
-  const cardBg = meal.preWorkout
-    ? 'rgba(250,204,21,0.04)'
-    : meal.postWorkout
-    ? 'rgba(74,222,128,0.04)'
-    : 'var(--glass-bg)';
+    ? 'rgba(74,222,128,0.2)'
+    : 'var(--iron-light)';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: mealIndex * 0.07 }}
-      style={{ background: cardBg, border: `1px solid ${cardBorderColor}`, borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 12 }}
+      style={{ background: 'var(--carbon)', border: `1px solid ${cardBorderColor}`, borderRadius: 10, overflow: 'hidden', marginBottom: 10 }}
     >
-      {/* ✅ شريط علوي ملون لوجبات التمرين */}
-      {(meal.preWorkout || meal.postWorkout) && (
-        <div style={{ height: 2, background: meal.preWorkout ? 'linear-gradient(90deg,#facc15,transparent)' : 'linear-gradient(90deg,#4ade80,transparent)' }} />
-      )}
-
       {/* Header */}
       <div
         onClick={() => setOpen(p => !p)}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', borderBottom: open ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', borderBottom: open ? '1px solid var(--iron-light)' : 'none' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: planColor, boxShadow: `0 0 8px ${planColor}80` }} />
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>{meal.name}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)' }}>{meal.time}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash)', minWidth: 46 }}>{meal.time}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.98rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>{meal.name}</span>
+          {meal.preWorkout && <Dumbbell size={12} color="#facc15" style={{ flexShrink: 0 }} />}
+          {meal.postWorkout && <CheckCircle2 size={12} color="#4ade80" style={{ flexShrink: 0 }} />}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: planColor }}>{mealCal} كال</span>
@@ -414,20 +404,20 @@ function MealCard({ meal, planColor, mealIndex }) {
 
               {/* نصيحة وجبة التمرين */}
               {meal.preWorkout && (
-                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.2)', borderRadius: 8, fontSize: '0.75rem', color: '#facc15', fontFamily: 'var(--font-body)' }}>
-                  💡 تجنب الدهون قبل التمرين — بتبطئ الهضم وبتأثر على الأداء
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 12, padding: '8px 12px', background: 'rgba(250,204,21,0.06)', border: '1px solid rgba(250,204,21,0.18)', borderRadius: 8, fontSize: '0.75rem', color: '#facc15', fontFamily: 'var(--font-body)' }}>
+                  <Lightbulb size={13} style={{ flexShrink: 0, marginTop: 2 }} /> تجنب الدهون قبل التمرين — بتبطئ الهضم وبتأثر على الأداء
                 </div>
               )}
               {meal.postWorkout && (
-                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 8, fontSize: '0.75rem', color: '#4ade80', fontFamily: 'var(--font-body)' }}>
-                  💡 النافذة الذهبية — بروتين سريع + كارب بسيط خلال 30-60 دقيقة بعد التمرين
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 12, padding: '8px 12px', background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.18)', borderRadius: 8, fontSize: '0.75rem', color: '#4ade80', fontFamily: 'var(--font-body)' }}>
+                  <Lightbulb size={13} style={{ flexShrink: 0, marginTop: 2 }} /> النافذة الذهبية — بروتين سريع + كارب بسيط خلال 30-60 دقيقة بعد التمرين
                 </div>
               )}
 
               {/* ── البروتين ── */}
               {currentProtein && (
                 <FoodRow
-                  label="🥩 البروتين"
+                  label="البروتين"
                   item={currentProtein}
                   color="#f87171"
                   swapKey="protein"
@@ -442,7 +432,7 @@ function MealCard({ meal, planColor, mealIndex }) {
               {/* ── الكارب ── */}
               {currentCarb && (
                 <FoodRow
-                  label="🍚 الكارب"
+                  label="الكارب"
                   item={currentCarb}
                   color="#facc15"
                   swapKey="carb"
@@ -457,7 +447,7 @@ function MealCard({ meal, planColor, mealIndex }) {
               {/* ✅ الدهون — متصلة دلوقتي */}
               {currentFat && (
                 <FoodRow
-                  label="🥑 الدهون الصحية"
+                  label="الدهون الصحية"
                   item={currentFat}
                   color="#4ade80"
                   swapKey="fat"
@@ -469,17 +459,17 @@ function MealCard({ meal, planColor, mealIndex }) {
                 />
               )}
 
-              {/* ملخص الماكرو */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, marginTop: 14 }}>
+              {/* ملخص الماكرو — أرقام inline بدل 4 Cards ملونة */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--iron-light)' }}>
                 {[
                   { label: 'سعرات', val: mealCal, unit: '', color: planColor },
                   { label: 'بروتين', val: Math.round((currentProtein?.protein||0)+(currentCarb?.protein||0)+(currentFat?.protein||0)), unit: 'g', color: '#f87171' },
                   { label: 'كارب',   val: Math.round((currentProtein?.carbs||0)+(currentCarb?.carbs||0)+(currentFat?.carbs||0)),   unit: 'g', color: '#facc15' },
                   { label: 'دهون',   val: Math.round((currentProtein?.fat||0)+(currentCarb?.fat||0)+(currentFat?.fat||0)),           unit: 'g', color: '#4ade80' },
                 ].map(({ label, val, unit, color }) => (
-                  <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: `${color}0a`, border: `1px solid ${color}18`, borderRadius: 6 }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color }}>{val}<span style={{ fontSize: '0.6rem' }}>{unit}</span></div>
-                    <div style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2 }}>{label}</div>
+                  <div key={label} style={{ textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color }}>{val}<span style={{ fontSize: '0.62rem' }}>{unit}</span></div>
+                    <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2, letterSpacing: '0.04em' }}>{label}</div>
                   </div>
                 ))}
               </div>
@@ -496,12 +486,12 @@ function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, 
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 6 }}>{label}</div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: `${color}09`, border: `1px solid ${color}25`, borderRadius: 'var(--radius-sm)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)' }}>
         <span style={{ fontSize: '0.82rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{item.name}</span>
         <motion.button
           whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
           onClick={() => setSwapping(swapping === swapKey ? null : swapKey)}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: `${color}18`, border: `1px solid ${color}40`, borderRadius: 6, color, cursor: 'pointer', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: 'transparent', border: `1px solid ${color}40`, borderRadius: 6, color, cursor: 'pointer', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}
         >
           <RefreshCw size={11} /> بدّل
         </motion.button>
@@ -511,7 +501,7 @@ function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, 
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {options.map((opt, i) => (
               <motion.button key={i} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => onSelect(i)}
-                style={{ textAlign: 'right', padding: '8px 12px', background: i === currentIndex ? `${color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${i === currentIndex ? color + '50' : 'rgba(255,255,255,0.07)'}`, borderRadius: 6, color: 'var(--chalk)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                style={{ textAlign: 'right', padding: '8px 12px', background: i === currentIndex ? `${color}18` : 'var(--iron)', border: `1px solid ${i === currentIndex ? color + '50' : 'var(--iron-light)'}`, borderRadius: 6, color: 'var(--chalk)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.62rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{opt.cal} كال · {opt.protein}g بروتين</span>
                 {opt.name}
               </motion.button>
@@ -528,13 +518,12 @@ function SupplementsCard({ goalType }) {
   const supps = SUPPLEMENTS[goalType] || SUPPLEMENTS.maintain;
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ marginBottom: 16, background: 'var(--glass-bg)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-      <div style={{ height: 2, background: 'linear-gradient(90deg,#a78bfa,transparent)' }} />
+    <div style={{ marginBottom: 16, background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10, overflow: 'hidden' }}>
       <div onClick={() => setOpen(p => !p)} style={{ padding: '14px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Zap size={15} color="#a78bfa" />
+          <Zap size={15} color="var(--volt)" />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>مكملات مقترحة لهدفك</span>
-          <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa' }}>اختياري</span>
+          <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash-light)' }}>اختياري</span>
         </div>
         {open ? <ChevronUp size={14} color="var(--ash)" /> : <ChevronDown size={14} color="var(--ash)" />}
       </div>
@@ -543,17 +532,17 @@ function SupplementsCard({ goalType }) {
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }} style={{ overflow: 'hidden' }}>
             <div style={{ padding: '0 18px 18px', direction: 'rtl', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {supps.map((s, i) => (
-                <div key={i} style={{ padding: '12px 14px', background: s.important ? 'rgba(167,139,250,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${s.important ? 'rgba(167,139,250,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8 }}>
+                <div key={i} style={{ padding: '12px 14px', background: s.important ? 'rgba(255,85,0,0.05)' : 'var(--iron)', border: `1px solid ${s.important ? 'rgba(255,85,0,0.25)' : 'var(--iron-light)'}`, borderRadius: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)' }}>{s.name}</span>
-                    {s.important && <span style={{ fontSize: '0.55rem', fontFamily: 'var(--font-mono)', padding: '1px 6px', borderRadius: 3, background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa' }}>مهم</span>}
+                    {s.important && <span style={{ fontSize: '0.55rem', fontFamily: 'var(--font-mono)', padding: '1px 6px', borderRadius: 3, background: 'rgba(255,85,0,0.12)', border: '1px solid rgba(255,85,0,0.3)', color: 'var(--volt)' }}>مهم</span>}
                   </div>
-                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: '#a78bfa', marginBottom: 4 }}>{s.dose}</div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--volt)', marginBottom: 4 }}>{s.dose}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>{s.reason}</div>
                 </div>
               ))}
-              <p style={{ fontSize: '0.7rem', color: 'var(--ash)', lineHeight: 1.6, marginTop: 4 }}>
-                ⚠️ المكملات مش إلزامية — الأكل الطبيعي هو الأساس. استشر دكتور قبل ما تاخد أي مكمل لو عندك أي حالة صحية.
+              <p style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: '0.7rem', color: 'var(--ash)', lineHeight: 1.6, marginTop: 4 }}>
+                <AlertTriangle size={12} style={{ flexShrink: 0, marginTop: 2 }} /> المكملات مش إلزامية — الأكل الطبيعي هو الأساس. استشر دكتور قبل ما تاخد أي مكمل لو عندك أي حالة صحية.
               </p>
             </div>
           </motion.div>
@@ -568,19 +557,17 @@ function WaterCard({ weight }) {
   const liters = ((weight * 33) / 1000).toFixed(1);
   const glasses = Math.round((weight * 33) / 250);
   return (
-    <div style={{ marginBottom: 16, padding: '16px 18px', background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: 'var(--radius-md)', direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ marginBottom: 16, padding: '16px 18px', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10, direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Droplets size={16} color="#38bdf8" />
-        </div>
+        <Droplets size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', marginBottom: 2 }}>احتياجك اليومي من المياه</div>
           <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>وزن ({weight}kg) × 33ml</div>
         </div>
       </div>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#38bdf8', lineHeight: 1 }}>{liters}L</div>
-        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>≈ {glasses} كوب</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', color: 'var(--chalk)', lineHeight: 1 }}>{liters}<span style={{ fontSize: '0.9rem', color: 'var(--ash-light)' }}>L</span></div>
+        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2 }}>≈ {glasses} كوب</div>
       </div>
     </div>
   );
@@ -609,12 +596,11 @@ function FoodSearch() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '20px 20px 22px', marginBottom: 24, position: 'relative', overflow: 'hidden' }}
+      style={{ background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10, padding: '18px 18px 20px', marginBottom: 16 }}
     >
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#facc15,transparent)' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: '1rem' }}>🔍</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>دوّر على أكلة</span>
+        <Search size={15} color="var(--volt)" />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.92rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>دوّر على أكلة</span>
       </div>
       <input
         type="text"
@@ -622,8 +608,8 @@ function FoodSearch() {
         onChange={e => setQuery(e.target.value)}
         placeholder="اكتب اسم الأكلة... (مثلاً: فراخ، أرز، لوز)"
         style={{
-          width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)',
+          width: '100%', padding: '12px 14px', background: 'var(--iron)',
+          border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)',
           color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
           outline: 'none', boxSizing: 'border-box', direction: 'rtl',
         }}
@@ -639,13 +625,10 @@ function FoodSearch() {
                 معملناش لقيلها حاجة، جرّب اسم تاني.
               </div>
             ) : (
-              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column' }}>
                 {results.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', background: `${f.color}0a`, border: `1px solid ${f.color}25`, borderRadius: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span>{f.icon}</span>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{f.name}</span>
-                    </div>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 4px', borderTop: i > 0 ? '1px solid var(--iron-light)' : 'none' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)' }}>{f.name}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>
                       <span style={{ color: f.color }}>{f.category}</span>
                       <span>{f.cal} كال</span>
@@ -914,12 +897,11 @@ function BarcodeSearch({ userId }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '20px 20px 22px', marginBottom: 24, position: 'relative', overflow: 'hidden' }}
+      style={{ background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10, padding: '18px 18px 20px', marginBottom: 24 }}
     >
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#38bdf8,transparent)' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <Barcode size={17} color="#38bdf8" />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>دوّر بالباركود</span>
+        <Barcode size={16} color="var(--volt)" />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.92rem', color: 'var(--chalk)', letterSpacing: '0.04em' }}>دوّر بالباركود</span>
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>
@@ -932,8 +914,8 @@ function BarcodeSearch({ userId }) {
             onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
             placeholder="اكتب رقم الباركود (8-14 رقم)"
             style={{
-              width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)',
-              border: `1px solid ${status === 'error' ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 'var(--radius-sm)',
+              width: '100%', padding: '12px 14px', background: 'var(--iron)',
+              border: `1px solid ${status === 'error' ? 'rgba(248,113,113,0.5)' : 'var(--iron-light)'}`, borderRadius: 'var(--radius-sm)',
               color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
               outline: 'none', boxSizing: 'border-box', direction: 'ltr', textAlign: 'center',
               transition: 'border-color 0.2s ease',
@@ -944,7 +926,7 @@ function BarcodeSearch({ userId }) {
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
           onClick={() => handleSearch()}
           disabled={status === 'loading'}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 18px', background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.4)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'loading' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 18px', background: 'rgba(255,85,0,0.12)', border: '1px solid rgba(255,85,0,0.35)', borderRadius: 'var(--radius-sm)', color: 'var(--volt)', cursor: status === 'loading' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
         >
           {status === 'loading' ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Search size={14} />}
           دور
@@ -954,7 +936,7 @@ function BarcodeSearch({ userId }) {
           onClick={() => setScannerOpen(true)}
           disabled={status === 'loading'}
           title="امسح بالكاميرا"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 46, padding: 0, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'loading' ? 'default' : 'pointer', flexShrink: 0 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 46, padding: 0, background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', color: 'var(--ash-light)', cursor: status === 'loading' ? 'default' : 'pointer', flexShrink: 0 }}
         >
           <Camera size={17} />
         </motion.button>
@@ -990,7 +972,7 @@ function BarcodeSearch({ userId }) {
             animate={{ opacity: 1, y: 0, boxShadow: fromCamera ? ['0 0 0 0 rgba(74,222,128,0.35)', '0 0 0 8px rgba(74,222,128,0)'] : '0 0 0 0 rgba(74,222,128,0)' }}
             exit={{ opacity: 0 }}
             transition={{ boxShadow: { duration: 0.9, ease: 'easeOut' } }}
-            style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(56,189,248,0.05)', border: `1px solid ${fromCamera ? 'rgba(74,222,128,0.35)' : 'rgba(56,189,248,0.2)'}`, borderRadius: 'var(--radius-sm)' }}>
+            style={{ marginTop: 14, padding: '14px 16px', background: 'var(--iron)', border: `1px solid ${fromCamera ? 'rgba(74,222,128,0.35)' : 'var(--iron-light)'}`, borderRadius: 'var(--radius-sm)' }}>
             {fromCamera && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, color: '#4ade80', fontSize: '0.72rem', fontFamily: 'var(--font-body)' }}>
                 <Camera size={13} /> اتقرا بالكاميرا
@@ -1006,14 +988,14 @@ function BarcodeSearch({ userId }) {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', direction: 'ltr' }}>{result.barcode}</span>
             </div>
             <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginBottom: 10 }}>لكل {result.serving || '100 جرام'}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               {[
-                { label: 'سعرات', val: result.cal, unit: '', color: '#38bdf8' },
+                { label: 'سعرات', val: result.cal, unit: '', color: 'var(--chalk)' },
                 { label: 'بروتين', val: result.protein, unit: 'g', color: '#f87171' },
                 { label: 'كارب', val: result.carbs, unit: 'g', color: '#facc15' },
                 { label: 'دهون', val: result.fat, unit: 'g', color: '#4ade80' },
               ].map(({ label, val, unit, color }) => (
-                <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: `${color}0a`, border: `1px solid ${color}18`, borderRadius: 6 }}>
+                <div key={label} style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color }}>{val}<span style={{ fontSize: '0.6rem' }}>{unit}</span></div>
                   <div style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2 }}>{label}</div>
                 </div>
@@ -1025,7 +1007,7 @@ function BarcodeSearch({ userId }) {
 
         {(status === 'manual' || status === 'saving' || status === 'error-save') && (
           <motion.div key="manual" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-sm)' }}>
+            style={{ marginTop: 14, padding: '14px 16px', background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: '0.78rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)' }}>
               <Barcode size={13} color="var(--ash-light)" />
               المنتج مش موجود — اكتب بياناته من علبة المنتج وهنحفظها عشان تفيد غيرك بعدين.
@@ -1041,11 +1023,11 @@ function BarcodeSearch({ userId }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
               <input type="text" placeholder="اسم المنتج" value={manual.name}
                 onChange={e => setManual(m => ({ ...m, name: e.target.value }))}
-                style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
+                style={{ padding: '10px 12px', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
 
               <input type="text" placeholder="حجم الحصة (مثلاً: 100 جرام، علبة واحدة)" value={manual.serving}
                 onChange={e => setManual(m => ({ ...m, serving: e.target.value }))}
-                style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
+                style={{ padding: '10px 12px', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontSize: '0.82rem', outline: 'none', direction: 'rtl' }} />
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
                 {[
@@ -1056,7 +1038,7 @@ function BarcodeSearch({ userId }) {
                 ].map(({ key, ph }) => (
                   <input key={key} type="number" placeholder={ph} value={manual[key]}
                     onChange={e => setManual(m => ({ ...m, [key]: e.target.value }))}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', outline: 'none', textAlign: 'center', direction: 'ltr' }} />
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 10px', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', outline: 'none', textAlign: 'center', direction: 'ltr' }} />
                 ))}
               </div>
 
@@ -1070,7 +1052,7 @@ function BarcodeSearch({ userId }) {
                 whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
                 onClick={handleManualSave}
                 disabled={status === 'saving'}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.4)', borderRadius: 'var(--radius-sm)', color: '#38bdf8', cursor: status === 'saving' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', background: 'rgba(255,85,0,0.12)', border: '1px solid rgba(255,85,0,0.35)', borderRadius: 'var(--radius-sm)', color: 'var(--volt)', cursor: status === 'saving' ? 'default' : 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.85rem' }}
               >
                 {status === 'saving' ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />}
                 احفظ المنتج
@@ -1146,18 +1128,16 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
       <motion.div
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         onClick={() => setExpanded(true)}
-        style={{ cursor: 'pointer', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}
+        style={{ cursor: 'pointer', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,77,46,0.1)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <ShoppingBag size={18} color="var(--accent)" />
-          </div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>بياناتك محفوظة</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash-light)', marginTop: 2, direction: 'ltr', textAlign: 'right' }}>
-              {weight}كجم · {height}سم · {age} سنة
-            </div>
+        <div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', letterSpacing: '0.1em', marginBottom: 6, textTransform: 'uppercase' }}>YOUR DATA</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, direction: 'ltr' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: 'var(--chalk)' }}>{weight}<span style={{ fontSize: '0.6rem', color: 'var(--ash-light)' }}> KG</span></span>
+            <span style={{ color: 'var(--iron-light)' }}>·</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: 'var(--chalk)' }}>{height}<span style={{ fontSize: '0.6rem', color: 'var(--ash-light)' }}> CM</span></span>
+            <span style={{ color: 'var(--iron-light)' }}>·</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: 'var(--chalk)' }}>{age}<span style={{ fontSize: '0.6rem', color: 'var(--ash-light)' }}> YRS</span></span>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.66rem' }}>
@@ -1171,9 +1151,8 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-      style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '28px 24px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}
+      style={{ background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10, padding: '24px 22px', marginBottom: 24 }}
     >
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Calculator size={18} color="var(--accent)" />
@@ -1183,7 +1162,7 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
           <motion.button
             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
             onClick={() => setExpanded(false)}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.66rem', fontFamily: 'var(--font-mono)' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', background: 'transparent', border: '1px solid var(--iron-light)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.66rem', fontFamily: 'var(--font-mono)' }}
           >
             <ChevronUp size={12} /> اقفل
           </motion.button>
@@ -1192,9 +1171,9 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
       <div style={{ marginBottom: 16 }}>
         <span style={labelStyle}>الجنس</span>
         <div style={{ display: 'flex', gap: 8 }}>
-          {[{ id: 'male', label: '👨 ذكر' }, { id: 'female', label: '👩 أنثى' }].map(g => (
+          {[{ id: 'male', label: 'ذكر' }, { id: 'female', label: 'أنثى' }].map(g => (
             <motion.button key={g.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setGender(g.id)}
-              style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,77,46,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gender === g.id ? 'rgba(255,77,46,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--accent)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}>
+              style={{ flex: 1, padding: '10px', background: gender === g.id ? 'rgba(255,77,46,0.15)' : 'var(--iron)', border: `1px solid ${gender === g.id ? 'rgba(255,77,46,0.5)' : 'var(--iron-light)'}`, borderRadius: 'var(--radius-sm)', color: gender === g.id ? 'var(--accent)' : 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', transition: 'all 180ms' }}>
               {g.label}
             </motion.button>
           ))}
@@ -1217,7 +1196,7 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {activities.map(a => (
             <motion.button key={a.id} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setActivity(a.id)}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,77,46,0.1)' : 'rgba(255,255,255,0.02)', border: `1px solid ${activity === a.id ? 'rgba(255,77,46,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}>
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: activity === a.id ? 'rgba(255,77,46,0.1)' : 'var(--iron)', border: `1px solid ${activity === a.id ? 'rgba(255,77,46,0.4)' : 'var(--iron-light)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 180ms', direction: 'rtl' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: activity === a.id ? 'var(--accent)' : 'var(--chalk)' }}>{a.label}</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>{a.desc}</span>
             </motion.button>
@@ -1225,8 +1204,8 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         </div>
       </div>
       {error && (
-        <div style={{ padding: '10px 14px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 'var(--radius-sm)', color: '#f87171', fontSize: '0.78rem', fontFamily: 'var(--font-body)', marginBottom: 14, direction: 'rtl' }}>
-          ⚠️ {error}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 'var(--radius-sm)', color: '#f87171', fontSize: '0.78rem', fontFamily: 'var(--font-body)', marginBottom: 14, direction: 'rtl' }}>
+          <AlertTriangle size={13} style={{ flexShrink: 0 }} /> {error}
         </div>
       )}
       <motion.button
@@ -1234,7 +1213,7 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         onClick={handleCalc}
         style={{ width: '100%', padding: '14px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.06em', cursor: 'pointer' }}
       >
-        احسب احتياجك وشوف خطتك 🔥
+        احسب احتياجك وشوف خطتك
       </motion.button>
       {initialData && (
         <motion.button
@@ -1244,9 +1223,9 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
             onClear?.();
             setWeight(''); setHeight(''); setAge(''); setGender('male'); setActivity('moderate');
           }}
-          style={{ width: '100%', marginTop: 10, padding: '8px', background: 'transparent', border: 'none', color: 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.66rem', textDecoration: 'underline' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', marginTop: 10, padding: '8px', background: 'transparent', border: 'none', color: 'var(--ash-light)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.66rem', textDecoration: 'underline' }}
         >
-          🗑 امسح البيانات المحفوظة وابدأ من جديد
+          <Trash2 size={11} /> امسح البيانات المحفوظة وابدأ من جديد
         </motion.button>
       )}
     </motion.div>
@@ -1341,17 +1320,17 @@ export default function NutritionPage() {
     <>
       <Head><title>الأنظمة الغذائية — GYMZ</title></Head>
       <div style={{ minHeight: '100vh', paddingTop: 88, paddingBottom: 60, position: 'relative', direction: 'rtl' }}>
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(255,77,46,0.07) 0%,transparent 60%)' }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 45% 30% at 50% 15%, rgba(255,77,46,0.04) 0%,transparent 60%)' }} />
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
 
           {/* header */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} style={{ marginBottom: 32 }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash)', marginBottom: 8 }}>أنظمة غذائية مصرية</div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem,5vw,3.5rem)', letterSpacing: '0.04em', lineHeight: 1 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} style={{ marginBottom: 20 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.66rem', color: 'var(--ash)', marginBottom: 8, letterSpacing: '0.14em' }}>NUTRITION</div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,4.6vw,3.2rem)', letterSpacing: '0.04em', lineHeight: 1 }}>
               تغذية<br /><span style={{ color: 'var(--accent)' }}>على قد إيدك</span>
             </h1>
-            <p style={{ color: 'var(--ash-light)', marginTop: 12, fontSize: '0.875rem', lineHeight: 1.7 }}>
-              حط بياناتك، هنحسبلك احتياجك اليومي من السعرات ونديك النظام المناسب لهدفك.
+            <p style={{ color: 'var(--ash-light)', marginTop: 10, fontSize: '0.85rem', lineHeight: 1.7 }}>
+              خطتك حسب بياناتك وهدفك — هنحسبلك احتياجك اليومي من السعرات ونديك النظام المناسب.
             </p>
           </motion.div>
 
@@ -1374,82 +1353,82 @@ export default function NutritionPage() {
               {/* ✅ Water Intake */}
               {userData && <WaterCard weight={userData.weight} />}
 
-              {/* TDEE badge */}
+              {/* DAILY CALORIES — الرقم هو العنصر البصري الرئيسي */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'rgba(255,77,46,0.06)', border: '1px solid rgba(255,77,46,0.2)', borderRadius: 'var(--radius-md)', marginBottom: 20 }}
+                style={{ marginBottom: 20 }}
               >
-                <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 4 }}>احتياجك اليومي من السعرات</div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--accent)', lineHeight: 1 }}>{tdee} <span style={{ fontSize: '0.8rem', color: 'var(--ash-light)' }}>سعرة/يوم</span></div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.1em', marginBottom: 6 }}>DAILY CALORIES</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.6rem,7vw,3.4rem)', color: 'var(--volt)', lineHeight: 1 }}>{plan.targetCal}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--ash-light)' }}>kcal / day</span>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
+                    onClick={() => { setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: 'transparent', border: '1px solid var(--iron-light)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}
+                  >
+                    <RefreshCw size={11} /> غيّر
+                  </motion.button>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
-                  onClick={() => { setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, color: 'var(--ash-light)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}
-                >
-                  <RefreshCw size={11} /> غيّر
-                </motion.button>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', marginTop: 6 }}>
+                  {plan.label} — {plan.goal} · على أساس {tdee} سعرة/يوم احتياجك الأساسي
+                </div>
               </motion.div>
 
-              {/* plan selector */}
-              <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-                {Object.entries(plans).map(([key, p]) => {
+              {/* YOUR GOAL — Row list بدل Pills ملونة بأيقونات */}
+              <div style={{ marginBottom: 24, border: '1px solid var(--iron-light)', borderRadius: 10, overflow: 'hidden', background: 'var(--carbon)' }}>
+                <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--iron-light)', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', letterSpacing: '0.1em' }}>YOUR GOAL</div>
+                {Object.entries(plans).map(([key, p], i, arr) => {
                   const active = activePlan === key;
                   return (
-                    <motion.button key={key} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setActivePlan(key)}
-                      style={{ padding: '10px 14px', background: active ? `${p.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${active ? p.color + '55' : 'rgba(255,255,255,0.08)'}`, borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, transition: 'all 200ms', minWidth: 100 }}>
-                      <span style={{ fontSize: '1.2rem' }}>{p.icon}</span>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', color: active ? p.color : 'var(--chalk)', letterSpacing: '0.04em' }}>{p.label}</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.56rem', color: active ? p.color : 'var(--ash)', letterSpacing: '0.06em' }}>{p.goal}</span>
-                    </motion.button>
+                    <div key={key} onClick={() => setActivePlan(key)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '13px 16px', cursor: 'pointer',
+                        background: active ? 'rgba(255,85,0,0.06)' : 'transparent',
+                        borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--iron-light)',
+                        borderInlineStart: active ? '2px solid var(--volt)' : '2px solid transparent',
+                        transition: 'background 0.2s',
+                      }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', color: active ? 'var(--volt)' : 'var(--chalk)', letterSpacing: '0.02em' }}>{p.label}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: active ? 'var(--volt)' : 'var(--ash-light)' }}>{p.targetCal}</span>
+                    </div>
                   );
                 })}
               </div>
 
-              {/* macros summary */}
+              {/* macros summary — 3 أعمدة، أرقام كبيرة، من غير Emoji ولا Cards */}
               <AnimatePresence mode="wait">
                 <motion.div key={activePlan}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ marginBottom: 24, padding: '18px 20px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', position: 'relative', overflow: 'hidden' }}
+                  style={{ marginBottom: 24, padding: '18px 4px', borderTop: '1px solid var(--iron-light)', borderBottom: '1px solid var(--iron-light)' }}
                 >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${plan.color},transparent)` }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--chalk)' }}>{plan.label} — {plan.goal}</div>
-                        {goalBadge && (
-                          <span style={{ padding: '2px 10px', background: goalBadge.bg, border: `1px solid ${goalBadge.color}40`, borderRadius: 10, fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: goalBadge.color, letterSpacing: '0.06em' }}>
-                            {goalBadge.label}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)', marginTop: 3 }}>
-                        {plan.deficit > 0 ? `+${plan.deficit}` : plan.deficit} سعرة عن احتياجك اليومي
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: plan.color, lineHeight: 1 }}>{plan.targetCal}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)' }}>سعرة/يوم</div>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.1em' }}>MACROS</span>
+                    {goalBadge && (
+                      <span style={{ padding: '2px 8px', background: goalBadge.bg, border: `1px solid ${goalBadge.color}40`, borderRadius: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: goalBadge.color, letterSpacing: '0.06em' }}>
+                        {goalBadge.label}
+                      </span>
+                    )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)' }}>
                     {[
-                      { label: 'بروتين', val: plan.macros.protein, color: '#f87171', icon: '🥩' },
-                      { label: 'كارب',   val: plan.macros.carbs,   color: '#facc15', icon: '🍚' },
-                      { label: 'دهون',   val: plan.macros.fat,     color: '#4ade80', icon: '🥑' },
-                    ].map(({ label, val, color, icon }) => (
-                      <div key={label} style={{ textAlign: 'center', padding: '10px 6px', background: `${color}0a`, border: `1px solid ${color}18`, borderRadius: 8 }}>
-                        <div style={{ fontSize: '1rem', marginBottom: 2 }}>{icon}</div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color }}>{val}<span style={{ fontSize: '0.7rem' }}>g</span></div>
-                        <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 2 }}>{label}</div>
+                      { label: 'PROTEIN', val: plan.macros.protein, color: '#f87171' },
+                      { label: 'CARBS',   val: plan.macros.carbs,   color: '#facc15' },
+                      { label: 'FAT',     val: plan.macros.fat,     color: '#4ade80' },
+                    ].map(({ label, val, color }) => (
+                      <div key={label} style={{ textAlign: 'center' }}>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.7rem', color }}>{val}<span style={{ fontSize: '0.75rem' }}>g</span></div>
+                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginTop: 3, letterSpacing: '0.08em' }}>{label}</div>
                       </div>
                     ))}
                   </div>
                 </motion.div>
               </AnimatePresence>
 
-              {/* ✅ مكملات مقترحة */}
+              {/* مكملات مقترحة */}
               <SupplementsCard goalType={plan.goalType} />
 
               {/* meals */}
@@ -1464,8 +1443,9 @@ export default function NutritionPage() {
                 </motion.div>
               </AnimatePresence>
 
-              <div style={{ marginTop: 16, padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>
-                💡 <strong style={{ color: 'var(--chalk)' }}>نصيحة:</strong> الأرقام تقريبية بناءً على معادلة هاريس-بينيديكت. لو وزنك اتغير، اضغط &quot;غيّر&quot; وحسب من جديد.
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 16, padding: '14px 16px', background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.7 }}>
+                <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
+                <span><strong style={{ color: 'var(--chalk)' }}>نصيحة:</strong> الأرقام تقريبية بناءً على معادلة هاريس-بينيديكت. لو وزنك اتغير، اضغط &quot;غيّر&quot; وحسب من جديد.</span>
               </div>
             </div>
           )}
