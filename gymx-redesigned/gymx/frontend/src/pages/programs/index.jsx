@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2, ImageIcon, X } from 'lucide-react';
+import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2, ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell } from 'lucide-react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabaseClient';
@@ -66,10 +66,10 @@ function getExerciseImage(name) {
 // الهيكل الأساسي لأي يوم تمرين
 // ══════════════════════════════════════════
 const DAY_STRUCTURE = [
-  { step: '01', title: 'الإحماء', subtitle: 'تسخين الجسم', desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.', color: '#4ade80', icon: '🔥' },
-  { step: '02', title: 'التمارين الأساسية', subtitle: 'التمارين الكبيرة', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#FFFFFF', icon: '🏋️' },
-  { step: '03', title: 'التمارين المساعدة', subtitle: 'تمارين عضلة واحدة', desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.', color: '#facc15', icon: '🎯' },
-  { step: '04', title: 'التبريد والإطالات', subtitle: 'تهدئة الجسم', desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.', color: '#f87171', icon: '❄️' },
+  { step: '01', title: 'الإحماء', subtitle: 'تسخين الجسم', desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.', color: '#4ade80', Icon: Flame },
+  { step: '02', title: 'التمارين الأساسية', subtitle: 'التمارين الكبيرة', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#FFFFFF', Icon: Dumbbell },
+  { step: '03', title: 'التمارين المساعدة', subtitle: 'تمارين عضلة واحدة', desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.', color: '#facc15', Icon: Target },
+  { step: '04', title: 'التبريد والإطالات', subtitle: 'تهدئة الجسم', desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.', color: '#f87171', Icon: Snowflake },
 ];
 
 // ══════════════════════════════════════════
@@ -172,13 +172,21 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
       <motion.div
         whileHover={{ borderColor: 'var(--glass-border-hover)' }}
         transition={{ duration: 0.12 }}
-        style={{ position: 'relative', overflow: 'hidden', background: 'var(--carbon)', border: highlighted ? '1px solid rgba(255,77,46,0.4)' : '1px solid var(--glass-border)', borderRadius: open ? '14px 14px 0 0' : 14, transition: 'border-color 150ms ease, background 150ms ease', cursor: 'pointer', padding: '24px 28px' }}
+        style={{ position: 'relative', overflow: 'hidden', background: 'var(--carbon)', border: highlighted ? '1px solid rgba(255,77,46,0.4)' : '1px solid var(--glass-border)', borderRadius: open ? '10px 10px 0 0' : 10, transition: 'border-color 150ms ease, background 150ms ease', cursor: 'pointer', padding: '24px 28px' }}
         onClick={() => setOpen(!open)}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+        {/* large background number — editorial identity instead of an emoji icon */}
+        <div style={{
+          position: 'absolute', top: -6, insetInlineEnd: 18,
+          fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(64px,8vw,96px)',
+          lineHeight: 1, color: 'var(--iron-light)', userSelect: 'none', pointerEvents: 'none', zIndex: 0,
+        }}>
+          {String(index + 1).padStart(2, '0')}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, position: 'relative', zIndex: 1 }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '1.4rem' }}>{program.icon}</span>
               <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
                 {program.subtitle}
               </span>
@@ -187,7 +195,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               </span>
               {isMyProgram && (
                 <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  ✅ برنامجك الحالي
+                  <CheckCircle2 size={11} /> برنامجك الحالي
                 </span>
               )}
             </div>
@@ -231,7 +239,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
             transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderTop: 'none', borderRadius: '0 0 16px 16px', padding: '24px 28px' }}>
+            <div style={{ background: 'var(--carbon)', border: '1px solid var(--glass-border)', borderTop: 'none', borderRadius: '0 0 10px 10px', padding: '24px 28px' }}>
               {/* Day tabs */}
               <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
                 {program.days_detail.map((d, i) => (
@@ -260,7 +268,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                   {program.days_detail[activeDay].exercises.map((ex, i) => {
                     const exImg = getExerciseImage(ex.name);
                     return (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', direction: 'rtl' }}>
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderRadius: 8, background: 'var(--carbon)', border: '1px solid var(--iron-light)', direction: 'rtl' }}>
                         <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: program.accentColor, opacity: 0.7, minWidth: 22, paddingTop: 2 }}>
                           {String(i + 1).padStart(2, '0')}
                         </span>
@@ -304,7 +312,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                     direction: 'rtl',
                   }}
                 >
-                  <span style={{ fontSize: '1rem' }}>⚠️</span>
+                  <AlertTriangle size={16} color="#facc15" style={{ flexShrink: 0, marginTop: 1 }} />
                   <div>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#facc15', margin: 0 }}>
                       إنت مسجل حالياً في برنامج <strong>{enrolledTitle}</strong>
@@ -352,7 +360,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                 {sessionDone
                   ? <><CheckCircle2 size={15} /> تمت جلسة النهارده 💪</>
                   : savingSession ? 'جاري الحفظ...'
-                  : <>✅ سجّل جلسة النهارده</>}
+                  : <><CheckCircle2 size={15} /> سجّل جلسة النهارده</>}
               </motion.button>
             </div>
           </motion.div>
@@ -400,8 +408,9 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                   {previewExercise.name_ar}
                 </div>
                 {previewExercise.tips && (
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
-                    💡 {previewExercise.tips}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
+                    <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span>{previewExercise.tips}</span>
                   </div>
                 )}
               </div>
@@ -416,16 +425,17 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
 function StructureStep({ step, index }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const { Icon } = step;
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '20px 24px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12 }}
+      style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '20px 24px', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10 }}
     >
-      <div style={{ width: 44, height: 44, borderRadius: 12, background: step.color + '18', border: '1px solid ' + step.color + '44', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
-        {step.icon}
+      <div style={{ width: 40, height: 40, borderRadius: 8, background: step.color + '18', border: '1px solid ' + step.color + '44', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={18} color={step.color} strokeWidth={2} />
       </div>
       <div style={{ flex: 1, direction: 'rtl' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
