@@ -1,8 +1,8 @@
 // src/pages/exercises/videos.jsx
 // ── مكتبة التمارين — صفحة مستقلة، بريميوم ──────────────────
 //
-// المصدر: arhxam/free-exercise-db-with-videos (رخصة MIT — حر تمامًا)
-// https://github.com/arhxam/free-exercise-db-with-videos
+// المصدر: harshvishu/free-exercise-db-with-videos (رخصة MIT — حر تمامًا)
+// https://github.com/harshvishu/free-exercise-db-with-videos
 // 317 تمرين، 593 فيديو حقيقي (راجل وست) بجودة Full HD.
 //
 // الداتا بتتجاب عن طريق jsDelivr (مرآة CDN لأي مشروع مفتوح المصدر على
@@ -30,8 +30,8 @@ import { supabase } from '../../lib/supabaseClient';
 // ── مصدر الداتا: jsDelivr (مرآة CDN رسمية لأي مشروع GitHub، بتدعم
 // CORS بشكل مضمون من المتصفح) — ومصدر احتياطي مباشر من GitHub لو
 // jsDelivr كان بطيء أو واقع لحظتها ──────────────────────────────
-const DATA_URL = 'https://cdn.jsdelivr.net/gh/arhxam/free-exercise-db-with-videos@main/data/exercises.json';
-const DATA_URL_FALLBACK = 'https://raw.githubusercontent.com/arhxam/free-exercise-db-with-videos/main/data/exercises.json';
+const DATA_URL = 'https://cdn.jsdelivr.net/gh/harshvishu/free-exercise-db-with-videos@main/data/exercises.json';
+const DATA_URL_FALLBACK = 'https://raw.githubusercontent.com/harshvishu/free-exercise-db-with-videos/main/data/exercises.json';
 const PAGE_LIMIT = 24;
 
 // ── ترجمة أقسام الجسم ──────────────────────────────────────
