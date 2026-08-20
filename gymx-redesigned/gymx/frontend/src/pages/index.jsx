@@ -43,14 +43,11 @@ function FloatCard({ style, className, animDelay = 0, animDuration = 4, children
       transition={{ duration: animDuration, delay: animDelay, repeat: Infinity, ease: 'easeInOut' }}
       style={{
         position: 'absolute',
-        background: 'rgba(17,17,17,0.78)',
-        backdropFilter: 'blur(22px)',
-        WebkitBackdropFilter: 'blur(22px)',
+        background: 'var(--carbon)',
         borderRadius: 'var(--radius-lg)',
         padding: '12px 16px',
         zIndex: 10,
-        boxShadow: '0 16px 40px rgba(0,0,0,0.55)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid var(--iron-light)',
         ...style,
       }}
     >
@@ -582,25 +579,55 @@ export default function HomePage() {
             <span className="label-tag">{ar ? `أهلاً يا ${userName}` : `HEY, ${userName.toUpperCase()}`}</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-            {[
-              { href: '/workout',   emoji: '⚡', title: ar ? 'ابدأ جلستي'     : 'START WORKOUT',   desc: ar ? 'سجّل تمرين جديد دلوقتي'           : 'Log a new workout session now'      },
-              { href: '/dashboard', emoji: '📊', title: ar ? 'تقدمي'           : 'MY PROGRESS',     desc: ar ? 'شوف أرقامك ومؤشراتك الأسبوعية'    : 'View your weekly stats and numbers'  },
-              { href: '/programs',  emoji: '🏋️', title: ar ? 'برامجي'          : 'MY PROGRAMS',     desc: ar ? 'استكشف وغيّر برنامجك التدريبي'     : 'Explore and switch training programs' },
-              { href: '/nutrition', emoji: '🥗', title: ar ? 'خطتي الغذائية'  : 'NUTRITION PLAN',  desc: ar ? 'اتابع وجباتك وسعراتك اليومية'      : 'Track your meals and daily calories'  },
-            ].map(({ href, emoji, title, desc }) => (
-              <Link key={href} href={href}>
-                <div style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', padding: '20px 18px', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--volt)'; e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.background = 'var(--iron-light)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.5), 0 0 30px var(--volt-glow)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--iron-light)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'var(--iron)'; e.currentTarget.style.boxShadow = 'none'; }}
-                >
-                  <div style={{ fontSize: '1.5rem', marginBottom: 10 }}>{emoji}</div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', letterSpacing: '0.06em', color: 'var(--chalk)', marginBottom: 6 }}>{title}</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>{desc}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(0,1fr)', gap: 12, alignItems: 'stretch' }} className="quick-actions-grid">
+            {/* FEATURED — primary next action, large typography instead of an equal card */}
+            <Link href="/workout">
+              <div className="card-hover" style={{ position: 'relative', overflow: 'hidden', height: '100%', minHeight: 220, background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', padding: '28px 26px', cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(90px,10vw,140px)', lineHeight: 1, color: 'var(--iron-light)', position: 'absolute', top: -10, [ar ? 'left' : 'right']: 10, userSelect: 'none', pointerEvents: 'none' }}>01</div>
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <span className="label-tag" style={{ color: 'var(--volt)' }}>{ar ? 'الجلسة القادمة' : 'NEXT UP'}</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3vw,2.6rem)', letterSpacing: '0.02em', color: 'var(--chalk)', textTransform: 'uppercase', margin: '10px 0 8px' }}>
+                    {ar ? 'ابدأ جلستي' : 'START WORKOUT'}
+                  </h3>
+                  <p style={{ color: 'var(--ash-light)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: 320 }}>
+                    {ar ? 'سجّل تمرين جديد وتابع كل عدة دلوقتي.' : 'Log a new session and track every rep now.'}
+                  </p>
                 </div>
-              </Link>
-            ))}
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--volt)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>{ar ? 'ابدأ الآن' : 'BEGIN NOW'}</span>
+                  <ArrowRight size={16} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
+                </div>
+              </div>
+            </Link>
+
+            {/* SECONDARY — thin editorial rows, not cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', overflow: 'hidden' }}>
+              {[
+                { href: '/dashboard', icon: BarChart3, title: ar ? 'تقدمي'          : 'MY PROGRESS',    desc: ar ? 'أرقامك ومؤشراتك الأسبوعية'    : 'Weekly stats and numbers'  },
+                { href: '/programs',  icon: Dumbbell,  title: ar ? 'برامجي'          : 'MY PROGRAMS',    desc: ar ? 'استكشف وغيّر برنامجك'          : 'Explore and switch programs' },
+                { href: '/nutrition', icon: Apple,     title: ar ? 'خطتي الغذائية'  : 'NUTRITION PLAN', desc: ar ? 'وجباتك وسعراتك اليومية'        : 'Meals and daily calories'  },
+              ].map(({ href, icon: Icon, title, desc }, i) => (
+                <Link key={href} href={href}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderTop: i > 0 ? '1px solid var(--iron-light)' : 'none', background: 'var(--carbon)', cursor: 'pointer', transition: 'background var(--transition-base)', direction: ar ? 'rtl' : 'ltr' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--iron)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--carbon)'; }}
+                  >
+                    <Icon size={17} color="var(--volt)" style={{ flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.92rem', letterSpacing: '0.03em', color: 'var(--chalk)' }}>{title}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ash)', marginTop: 2 }}>{desc}</div>
+                    </div>
+                    <ChevronRight size={14} color="var(--ash)" style={{ flexShrink: 0, transform: ar ? 'rotate(180deg)' : 'none' }} />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
+          <style>{`
+            @media (max-width: 720px) {
+              .quick-actions-grid { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
         </div>
       </section>
       )}
