@@ -28,8 +28,10 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 
 // ── مصدر الداتا: jsDelivr (مرآة CDN رسمية لأي مشروع GitHub، بتدعم
-// CORS بشكل مضمون من المتصفح) ──────────────────────────────
+// CORS بشكل مضمون من المتصفح) — ومصدر احتياطي مباشر من GitHub لو
+// jsDelivr كان بطيء أو واقع لحظتها ──────────────────────────────
 const DATA_URL = 'https://cdn.jsdelivr.net/gh/arhxam/free-exercise-db-with-videos@main/data/exercises.json';
+const DATA_URL_FALLBACK = 'https://raw.githubusercontent.com/arhxam/free-exercise-db-with-videos/main/data/exercises.json';
 const PAGE_LIMIT = 24;
 
 // ── ترجمة أقسام الجسم ──────────────────────────────────────
@@ -654,18 +656,37 @@ export default function ExerciseVideosPage() {
   }, [search]);
 
   // جلب الداتا كلها مرة واحدة (JSON واحد، مفيش صفحات في المصدر نفسه)
+  // بمحاولات تلقائية + مصدر احتياطي، عشان طلب واحد فاشل (نت بطيء لحظة،
+  // أو الـCDN واقع) ميوقفش الصفحة على طول زي ما كان بيحصل قبل كده
+  const fetchWithTimeout = async (url, ms = 8000) => {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), ms);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) throw new Error('bad response');
+      return await res.json();
+    } finally {
+      clearTimeout(t);
+    }
+  };
+
   const fetchExercises = useCallback(async () => {
     setLoadingList(true);
     setLoadError(false);
-    try {
-      const res = await fetch(DATA_URL);
-      if (!res.ok) throw new Error('bad response');
-      const json = await res.json();
-      setAllExercises(Array.isArray(json) ? json : []);
-    } catch {
-      setLoadError(true);
-      setAllExercises([]);
+
+    const attempts = [DATA_URL, DATA_URL, DATA_URL_FALLBACK]; // محاولتين على jsDelivr وبعدين fallback
+    for (let i = 0; i < attempts.length; i++) {
+      try {
+        const json = await fetchWithTimeout(attempts[i]);
+        setAllExercises(Array.isArray(json) ? json : []);
+        setLoadingList(false);
+        return;
+      } catch {
+        if (i < attempts.length - 1) await new Promise(r => setTimeout(r, 700)); // استنى شوية وحاول تاني
+      }
     }
+    setLoadError(true);
+    setAllExercises([]);
     setLoadingList(false);
   }, []);
 
@@ -735,7 +756,7 @@ export default function ExerciseVideosPage() {
               <input
                 className="input" placeholder="دوّر باسم التمرين بالإنجليزي (مثلاً: squat)"
                 value={search} onChange={e => setSearch(e.target.value)}
-                style={{ width: '100%', paddingRight: 38, boxSizing: 'border-box', direction: 'ltr', textAlign: 'right' }}
+                style={{ width: '100%', paddingRight: 38, boxSizing: 'border-box', direction: 'rtl', textAlign: 'right' }}
               />
             </div>
             <motion.button
