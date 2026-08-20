@@ -33,91 +33,6 @@ function AnimatedCounter({ target, suffix = '', duration = 1600 }) {
 }
 
 /* ─────────────────────────────────────────────
-   FLOATING CARD
-───────────────────────────────────────────── */
-function FloatCard({ style, className, animDelay = 0, animDuration = 4, children }) {
-  return (
-    <motion.div
-      className={className}
-      animate={{ y: [0, -12, 0], rotate: [0, 0.5, 0] }}
-      transition={{ duration: animDuration, delay: animDelay, repeat: Infinity, ease: 'easeInOut' }}
-      style={{
-        position: 'absolute',
-        background: 'var(--carbon)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '12px 16px',
-        zIndex: 10,
-        border: '1px solid var(--iron-light)',
-        ...style,
-      }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   PHONE MOCKUP — real programs
-───────────────────────────────────────────── */
-function PhoneMockup({ ar, programs }) {
-  const demo = programs.length > 0 ? programs : [
-    { title_ar: 'كامل الجسم',  title_en: 'Full Body',   days_per_week: 3, level: 'beginner'     },
-    { title_ar: 'حرق الدهون',  title_en: 'Fat Loss',    days_per_week: 4, level: 'intermediate' },
-    { title_ar: 'بناء العضل',  title_en: 'Muscle Gain', days_per_week: 5, level: 'advanced'     },
-  ];
-  const levelLabel = ar
-    ? { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' }
-    : { beginner: 'BGNNR', intermediate: 'INTER', advanced: 'ADVNC' };
-
-  return (
-    <div className="phone-frame" style={{ width: 205, padding: '14px 12px', transform: 'rotate(-3deg)' }}>
-      <div style={{ width: 50, height: 4, background: 'var(--iron-light)', borderRadius: 2, margin: '0 auto 12px' }} />
-      <div className="phone-screen" style={{ padding: 13 }}>
-        {/* header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--ash)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 2 }}>
-              {ar ? 'اختار' : 'SELECT'}
-            </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--chalk)', letterSpacing: '0.05em' }}>
-              {ar ? 'البرامج' : 'PROGRAMS'}
-            </div>
-          </div>
-          <div style={{ width: 28, height: 28, background: 'var(--volt)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-display)', fontSize: 14, color: '#fff' }}>G</div>
-        </div>
-
-        {/* orange divider */}
-        <div style={{ height: 2, background: 'var(--volt)', borderRadius: 1, marginBottom: 10, width: '40%' }} />
-
-        {/* programs */}
-        {demo.slice(0, 3).map((p, i) => {
-          const name  = ar ? (p.title_ar || p.program_title_ar || p.program_title) : (p.title_en || p.program_title || p.title_ar);
-          const days  = p.days_per_week || p.days || 3;
-          const level = p.level || 'beginner';
-          return (
-            <div key={i} style={{ background: '#111', borderLeft: i === 0 ? '3px solid var(--volt)' : '3px solid var(--iron-light)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: i === 0 ? 'var(--volt)' : 'var(--chalk)', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 100 }}>{name}</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--ash)', marginTop: 2 }}>{days}×{ar ? 'أسبوع' : 'WEEK'}</div>
-              </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: i === 0 ? 'var(--volt)' : 'var(--ash)', border: `1px solid ${i === 0 ? 'var(--volt)' : 'var(--iron-light)'}`, padding: '2px 5px', borderRadius: 2 }}>
-                {levelLabel[level]}
-              </div>
-            </div>
-          );
-        })}
-
-        <div style={{ marginTop: 10, padding: '8px 10px', background: 'var(--volt)', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: '#fff', letterSpacing: '0.1em' }}>
-            {ar ? 'ابدأ مجاناً' : 'START FREE'}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
    SERVICE ROW ITEM
 ───────────────────────────────────────────── */
 function ServiceRow({ s, i, ar }) {
@@ -297,27 +212,27 @@ export default function HomePage() {
         {/* noise */}
         <div className="hero-noise" />
 
-        {/* orange diagonal glow — right side */}
+        {/* orange diagonal glow — right side, subtle */}
         <div style={{
           position: 'absolute',
           right: ar ? 'auto' : 0, left: ar ? 0 : 'auto',
           top: 0, bottom: 0,
           width: '52%',
-          background: 'radial-gradient(ellipse at center, rgba(255,85,0,0.13) 0%, rgba(255,85,0,0.04) 50%, transparent 75%)',
+          background: 'radial-gradient(ellipse at center, rgba(255,85,0,0.06) 0%, rgba(255,85,0,0.015) 50%, transparent 75%)',
           clipPath: ar
             ? 'polygon(0 0, 85% 0, 100% 100%, 0% 100%)'
             : 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)',
           pointerEvents: 'none',
         }} />
 
-        {/* diagonal orange accent line */}
+        {/* diagonal orange accent line — kept as signature detail, subtler */}
         <div style={{
           position: 'absolute',
           right: ar ? 'auto' : '48%', left: ar ? '48%' : 'auto',
           top: 0, bottom: 0,
           width: 2,
           background: 'linear-gradient(180deg, transparent 0%, var(--volt) 30%, var(--volt) 70%, transparent 100%)',
-          opacity: 0.25,
+          opacity: 0.14,
           transform: 'skewX(-2deg)',
           pointerEvents: 'none',
         }} />
@@ -392,30 +307,30 @@ export default function HomePage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.55 }}
-                style={{ color: 'var(--ash-light)', fontSize: '0.88rem', lineHeight: 1.75, maxWidth: 380, margin: '20px 0 28px', fontFamily: 'var(--font-body)' }}
+                style={{ color: 'var(--ash-light)', fontSize: '0.82rem', lineHeight: 1.75, maxWidth: 360, margin: '20px 0 28px', fontFamily: 'var(--font-body)' }}
               >
                 {user
-                  ? (ar ? 'كمّل رحلتك من حيث وقفت 💪 — صفحتك فيها كل حاجة محتاجها.' : "Continue your journey 💪 — your dashboard has everything you need.")
+                  ? (ar ? 'كمّل رحلتك من حيث وقفت — صفحتك فيها كل حاجة محتاجها.' : "Continue your journey — your dashboard has everything you need.")
                   : (ar ? 'برنامج تدريب وتغذية ذكي، بيتابع كل تقدمك، وسيستيم منافسة يخليك مكمّل.' : 'Smart programs, real-time rep tracking, and friendly competition to keep you going.')}
               </motion.p>
 
-              {/* IDENTITY STRIP — streaks / xp / levels / leaderboard */}
+              {/* IDENTITY STRIP — streaks / xp / levels / leaderboard, editorial not pills */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap', marginBottom: 24 }}
               >
                 {[
                   { icon: Flame,       label: ar ? 'ستريك'      : 'STREAKS'     },
                   { icon: Star,        label: 'XP'                              },
                   { icon: TrendingUp,  label: ar ? 'مستويات'    : 'LEVELS'      },
                   { icon: Trophy,      label: ar ? 'المتصدرين'  : 'LEADERBOARD' },
-                ].map(({ icon: Icon, label }) => (
+                ].map(({ icon: Icon, label }, i) => (
                   <div key={label} style={{
                     display: 'flex', alignItems: 'center', gap: 6,
-                    background: 'var(--iron)', border: '1px solid var(--iron-light)',
-                    borderRadius: 999, padding: '6px 12px',
+                    paddingInlineStart: i > 0 ? 14 : 0, paddingInlineEnd: 14,
+                    borderInlineStart: i > 0 ? '1px solid var(--iron-light)' : 'none',
                   }}>
                     <Icon size={12} color="var(--volt)" />
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ash-light)' }}>{label}</span>
@@ -423,7 +338,7 @@ export default function HomePage() {
                 ))}
               </motion.div>
 
-              {/* CTAs */}
+              {/* CTAs — workout is the primary next action, dashboard secondary */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -432,8 +347,8 @@ export default function HomePage() {
               >
                 {user ? (
                   <>
-                    <Link href="/dashboard"><div className="btn btn-primary"><BarChart3 size={14} /> {ar ? 'صفحتي' : 'DASHBOARD'}</div></Link>
-                    <Link href="/workout"><div className="btn btn-outline"><Zap size={14} /> {ar ? 'ابدأ تمريني' : 'WORKOUT'}</div></Link>
+                    <Link href="/workout"><div className="btn btn-primary"><Zap size={14} /> {ar ? 'ابدأ تمريني' : 'START WORKOUT'} <ArrowRight size={14} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} /></div></Link>
+                    <Link href="/dashboard"><div className="btn btn-outline"><BarChart3 size={14} /> {ar ? 'صفحتي' : 'DASHBOARD'}</div></Link>
                   </>
                 ) : (
                   <>
@@ -462,43 +377,51 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            {/* PHONE + CARDS SIDE — one strong anchor, not a card pile */}
+            {/* TRAINING PREVIEW — flat editorial panel instead of a 3D phone mockup */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.7 }}
-              style={{ position: 'relative', flexShrink: 0, margin: '24px auto 0', paddingBottom: 20 }}
+              style={{ flexShrink: 0, width: '100%', maxWidth: 300, margin: '24px auto 0' }}
             >
-              {/* accent badge — replaces the old repeated stat cards, single punch instead */}
-              <FloatCard className="hero-side-card" animDelay={0} animDuration={4.2}
-                style={{
-                  top: -14, right: ar ? 'auto' : -40, left: ar ? -40 : 'auto',
-                  minWidth: 118, background: 'var(--volt)', border: 'none',
-                  boxShadow: '0 16px 40px rgba(255,85,0,0.35)', transform: 'rotate(-4deg)',
-                }}
-              >
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: '#fff', letterSpacing: '0.06em', lineHeight: 1.2 }}>
-                  {ar ? 'مجاناً 100%' : '100% FREE'}
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'rgba(255,255,255,0.8)', marginTop: 3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  {ar ? 'مفيش بطاقة' : 'NO CARD NEEDED'}
-                </div>
-              </FloatCard>
+              <div style={{ background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', padding: '22px 22px 18px', direction: ar ? 'rtl' : 'ltr' }}>
+                <span className="label-tag" style={{ color: 'var(--volt)' }}>{ar ? 'ابدأ من هنا' : 'YOUR TRAINING'}</span>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.03em', color: 'var(--chalk)', textTransform: 'uppercase', margin: '8px 0 16px' }}>
+                  {ar ? 'البرامج المتاحة' : 'AVAILABLE PROGRAMS'}
+                </h3>
 
-              {/* STAT CARD: streak — gamified identity, kept because it's not repeated anywhere else */}
-              <FloatCard animDelay={1.1} animDuration={4.2} style={{ bottom: -18, left: 'calc(50% - 64px)', minWidth: 128 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Flame size={14} color="var(--volt)" />
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--chalk)', lineHeight: 1 }}>
-                    12 {ar ? 'يوم' : 'DAY'}
+                {(() => {
+                  const demo = programs.length > 0 ? programs : [
+                    { title_ar: 'كامل الجسم',  title_en: 'Full Body',   days_per_week: 3, level: 'beginner'     },
+                    { title_ar: 'حرق الدهون',  title_en: 'Fat Loss',    days_per_week: 4, level: 'intermediate' },
+                    { title_ar: 'بناء العضل',  title_en: 'Muscle Gain', days_per_week: 5, level: 'advanced'     },
+                  ];
+                  const levelLabel = ar
+                    ? { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' }
+                    : { beginner: 'BEGINNER', intermediate: 'INTERMEDIATE', advanced: 'ADVANCED' };
+                  return demo.slice(0, 3).map((p, i) => {
+                    const name = ar ? (p.title_ar || p.program_title_ar || p.program_title) : (p.title_en || p.program_title || p.title_ar);
+                    const days = p.days_per_week || p.days || 3;
+                    const level = p.level || 'beginner';
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 0', borderTop: i > 0 ? '1px solid var(--iron-light)' : 'none' }}>
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.92rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>{name}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{days}× {ar ? 'أسبوعياً' : 'WEEK'} · {levelLabel[level]}</div>
+                        </div>
+                        <ChevronRight size={14} color="var(--ash)" style={{ flexShrink: 0, transform: ar ? 'rotate(180deg)' : 'none' }} />
+                      </div>
+                    );
+                  });
+                })()}
+
+                <Link href="/programs">
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--iron-light)', display: 'flex', alignItems: 'center', gap: 6, color: 'var(--volt)', cursor: 'pointer' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{ar ? 'شوف كل البرامج' : 'VIEW ALL PROGRAMS'}</span>
+                    <ArrowRight size={13} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
                   </div>
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--ash)', marginTop: 4, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                  {ar ? 'ستريك نشط' : 'ACTIVE STREAK'}
-                </div>
-              </FloatCard>
-
-              <PhoneMockup ar={ar} programs={programs} />
+                </Link>
+              </div>
             </motion.div>
 
           </div>
