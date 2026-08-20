@@ -59,9 +59,9 @@ function Reveal({ children, delay = 0 }) {
 function GlassCard({ children, style = {}, accent }) {
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.04)',
-      border: `1px solid ${accent ? accent + '30' : 'rgba(255,255,255,0.08)'}`,
-      borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      background: 'var(--carbon)',
+      border: `1px solid ${accent ? accent + '40' : 'var(--iron-light)'}`,
+      borderRadius: 10,
       position: 'relative', overflow: 'hidden',
       ...style,
     }}>
@@ -147,13 +147,13 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
               {dayLabel}
             </span>
             {savedToday && (
-              <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', letterSpacing: '0.06em' }}>
-                ✓ اتسجل
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', letterSpacing: '0.06em' }}>
+                <CheckCircle2 size={10} /> اتسجل
               </span>
             )}
             {isOpen && elapsed > 0 && (
-              <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--ash-light)', letterSpacing: '0.06em' }}>
-                ⏱ {formatTime(elapsed)}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash-light)', letterSpacing: '0.06em' }}>
+                <Clock size={10} /> {formatTime(elapsed)}
               </span>
             )}
           </div>
@@ -357,7 +357,7 @@ export default function WorkoutPage() {
                 — جلسة اليوم
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,2.8rem)', letterSpacing: '0.03em', color: 'var(--chalk)', lineHeight: 1, marginBottom: 6 }}>
-               وقت الجيم 💪🔥<span style={{ color: 'var(--accent)' }}>💪</span>
+               وقت <span style={{ color: 'var(--accent)' }}>الجيم</span>
               </h1>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ash-light)' }}>
                 {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -451,13 +451,13 @@ export default function WorkoutPage() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                         {s.duration_min > 0 && (
-                          <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>
-                            ⏱ {s.duration_min} دقيقة
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>
+                            <Clock size={10} /> {s.duration_min} دقيقة
                           </span>
                         )}
-                        <span style={{ fontSize: '0.7rem', color: s.done ? '#4ade80' : 'var(--ash)' }}>
-                          {s.done ? '✓' : '~'}
-                        </span>
+                        {s.done
+                          ? <CheckCircle2 size={14} color="#4ade80" />
+                          : <Circle size={14} color="var(--ash)" />}
                       </div>
                     </div>
                   </GlassCard>
