@@ -4,6 +4,7 @@ import {
   User, Mail, Calendar, Target, Dumbbell, TrendingUp,
   Award, Clock, ChevronRight, Edit3, LogOut, Shield,
   Zap, BarChart2, CheckCircle, Lock, Eye, EyeOff, ArrowRight, Flame, Loader,
+  Trophy, Star, X,
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -50,34 +51,6 @@ function GlassCard({ children, style = {}, hover = true }) {
   );
 }
 
-// ── stat card ────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, accent = 'var(--accent)', delay }) {
-  return (
-    <Reveal delay={delay}>
-      <GlassCard style={{ padding: '20px 22px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div>
-            <p style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8 }}>
-              {label}
-            </p>
-            <p style={{ fontSize: '1.8rem', fontFamily: 'var(--font-display)', letterSpacing: '0.02em', color: 'var(--chalk)' }}>
-              {value}
-            </p>
-          </div>
-          <div style={{
-            width: 40, height: 40, borderRadius: 10,
-            background: `${accent}1A`,
-            border: `1px solid ${accent}33`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Icon size={18} color={accent} />
-          </div>
-        </div>
-      </GlassCard>
-    </Reveal>
-  );
-}
-
 // ── الإنجازات: تعريف موحّد + مقدار التقدم لكل واحد ────────────
 // (المفتاح "key" لازم يفضل زي ما هو — ده اللي بيتسجل في جدول user_achievements)
 const ACHIEVEMENT_DEFS = [
@@ -88,6 +61,17 @@ const ACHIEVEMENT_DEFS = [
   { key: 'full_session',  icon: '🎯', label: 'أكملت جلسة كاملة', target: 1,  getCurrent: (d) => d.filter(s => s.done).length },
   { key: 'sessions_50',   icon: '🌟', label: 'محترف (50 جلسة)',  target: 50, getCurrent: (d) => d.length },
 ];
+
+// ── أيقونات حقيقية للعرض فقط — ach.icon (الإيموجي) يفضل زي ما هو
+// لأنه بيتخزن في notifications.title، مبنلمسوش هنا ──
+const ACHIEVEMENT_ICON_MAP = {
+  first_workout: Flame,
+  streak_7:      Dumbbell,
+  sessions_10:   Zap,
+  sessions_30:   Trophy,
+  full_session:  Target,
+  sessions_50:   Star,
+};
 
 // ── كونفيتي خفيف بدون أي مكتبة خارجية ─────────────────────────
 function ConfettiBurst() {
@@ -124,6 +108,7 @@ function ConfettiBurst() {
 // ── مودال احتفال بإنجاز جديد ──────────────────────────────────
 function AchievementCelebration({ achievement, onClose }) {
   if (!achievement) return null;
+  const Icon = ACHIEVEMENT_ICON_MAP[achievement.key] || Award;
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -142,22 +127,21 @@ function AchievementCelebration({ achievement, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{
           position: 'relative', overflow: 'hidden',
-          background: 'linear-gradient(180deg, #161616, #0c0c0c)',
+          background: 'var(--carbon)',
           border: '1px solid rgba(255,85,0,0.35)',
-          borderRadius: 12, padding: '40px 32px 32px',
+          borderRadius: 10, padding: '40px 32px 32px',
           maxWidth: 340, width: '100%', textAlign: 'center',
-          boxShadow: '0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255,85,0,0.15)',
         }}
       >
         <ConfettiBurst />
         <motion.div
           initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ duration: 0.6, delay: 0.1 }}
-          style={{ fontSize: '3.4rem', marginBottom: 10 }}
+          style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,85,0,0.12)', border: '1px solid rgba(255,85,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}
         >
-          {achievement.icon}
+          <Icon size={28} color="var(--volt)" />
         </motion.div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--volt)', letterSpacing: '0.14em', marginBottom: 8 }}>
-          إنجاز جديد! 🎉
+          إنجاز جديد!
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', letterSpacing: '0.03em', marginBottom: 20 }}>
           {achievement.label}
@@ -167,7 +151,7 @@ function AchievementCelebration({ achievement, onClose }) {
           className="btn btn-primary"
           style={{ width: '100%', padding: '12px' }}
         >
-          تمام 🔥
+          تمام
         </button>
       </motion.div>
     </motion.div>
@@ -198,8 +182,7 @@ function CalendarHeatmap({ sessions }) {
               title={cell.date.toLocaleDateString('ar-EG')}
               style={{
                 width: 11, height: 11, borderRadius: 3,
-                background: cell.active ? 'var(--volt)' : 'rgba(255,255,255,0.06)',
-                boxShadow: cell.active ? '0 0 6px rgba(255,85,0,0.5)' : 'none',
+                background: cell.active ? 'var(--volt)' : 'var(--iron)',
               }}
             />
           ))}
@@ -234,8 +217,8 @@ function ChangePasswordModal({ onClose }) {
   };
 
   const inp = {
-    width: '100%', background: 'rgba(255,255,255,0.05)',
-    border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)',
+    width: '100%', background: 'var(--iron)',
+    border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)',
     padding: '11px 14px', color: 'var(--chalk)', fontFamily: 'var(--font-body)',
     fontSize: '0.875rem', outline: 'none',
   };
@@ -257,15 +240,14 @@ function ChangePasswordModal({ onClose }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 400,
-          background: 'rgba(13,13,26,0.95)',
-          border: '1px solid var(--glass-border)',
-          borderRadius: 'var(--radius-lg)',
+          background: 'var(--carbon)',
+          border: '1px solid var(--iron-light)',
+          borderRadius: 10,
           padding: '36px 28px',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.7)',
           position: 'relative',
         }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)', borderRadius: '10px 22px 0 0' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,77,46,0.12)', border: '1px solid rgba(255,77,46,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -303,8 +285,8 @@ function ChangePasswordModal({ onClose }) {
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
             <motion.button whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={onClose} style={{
-              flex: 1, padding: '11px', background: 'rgba(255,255,255,0.05)',
-              border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)',
+              flex: 1, padding: '11px', background: 'var(--iron)',
+              border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-sm)',
               color: 'var(--ash-light)', fontFamily: 'var(--font-body)', cursor: 'pointer', fontSize: '0.875rem',
             }}>إلغاء</motion.button>
             <motion.button onClick={handleSave} disabled={loading} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={{
@@ -403,17 +385,17 @@ function StatsModal({ sessions, onClose }) {
         transition={{ duration: 0.2 }}
         onClick={e => e.stopPropagation()}
         style={{
-          background: 'linear-gradient(180deg, #161616, #0c0c0c)',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
+          background: 'var(--carbon)',
+          border: '1px solid var(--iron-light)', borderRadius: 10,
           padding: 26, maxWidth: 420, width: '100%', maxHeight: '85vh', overflowY: 'auto',
           direction: 'rtl',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
-            📊 إحصائياتي
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
+            <BarChart2 size={17} color="var(--volt)" /> إحصائياتي
           </h2>
-          <button onClick={onClose} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
         </div>
 
         {sessions.length === 0 ? (
@@ -489,17 +471,17 @@ function AllAchievementsModal({ achievements, onClose }) {
         transition={{ duration: 0.2 }}
         onClick={e => e.stopPropagation()}
         style={{
-          background: 'linear-gradient(180deg, #161616, #0c0c0c)',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
+          background: 'var(--carbon)',
+          border: '1px solid var(--iron-light)', borderRadius: 10,
           padding: 26, maxWidth: 460, width: '100%', maxHeight: '85vh', overflowY: 'auto',
           direction: 'rtl',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
-            🏆 كل الإنجازات
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
+            <Trophy size={17} color="var(--volt)" /> كل الإنجازات
           </h2>
-          <button onClick={onClose} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
         </div>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.05em', marginBottom: 18 }}>
           فتحت {earnedCount} من {achievements.length}
@@ -511,24 +493,28 @@ function AllAchievementsModal({ achievements, onClose }) {
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {achievements.map(ach => (
+            {achievements.map(ach => {
+              const AchIcon = ACHIEVEMENT_ICON_MAP[ach.key] || Award;
+              return (
               <div key={ach.key} style={{
-                display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 12,
-                background: ach.earned ? 'rgba(74,222,128,0.06)' : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${ach.earned ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 10,
+                background: ach.earned ? 'rgba(74,222,128,0.06)' : 'var(--iron)',
+                border: `1px solid ${ach.earned ? 'rgba(74,222,128,0.25)' : 'var(--iron-light)'}`,
               }}>
-                <div style={{ fontSize: '1.6rem', filter: ach.earned ? 'none' : 'grayscale(1)', opacity: ach.earned ? 1 : 0.5 }}>{ach.icon}</div>
+                <div style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: ach.earned ? 'rgba(255,85,0,0.12)' : 'var(--carbon)', border: `1px solid ${ach.earned ? 'rgba(255,85,0,0.3)' : 'var(--iron-light)'}` }}>
+                  <AchIcon size={16} color={ach.earned ? 'var(--volt)' : 'var(--ash)'} />
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: ach.earned ? 'var(--chalk)' : 'var(--ash-light)' }}>
                     {ach.label}
                   </div>
                   {ach.earned ? (
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#4ade80', marginTop: 3 }}>
-                      ✓ فتحته {daysSince(ach.earnedAt) || ''}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#4ade80', marginTop: 3 }}>
+                      <CheckCircle size={10} /> فتحته {daysSince(ach.earnedAt) || ''}
                     </div>
                   ) : (
                     <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--iron-light)', overflow: 'hidden' }}>
                         <div style={{ width: `${Math.round((ach.current / ach.target) * 100)}%`, height: '100%', background: 'var(--volt)', borderRadius: 2 }} />
                       </div>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', whiteSpace: 'nowrap' }}>{ach.current}/{ach.target}</span>
@@ -536,7 +522,8 @@ function AllAchievementsModal({ achievements, onClose }) {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </motion.div>
@@ -755,13 +742,33 @@ export default function ProfilePage() {
             </GlassCard>
           </Reveal>
 
-          {/* ── STATS ROW ────────────────────────── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 16 }}>
-            <StatCard icon={Dumbbell}   label="كل الجلسات"    value={realStats.sessions}  accent="var(--accent)"  delay={0.05} />
-            <StatCard icon={TrendingUp} label="البرامج"        value={realStats.programs}  accent="#4ade80"        delay={0.1}  />
-            <StatCard icon={Flame}      label="الاستمرارية"    value={realStats.streak ? `${realStats.streak} يوم` : '—'} accent="#facc15" delay={0.15} />
-            <StatCard icon={Target}     label="هدفك"           value={onboarding ? { burn: '🔥 حرق دهون', muscle: '💪 بناء عضل', fitness: '⚡ لياقة', health: '❤️ صحة' }[onboarding.goal] || '—' : '—'} accent="var(--accent)" delay={0.2} />
-          </div>
+          {/* ── STATS ROW — editorial numbers, no per-metric cards ── */}
+          <Reveal delay={0.05}>
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+              background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)',
+              marginBottom: 24, overflow: 'hidden',
+            }}>
+              {[
+                { label: 'كل الجلسات',  value: realStats.sessions },
+                { label: 'البرامج',      value: realStats.programs },
+                { label: 'الاستمرارية',  value: realStats.streak ? `${realStats.streak} يوم` : '—' },
+                { label: 'هدفك',         value: onboarding ? ({ burn: 'حرق دهون', muscle: 'بناء عضل', fitness: 'لياقة', health: 'صحة' }[onboarding.goal] || '—') : '—' },
+              ].map((s, i) => (
+                <div key={s.label} style={{
+                  padding: '20px 22px',
+                  borderInlineStart: i > 0 ? '1px solid var(--iron-light)' : 'none',
+                }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', letterSpacing: '0.01em', color: 'var(--chalk)', lineHeight: 1 }}>
+                    {s.value}
+                  </p>
+                  <p style={{ fontSize: '0.66rem', fontFamily: 'var(--font-mono)', color: 'var(--ash)', letterSpacing: '0.06em', marginTop: 8, textTransform: 'uppercase' }}>
+                    {s.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
 
           {/* ── CONSISTENCY HEATMAP ──────────────── */}
           {allSessions.length > 0 && (
@@ -772,8 +779,8 @@ export default function ProfilePage() {
                     خريطة الاستمرارية — آخر 12 أسبوع
                   </p>
                   {realStats.streak > 0 && (
-                    <p style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--volt)', letterSpacing: '0.02em' }}>
-                      🔥 {realStats.streak} يوم متتالي
+                    <p style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--volt)', letterSpacing: '0.02em' }}>
+                      <Flame size={11} /> {realStats.streak} يوم متتالي
                     </p>
                   )}
                 </div>
@@ -803,7 +810,7 @@ export default function ProfilePage() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {enrolledPrograms.length === 0 ? (
-                    <div style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+                    <div style={{ padding: '20px', textAlign: 'center', background: 'var(--iron)', border: '1px solid var(--iron-light)', borderRadius: 10 }}>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)', marginBottom: 8 }}>
                         {onboarding ? `البرنامج المقترح ليك: ${onboarding.recommended_program}` : 'لسه ما اخترتش برنامج'}
                       </p>
@@ -814,8 +821,8 @@ export default function ProfilePage() {
                   ) : enrolledPrograms.map((prog) => (
                     <div key={prog.id} style={{
                       padding: '16px',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.07)',
+                      background: 'var(--iron)',
+                      border: '1px solid var(--iron-light)',
                       borderRadius: 'var(--radius-sm)',
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
@@ -836,7 +843,7 @@ export default function ProfilePage() {
                         }}>{prog.level || 'active'}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+                        <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'var(--iron-light)', overflow: 'hidden' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${prog.progress || 0}%` }}
@@ -884,9 +891,9 @@ export default function ProfilePage() {
                       <div key={i} style={{
                         display: 'flex', alignItems: 'center', gap: 12,
                         padding: '10px 12px',
-                        background: 'rgba(255,255,255,0.025)',
+                        background: 'var(--iron)',
                         borderRadius: 8,
-                        borderLeft: `3px solid ${a.done ? 'var(--accent)' : 'rgba(255,255,255,0.08)'}`,
+                        borderLeft: `3px solid ${a.done ? 'var(--accent)' : 'var(--iron-light)'}`,
                       }}>
                         <div style={{ color: a.done ? '#4ade80' : 'var(--ash)', flexShrink: 0 }}>
                           {a.done ? <CheckCircle size={15} /> : <Clock size={15} />}
@@ -917,30 +924,37 @@ export default function ProfilePage() {
                     الإنجازات
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                    {achievements.map((ach, i) => (
+                    {achievements.map((ach, i) => {
+                      const AchIcon = ACHIEVEMENT_ICON_MAP[ach.key] || Award;
+                      return (
                       <div key={ach.key || i} style={{
                         padding: '14px 12px', borderRadius: 10, textAlign: 'center',
-                        background: ach.earned ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${ach.earned ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)'}`,
+                        background: ach.earned ? 'var(--iron)' : 'var(--carbon)',
+                        border: `1px solid ${ach.earned ? 'var(--iron-light)' : 'var(--iron)'}`,
                         opacity: ach.earned ? 1 : 0.55,
                         transition: 'opacity 200ms',
                       }}>
-                        <div style={{ fontSize: '1.4rem', marginBottom: 6, filter: ach.earned ? 'none' : 'grayscale(1)' }}>{ach.icon}</div>
+                        <div style={{ width: 30, height: 30, borderRadius: 8, margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: ach.earned ? 'rgba(255,85,0,0.12)' : 'var(--iron)', border: `1px solid ${ach.earned ? 'rgba(255,85,0,0.3)' : 'var(--iron-light)'}` }}>
+                          <AchIcon size={14} color={ach.earned ? 'var(--volt)' : 'var(--ash)'} />
+                        </div>
                         <p style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: ach.earned ? 'var(--chalk)' : 'var(--ash)', letterSpacing: '0.05em' }}>
                           {ach.label}
                         </p>
                         {ach.earned ? (
-                          <div style={{ fontSize: '0.55rem', color: '#4ade80', marginTop: 4, fontFamily: 'var(--font-mono)' }}>✓ محقق</div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, fontSize: '0.55rem', color: '#4ade80', marginTop: 4, fontFamily: 'var(--font-mono)' }}>
+                            <CheckCircle size={9} /> محقق
+                          </div>
                         ) : (
                           <div style={{ marginTop: 6 }}>
-                            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                            <div style={{ height: 3, borderRadius: 2, background: 'var(--iron-light)', overflow: 'hidden' }}>
                               <div style={{ width: `${Math.round((ach.current / ach.target) * 100)}%`, height: '100%', background: 'var(--volt)', borderRadius: 2 }} />
                             </div>
                             <div style={{ fontSize: '0.55rem', color: 'var(--ash)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>{ach.current}/{ach.target}</div>
                           </div>
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </GlassCard>
               </Reveal>
@@ -964,14 +978,14 @@ export default function ProfilePage() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12,
                           padding: '12px 14px',
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.07)',
+                          background: 'var(--iron)',
+                          border: '1px solid var(--iron-light)',
                           borderRadius: 'var(--radius-sm)',
                           color: 'var(--chalk)', cursor: 'pointer',
                           textAlign: 'right', width: '100%',
                           transition: 'background 200ms, border-color 200ms',
                         }}
-                        whileHover={{ background: 'rgba(255,255,255,0.06)', borderColor: `${accent}33` }}
+                        whileHover={{ background: 'var(--iron-light)', borderColor: `${accent}33` }}
                       >
                         <div style={{
                           width: 30, height: 30, borderRadius: 8,
