@@ -38,9 +38,35 @@ function getProgramDays(programTitle) {
 
   const result = {};
   prog.days_detail.forEach((d) => {
-    result[d.day] = d.exercises.map((ex) => `${ex.name} — ${ex.detail}`);
+    // كل تمرين بيفضل object {name, detail} — مش string مدموج — عشان نقدر نعرض
+    // الاسم والـsets/reps والعضلة كل واحد في مكانه بدل سطر واحد طويل
+    result[d.day] = d.exercises;
   });
   return result;
+}
+
+// ── عرض فقط: شيل أي emoji من نص اليوم (الداتا نفسها في data/programs.js
+// فيها emoji متضمّن جوه الـstring — بنشيله وقت العرض بس، مش بنغيّر الداتا) ──
+function stripEmoji(text) {
+  return (text || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+}
+
+// ── عرض فقط: "يوم الدفع — Push 💥" → { primary: 'PUSH', subtitle: 'يوم الدفع' }
+// "اليوم الأول — السبت" (مفيش نص إنجليزي) → { primary: 'اليوم الأول', subtitle: 'السبت' } ──
+function parseDayLabel(raw) {
+  const clean = stripEmoji(raw);
+  const parts = clean.split('—').map(s => s.trim()).filter(Boolean);
+  if (parts.length >= 2 && /[a-zA-Z]/.test(parts[1])) {
+    return { primary: parts[1].toUpperCase(), subtitle: parts[0] };
+  }
+  return { primary: parts[0] || clean, subtitle: parts[1] || '' };
+}
+
+// ── عرض فقط: "4 سيتات × 8 رباعات — الصدر الأساسي" → { meta, muscle } ──
+function parseExerciseDetail(detail) {
+  const parts = (detail || '').split('—').map(s => s.trim()).filter(Boolean);
+  if (parts.length >= 2) return { meta: parts[0], muscle: parts[1] };
+  return { meta: parts[0] || detail || '', muscle: '' };
 }
 
 // ── helpers ───────────────────────────────────────────────
@@ -71,7 +97,8 @@ function GlassCard({ children, style = {}, accent }) {
 }
 
 // ── مكون تمرين واحد ──────────────────────────────────────
-function ExerciseRow({ name, checked, onToggle, delay }) {
+function ExerciseRow({ index, exercise, checked, onToggle, delay, isLast }) {
+  const { meta, muscle } = parseExerciseDetail(exercise.detail);
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
@@ -80,33 +107,48 @@ function ExerciseRow({ name, checked, onToggle, delay }) {
       onClick={onToggle}
       style={{
         display: 'flex', alignItems: 'center', gap: 12,
-        padding: '12px 16px', borderRadius: 10, cursor: 'pointer',
-        background: checked ? 'rgba(74,222,128,0.07)' : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${checked ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.06)'}`,
-        marginBottom: 8, transition: 'all 0.2s',
+        padding: '13px 4px', cursor: 'pointer',
+        borderBottom: isLast ? 'none' : '1px solid var(--iron-light)',
+        background: checked ? 'rgba(74,222,128,0.04)' : 'transparent',
+        transition: 'background 0.2s',
         direction: 'rtl',
       }}
     >
-      <motion.div animate={{ scale: checked ? [1, 1.2, 1] : 1 }} transition={{ duration: 0.2 }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash)', width: 20, flexShrink: 0, textAlign: 'center' }}>
+        {String(index + 1).padStart(2, '0')}
+      </span>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontFamily: 'var(--font-display)', fontSize: '0.98rem', letterSpacing: '0.02em',
+          color: checked ? 'var(--ash-light)' : 'var(--chalk)',
+          textDecoration: checked ? 'line-through' : 'none',
+          transition: 'color 0.2s',
+        }}>
+          {exercise.name}
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash)', marginTop: 3 }}>
+          {meta}{muscle && <> <span style={{ opacity: 0.5 }}>·</span> {muscle}</>}
+        </div>
+      </div>
+
+      {/* مساحة ضغط كبيرة حوالين الأيقونة، من غير Button ضخمة */}
+      <motion.div
+        animate={{ scale: checked ? [1, 1.2, 1] : 1 }}
+        transition={{ duration: 0.2 }}
+        style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+      >
         {checked
-          ? <CheckCircle2 size={18} color="#4ade80" />
-          : <Circle size={18} color="rgba(255,255,255,0.2)" />
+          ? <CheckCircle2 size={22} color="var(--volt)" />
+          : <Circle size={22} color="var(--ash)" strokeWidth={1.6} />
         }
       </motion.div>
-      <span style={{
-        fontFamily: 'var(--font-body)', fontSize: '0.88rem',
-        color: checked ? 'rgba(255,255,255,0.5)' : 'var(--chalk)',
-        textDecoration: checked ? 'line-through' : 'none',
-        flex: 1, transition: 'all 0.2s',
-      }}>
-        {name}
-      </span>
     </motion.div>
   );
 }
 
 // ── مكون يوم تمرين ───────────────────────────────────────
-function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, savedToday }) {
+function DayCard({ dayIndex, dayLabel, exercises, isOpen, onToggle, onSave, isSaving, savedToday }) {
   const [checked, setChecked] = useState({});
   const [startTime, setStartTime] = useState(null);
   const [elapsed, setElapsed]   = useState(0);
@@ -132,37 +174,50 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
 
   const toggleEx = (name) => setChecked(prev => ({ ...prev, [name]: !prev[name] }));
 
+  const { primary, subtitle } = parseDayLabel(dayLabel);
+  // active = اليوم مفتوح دلوقتي (هو التمرين النشط فعليًا في الواجهة) — Orange فقط للحالة دي
+  const active = isOpen;
+
   return (
-    <GlassCard style={{ marginBottom: 12 }} accent={savedToday ? '#4ade80' : null}>
-      {savedToday && (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#4ade80,transparent)' }} />
-      )}
+    <div style={{
+      marginBottom: 0,
+      borderBottom: '1px solid var(--iron-light)',
+      background: active ? 'rgba(255,85,0,0.03)' : 'transparent',
+      transition: 'background 0.2s',
+    }}>
       <div
         onClick={onToggle}
-        style={{ padding: '16px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', direction: 'rtl' }}
+        style={{ padding: '16px 4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, direction: 'rtl' }}
       >
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em', color: 'var(--chalk)' }}>
-              {dayLabel}
+        <span style={{
+          fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.5rem',
+          color: active ? 'var(--volt)' : 'var(--iron-light)', width: 34, flexShrink: 0, lineHeight: 1,
+        }}>
+          {String(dayIndex + 1).padStart(2, '0')}
+        </span>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', letterSpacing: '0.04em', color: active ? 'var(--volt)' : 'var(--chalk)', textTransform: 'uppercase' }}>
+              {primary}
             </span>
             {savedToday && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', letterSpacing: '0.06em' }}>
-                <CheckCircle2 size={10} /> اتسجل
-              </span>
-            )}
-            {isOpen && elapsed > 0 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash-light)', letterSpacing: '0.06em' }}>
-                <Clock size={10} /> {formatTime(elapsed)}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.56rem', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: 4, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', letterSpacing: '0.06em' }}>
+                <CheckCircle2 size={9} /> اتسجل
               </span>
             )}
           </div>
-          <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)' }}>
+          {subtitle && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.76rem', color: 'var(--ash-light)', marginTop: 2 }}>
+              {subtitle}
+            </div>
+          )}
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--iron-light)' }}>
               <motion.div
                 animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.4 }}
-                style={{ height: '100%', borderRadius: 2, background: pct === 100 ? '#4ade80' : 'var(--accent)' }}
+                style={{ height: '100%', borderRadius: 1, background: pct === 100 ? '#4ade80' : 'var(--volt)' }}
               />
             </div>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>
@@ -170,8 +225,18 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
             </span>
           </div>
         </div>
-        <div style={{ marginRight: 16 }}>
-          {isOpen ? <ChevronUp size={16} color="var(--ash)" /> : <ChevronDown size={16} color="var(--ash)" />}
+
+        {isOpen && elapsed > 0 && (
+          <div style={{ textAlign: 'center', flexShrink: 0 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--ash)', letterSpacing: '0.1em', marginBottom: 2 }}>TIME</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)' }}>
+              <Clock size={13} color="var(--ash-light)" /> {formatTime(elapsed)}
+            </div>
+          </div>
+        )}
+
+        <div>
+          {isOpen ? <ChevronUp size={18} color="var(--ash)" /> : <ChevronDown size={18} color="var(--ash)" />}
         </div>
       </div>
 
@@ -184,14 +249,16 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
             transition={{ duration: 0.3 }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ padding: '0 20px 20px', direction: 'rtl' }}>
+            <div style={{ padding: '0 4px 20px', direction: 'rtl' }}>
               {exercises.map((ex, i) => (
                 <ExerciseRow
-                  key={ex}
-                  name={ex}
-                  checked={!!checked[ex]}
-                  onToggle={() => toggleEx(ex)}
+                  key={ex.name}
+                  index={i}
+                  exercise={ex}
+                  checked={!!checked[ex.name]}
+                  onToggle={() => toggleEx(ex.name)}
                   delay={i * 0.04}
+                  isLast={i === exercises.length - 1}
                 />
               ))}
 
@@ -201,12 +268,12 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
                 onClick={() => onSave(dayLabel, Object.values(checked).filter(Boolean).length === totalCount, elapsedMin)}
                 disabled={isSaving || doneCount === 0}
                 style={{
-                  width: '100%', marginTop: 12, padding: '13px',
+                  width: '100%', marginTop: 16, padding: '15px',
                   borderRadius: 10, border: 'none', cursor: doneCount === 0 ? 'not-allowed' : 'pointer',
-                  background: doneCount === 0 ? 'rgba(255,255,255,0.05)' : pct === 100 ? 'rgba(74,222,128,0.15)' : 'rgba(255,77,46,0.15)',
-                  color: doneCount === 0 ? 'var(--ash)' : pct === 100 ? '#4ade80' : 'var(--accent)',
-                  border: `1px solid ${doneCount === 0 ? 'rgba(255,255,255,0.06)' : pct === 100 ? 'rgba(74,222,128,0.3)' : 'rgba(255,77,46,0.3)'}`,
-                  fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.05em',
+                  background: doneCount === 0 ? 'var(--iron)' : pct === 100 ? 'rgba(74,222,128,0.15)' : 'rgba(255,85,0,0.15)',
+                  color: doneCount === 0 ? 'var(--ash)' : pct === 100 ? '#4ade80' : 'var(--volt)',
+                  border: `1px solid ${doneCount === 0 ? 'var(--iron-light)' : pct === 100 ? 'rgba(74,222,128,0.3)' : 'rgba(255,85,0,0.35)'}`,
+                  fontFamily: 'var(--font-display)', fontSize: '0.92rem', letterSpacing: '0.05em',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   transition: 'all 0.2s',
                 }}
@@ -224,7 +291,7 @@ function DayCard({ dayLabel, exercises, isOpen, onToggle, onSave, isSaving, save
           </motion.div>
         )}
       </AnimatePresence>
-    </GlassCard>
+    </div>
   );
 }
 
@@ -379,18 +446,21 @@ export default function WorkoutPage() {
               </div>
 
             {programDays ? (
-              Object.entries(programDays).map(([dayLabel, exercises], i) => (
-                <DayCard
-                  key={dayLabel}
-                  dayLabel={dayLabel}
-                  exercises={exercises}
-                  isOpen={openDay === dayLabel}
-                  onToggle={() => setOpenDay(prev => prev === dayLabel ? null : dayLabel)}
-                  onSave={saveSession}
-                  isSaving={savingDay === dayLabel}
-                  savedToday={savedTodayLabels.has(dayLabel)}
-                />
-              ))
+              <div style={{ border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', background: 'var(--carbon)', padding: '0 20px', overflow: 'hidden' }}>
+                {Object.entries(programDays).map(([dayLabel, exercises], i) => (
+                  <DayCard
+                    key={dayLabel}
+                    dayIndex={i}
+                    dayLabel={dayLabel}
+                    exercises={exercises}
+                    isOpen={openDay === dayLabel}
+                    onToggle={() => setOpenDay(prev => prev === dayLabel ? null : dayLabel)}
+                    onSave={saveSession}
+                    isSaving={savingDay === dayLabel}
+                    savedToday={savedTodayLabels.has(dayLabel)}
+                  />
+                ))}
+              </div>
             ) : (
               /* لو البرنامج مش في القائمة أو مش مسجل — سجل جلسة سريعة */
               <GlassCard style={{ padding: 20 }}>
@@ -438,30 +508,32 @@ export default function WorkoutPage() {
                 <div className="section-header" style={{ direction: 'rtl' }}>
                   <span className="section-header__label">آخر الجلسات</span>
                 </div>
-                {sessions.slice(0, 5).map((s, i) => (
-                  <GlassCard key={s.id} style={{ padding: '14px 18px', marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', direction: 'rtl' }}>
-                      <div className="no-shrink-text" style={{ minWidth: 0 }}>
-                        <div className="truncate-1" style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--chalk)', marginBottom: 3 }}>
-                          {s.day_label || s.program_title}
+                <div style={{ border: '1px solid var(--iron-light)', borderRadius: 'var(--radius-card)', background: 'var(--carbon)', padding: '0 18px' }}>
+                  {sessions.slice(0, 5).map((s, i, arr) => {
+                    const { primary } = parseDayLabel(s.day_label || s.program_title || '');
+                    return (
+                      <div key={s.id} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '13px 0',
+                        borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--iron-light)',
+                        direction: 'rtl',
+                      }}>
+                        <div className="no-shrink-text" style={{ minWidth: 0 }}>
+                          <div className="truncate-1" style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.02em', color: 'var(--chalk)', textTransform: 'uppercase', marginBottom: 3 }}>
+                            {primary}
+                          </div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.05em' }}>
+                            {new Date(s.created_at).toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}
+                            {s.duration_min > 0 && <> · {s.duration_min} دقيقة</>}
+                          </div>
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', letterSpacing: '0.05em' }}>
-                          {new Date(s.created_at).toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                        {s.duration_min > 0 && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.6rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: 4, background: 'var(--iron)', border: '1px solid var(--iron-light)', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>
-                            <Clock size={10} /> {s.duration_min} دقيقة
-                          </span>
-                        )}
                         {s.done
-                          ? <CheckCircle2 size={14} color="#4ade80" />
-                          : <Circle size={14} color="var(--ash)" />}
+                          ? <CheckCircle2 size={15} color="#4ade80" style={{ flexShrink: 0 }} />
+                          : <Circle size={15} color="var(--ash)" style={{ flexShrink: 0 }} />}
                       </div>
-                    </div>
-                  </GlassCard>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             </Reveal>
           )}
