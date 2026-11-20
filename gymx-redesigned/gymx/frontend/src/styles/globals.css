@@ -1,32 +1,35 @@
 /* =============================================
-   FONTS
+   FONTS & ROOT COLOR SCHEME
    ============================================= */
 /* Plus Jakarta Sans — display / headings
    Manrope           — body
    JetBrains Mono    — numbers / mono / labels */
 
-/* Force dark — prevents Chrome/Safari light mode from overriding our variables */
 :root {
   color-scheme: dark;
 }
+
 html {
   color-scheme: dark;
-  background-color: #090909;
+  background-color: #080808;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* =============================================
-   DARK THEME
+   DARK THEME (#080808 + #FF5A1F Liquid Glass)
    ============================================= */
-[data-theme="dark"] {
+[data-theme="dark"],
+:root {
   --bg:         #080808;
-  --carbon:     #111111;
-  --iron:       #171717;
-  --iron-light: #232323;
-  --iron-mid:   #1c1c1c;
+  --carbon:     #101012;
+  --iron:       #161619;
+  --iron-mid:   #1b1b1f;
+  --iron-light: #242429;
   --chalk:      #F5F5F5;
-  --chalk-dim:  rgba(245, 245, 245, 0.55);
-  --ash:        #8A8A8A;
-  --ash-light:  #A6A6A6;
+  --chalk-dim:  rgba(245, 245, 245, 0.58);
+  --ash:        #8A8A8E;
+  --ash-light:  #AEAEB4;
   --obsidian:   #000000;
 }
 
@@ -37,65 +40,63 @@ html {
   --bg:         #F5F0E8;
   --carbon:     #EDEAE2;
   --iron:       #E0DDD5;
-  --iron-light: #D4D1C9;
   --iron-mid:   #DEDAD2;
+  --iron-light: #D4D1C9;
   --chalk:      #0A0A0A;
-  --chalk-dim:  rgba(10, 10, 10, 0.55);
-  --ash:        #888078;
-  --ash-light:  #6A6560;
+  --chalk-dim:  rgba(10, 10, 10, 0.58);
+  --ash:        #7C756D;
+  --ash-light:  #5F5A54;
   --obsidian:   #FFFFFF;
 }
 
 /* =============================================
-   BRAND — ONE COLOR. COMMIT.
+   BRAND TOKENS — #FF5A1F ACCENT + LIQUID GLASS
    ============================================= */
 :root {
-  /* ORANGE — the only accent color. always. */
-  --volt:        #FF5500;
-  --volt-bright: #FF7A30;
-  --volt-dim:    rgba(255, 85, 0, 0.10);
-  --volt-glow:   rgba(255, 85, 0, 0.22);
+  /* Primary accent (#FF5A1F) + backward-compatible aliases */
+  --volt:          #FF5A1F;
+  --volt-bright:   #FF7747;
+  --volt-dim:      rgba(255, 90, 31, 0.11);
+  --volt-glow:     rgba(255, 90, 31, 0.24);
 
-  /* aliases kept for component compatibility */
-  --accent:        #FF5500;
-  --accent-bright: #FF7A30;
-  --accent-dim:    rgba(255, 85, 0, 0.10);
-  --accent-glow:   rgba(255, 85, 0, 0.22);
+  --accent:        var(--volt);
+  --accent-bright: var(--volt-bright);
+  --accent-dim:    var(--volt-dim);
+  --accent-glow:   var(--volt-glow);
 
-  /* fire = same orange */
-  --fire:        #FF5500;
-  --fire-dim:    rgba(255, 85, 0, 0.10);
-  --fire-glow:   rgba(255, 85, 0, 0.22);
-  --fire-bright: #FF7A30;
+  --fire:          var(--volt);
+  --fire-bright:   var(--volt-bright);
+  --fire-dim:      var(--volt-dim);
+  --fire-glow:     var(--volt-glow);
 
-  /* ── typography — modern, geometric ── */
-  --font-display: 'Plus Jakarta Sans', 'Manrope', sans-serif;
-  --font-body:    'Manrope', 'Helvetica Neue', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
-  --font-numeral: 'Plus Jakarta Sans', monospace;
+  /* Typography */
+  --font-display:  'Plus Jakarta Sans', 'Manrope', sans-serif;
+  --font-body:     'Manrope', 'Helvetica Neue', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+  --font-numeral:  'Plus Jakarta Sans', monospace;
 
-  /* ── radii — sharp, athletic. avoid large rounded corners ── */
-  --radius-sm:   6px;
-  --radius-md:   8px;
-  --radius-lg:   10px;
-  --radius-xl:   12px;
-  --radius-card: 10px;
+  /* Radii */
+  --radius-sm:     6px;
+  --radius-md:     8px;
+  --radius-lg:     10px;
+  --radius-xl:     14px;
+  --radius-card:   12px;
 
-  /* ── transitions ── */
+  /* Transitions */
   --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 360ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ── surfaces — flat, no blur/glass. rely on borders + contrast ── */
-  --glass-bg:           var(--carbon);
-  --glass-bg-hover:     var(--iron);
-  --glass-border:       rgba(255, 255, 255, 0.08);
-  --glass-border-hover: rgba(255, 85, 0, 0.4);
-  --glass-blur:         0px;
-  --glass-shadow:       none;
-  --glass-shadow-hover: none;
+  /* Liquid Glass surfaces */
+  --glass-bg:           rgba(18, 18, 22, 0.72);
+  --glass-bg-hover:     rgba(26, 26, 32, 0.86);
+  --glass-border:       rgba(255, 255, 255, 0.09);
+  --glass-border-hover: rgba(255, 90, 31, 0.45);
+  --glass-blur:         14px;
+  --glass-shadow:       inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --glass-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 16px 38px rgba(0, 0, 0, 0.58);
 
-  /* ── SPACING SCALE — 8px base. use these everywhere instead of random px values ── */
+  /* 8px Spacing Scale */
   --space-1:  4px;
   --space-2:  8px;
   --space-3:  12px;
@@ -108,18 +109,22 @@ html {
   --space-10: 72px;
   --space-11: 96px;
 
-  /* ── SECTION RHYTHM — vertical gap between major page sections ── */
-  --section-gap-mobile:  var(--space-8);   /* 40px  */
-  --section-gap-desktop: var(--space-9);   /* 56px  */
-  --page-top-mobile:     88px;             /* 56px header + 32px breathing room */
-  --page-top-desktop:    104px;            /* 56px header + 48px breathing room */
+  /* Section Rhythm */
+  --section-gap-mobile:  var(--space-8);
+  --section-gap-desktop: var(--space-9);
+  --page-top-mobile:     88px;
+  --page-top-desktop:    104px;
 }
 
 /* =============================================
-   RESET
+   RESET & BASE
    ============================================= */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--bg);
   color: var(--chalk);
@@ -129,22 +134,37 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-img, video { max-width: 100%; display: block; }
-a { color: inherit; text-decoration: none; }
-button { cursor: pointer; font-family: inherit; }
-input, textarea, select { font-family: inherit; }
+
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
 
 /* =============================================
-   TYPOGRAPHY — DISPLAY
+   TYPOGRAPHY — DISPLAY & STATS
    ============================================= */
 .display-hero {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(3.5rem, 9vw, 7.5rem);
   line-height: 1.02;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   text-transform: uppercase;
 }
+
 .display-xl {
   font-family: var(--font-display);
   font-weight: 800;
@@ -153,6 +173,7 @@ input, textarea, select { font-family: inherit; }
   letter-spacing: -0.01em;
   text-transform: uppercase;
 }
+
 .display-lg {
   font-family: var(--font-display);
   font-weight: 700;
@@ -161,6 +182,7 @@ input, textarea, select { font-family: inherit; }
   letter-spacing: -0.005em;
   text-transform: uppercase;
 }
+
 .display-md {
   font-family: var(--font-display);
   font-weight: 700;
@@ -168,6 +190,7 @@ input, textarea, select { font-family: inherit; }
   line-height: 1.1;
   text-transform: uppercase;
 }
+
 .label-tag {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -176,8 +199,10 @@ input, textarea, select { font-family: inherit; }
   text-transform: uppercase;
   color: var(--volt);
 }
+
 .mono-stat {
-  font-family: var(--font-display);
+  font-family: var(--font-numeral);
+  font-weight: 800;
   font-size: clamp(2rem, 4vw, 3.5rem);
   line-height: 1;
   color: var(--chalk);
@@ -192,13 +217,14 @@ input, textarea, select { font-family: inherit; }
   background: var(--volt);
   border-radius: 2px;
 }
+
 .rule-full {
   height: 1px;
-  background: linear-gradient(90deg, var(--volt) 0%, rgba(255,85,0,0.1) 60%, transparent 100%);
+  background: linear-gradient(90deg, var(--volt) 0%, rgba(255, 90, 31, 0.12) 60%, transparent 100%);
 }
 
 /* =============================================
-   BUTTONS — brutalist, decisive
+   BUTTONS
    ============================================= */
 .btn {
   display: inline-flex;
@@ -209,50 +235,58 @@ input, textarea, select { font-family: inherit; }
   border-radius: var(--radius-sm);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  border: none;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  border: 1px solid transparent;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   cursor: pointer;
   white-space: nowrap;
 }
-.btn:active { transform: scale(0.97); }
 
-.btn-primary {
-  background: var(--volt);
-  color: #ffffff;
+.btn:active {
+  transform: scale(0.98);
 }
-.btn-primary:hover {
+
+.btn-primary,
+.btn-fire {
+  background: var(--volt);
+  color: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(255, 90, 31, 0.18);
+}
+
+.btn-primary:hover,
+.btn-fire:hover {
   background: var(--volt-bright);
+  box-shadow: 0 10px 28px rgba(255, 90, 31, 0.28);
 }
 
 .btn-outline {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
   color: var(--chalk);
-  border: 1px solid var(--chalk);
+  border-color: rgba(255, 255, 255, 0.22);
 }
+
 .btn-outline:hover {
   background: var(--chalk);
   color: var(--bg);
+  border-color: var(--chalk);
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--ash);
-  border: none;
+  border-color: transparent;
   padding: 8px 16px;
   font-family: var(--font-body);
   text-transform: none;
   letter-spacing: 0;
   font-size: 0.88rem;
 }
-.btn-ghost:hover { color: var(--chalk); }
 
-.btn-fire {
-  background: var(--volt);
-  color: #fff;
-  font-weight: 700;
+.btn-ghost:hover {
+  color: var(--chalk);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 /* =============================================
@@ -268,87 +302,131 @@ input, textarea, select { font-family: inherit; }
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
+
 .input {
   width: 100%;
   padding: 12px 16px;
-  background: var(--iron);
-  border: 1px solid var(--iron-light);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--chalk);
   font-size: 0.9rem;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
   outline: none;
 }
+
+.input:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
 .input:focus {
   border-color: var(--volt);
-  box-shadow: 0 0 0 3px var(--volt-dim), inset 0 0 0 1px var(--volt);
+  background: var(--glass-bg-hover);
+  box-shadow: 0 0 0 3px var(--volt-dim);
 }
-.input::placeholder { color: var(--ash); }
+
+.input::placeholder {
+  color: var(--ash);
+}
 
 /* =============================================
-   GLASS CARD — brutalist version
+   LIQUID GLASS SURFACES & CARDS
    ============================================= */
 .glass-card {
-  background: var(--carbon);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
-  transition: border-color var(--transition-base);
-}
-.glass-card:hover {
-  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow);
+  transition: border-color var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
 }
 
-/* =============================================
-   CARD HOVER — subtle, no lift/glow. border does the work.
-   ============================================= */
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-hover);
+}
+
 .card-hover {
   transition: border-color var(--transition-base), background var(--transition-base);
 }
+
 .card-hover:hover {
-  border-color: rgba(255, 85, 0, 0.4) !important;
+  border-color: var(--glass-border-hover) !important;
+}
+
+/* Fallback when backdrop-filter is unsupported */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-card,
+  .input {
+    background: var(--carbon);
+  }
+  .glass-card:hover {
+    background: var(--iron);
+  }
 }
 
 /* =============================================
-   BACKGROUND TEXTURE — grid, blur glow, radial
+   BACKGROUND TEXTURE & HERO EFFECTS
    ============================================= */
 .bg-grid {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 44px 44px;
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
 }
+
 .bg-glow-blur {
-  position: absolute; pointer-events: none; z-index: 0; border-radius: 50%;
-  filter: blur(80px);
-  background: radial-gradient(circle, rgba(255, 85, 0, 0.1) 0%, transparent 70%);
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(84px);
+  background: radial-gradient(circle, rgba(255, 90, 31, 0.12) 0%, transparent 70%);
 }
 
-/* =============================================
-   HERO TEXTURES & EFFECTS
-   ============================================= */
 .hero-scanlines {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
   background-image: repeating-linear-gradient(
     0deg,
-    transparent, transparent 3px,
-    rgba(255, 255, 255, 0.012) 3px, rgba(255, 255, 255, 0.012) 4px
+    transparent,
+    transparent 3px,
+    rgba(255, 255, 255, 0.012) 3px,
+    rgba(255, 255, 255, 0.012) 4px
   );
 }
+
 .hero-noise {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0.03;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
 }
+
 .hero-glow-orange {
-  position: absolute; pointer-events: none; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,85,0,0.20) 0%, rgba(255,85,0,0.06) 45%, transparent 70%);
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 90, 31, 0.20) 0%, rgba(255, 90, 31, 0.06) 45%, transparent 70%);
 }
 
 /* =============================================
-   SERVICE ROW (not card grid — editorial rows)
+   SERVICE ROW
    ============================================= */
 .service-row {
   display: grid;
@@ -357,11 +435,17 @@ input, textarea, select { font-family: inherit; }
   align-items: start;
   padding: 28px 0;
   border-bottom: 1px solid var(--iron-light);
-  direction: inherit;
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-base);
 }
-.service-row:hover .service-num { color: var(--volt); }
-.service-row:hover { border-bottom-color: rgba(255, 85, 0, 0.3); }
+
+.service-row:hover {
+  border-bottom-color: rgba(255, 90, 31, 0.35);
+}
+
+.service-row:hover .service-num {
+  color: var(--volt);
+}
+
 .service-num {
   font-family: var(--font-display);
   font-weight: 800;
@@ -376,32 +460,34 @@ input, textarea, select { font-family: inherit; }
    PHONE MOCKUP
    ============================================= */
 .phone-frame {
-  background: #0D0D0D;
+  background: rgba(14, 14, 17, 0.85);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: 28px;
-  border: 1px solid var(--iron-light);
-  box-shadow: 8px 8px 0 rgba(255, 85, 0, 0.15), 0 0 60px rgba(255, 85, 0, 0.08);
+  border: 1px solid var(--glass-border);
+  box-shadow: 8px 8px 0 rgba(255, 90, 31, 0.16), 0 0 60px rgba(255, 90, 31, 0.09);
 }
+
 .phone-screen {
-  background: #080808;
+  background: var(--bg);
   border-radius: 20px;
 }
 
-/* the three offset stat cards next to the hero phone need real side-space
-   to sit off-canvas without overlapping the headline — below that width
-   they'd just collide with the text column, so they step aside and let
-   the phone + core stats carry the hero on tablet/mobile */
 @media (max-width: 980px) {
-  .hero-side-card { display: none; }
+  .hero-side-card {
+    display: none;
+  }
 }
 
 /* =============================================
-   MARQUEE — editorial ticker strip
+   MARQUEE
    ============================================= */
 .marquee-strip {
   overflow: hidden;
   white-space: nowrap;
   position: relative;
 }
+
 .marquee-track {
   display: inline-flex;
   width: max-content;
@@ -409,6 +495,7 @@ input, textarea, select { font-family: inherit; }
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
+
 @keyframes marqueeScroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -417,71 +504,305 @@ input, textarea, select { font-family: inherit; }
 /* =============================================
    PROGRESS BAR
    ============================================= */
-.progress-bar { height: 4px; background: var(--iron); border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--volt); border-radius: 2px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.progress-bar {
+  height: 4px;
+  background: var(--iron);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--volt);
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* =============================================
    ANIMATIONS
    ============================================= */
 @keyframes revealUp {
-  from { opacity: 0; transform: translateY(40px); }
+  from { opacity: 0; transform: translateY(28px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes revealLeft {
-  from { opacity: 0; transform: translateX(-40px); }
+  from { opacity: 0; transform: translateX(-28px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+
 @keyframes revealRight {
-  from { opacity: 0; transform: translateX(40px); }
+  from { opacity: 0; transform: translateX(28px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+
 @keyframes floatA {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50%       { transform: translateY(-14px) rotate(1deg); }
+  50%       { transform: translateY(-12px) rotate(1deg); }
 }
+
 @keyframes floatB {
   0%, 100% { transform: translateY(0) rotate(1deg); }
-  50%       { transform: translateY(-10px) rotate(-0.5deg); }
+  50%       { transform: translateY(-9px) rotate(-0.5deg); }
 }
+
 @keyframes floatC {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-18px); }
+  50%       { transform: translateY(-14px); }
 }
+
 @keyframes glowPulse {
   0%, 100% { opacity: 0.5; }
   50%       { opacity: 1; }
 }
+
 @keyframes dotBlink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
+
 @keyframes slideInRule {
   from { width: 0; }
   to   { width: 32px; }
 }
+
 @keyframes counterUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 @keyframes diagonalShift {
   0%, 100% { background-position: 0% 50%; }
   50%       { background-position: 100% 50%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rippleAnim {
+  from { transform: scale(0); opacity: 0.45; }
+  to   { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes skeletonShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.anim-fade-in   { animation: fadeIn var(--transition-slow) both; }
+.anim-slide-up  { animation: slideUp var(--transition-slow) both; }
+.anim-slide-down{ animation: slideDown var(--transition-slow) both; }
+
+.anim-stagger > * {
+  animation: slideUp var(--transition-slow) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
 }
 
 /* =============================================
    BOTTOM NAV (Mobile)
    ============================================= */
 @media (max-width: 768px) {
-  body { padding-bottom: 68px; }
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
 }
 
 /* =============================================
-   SCROLLBAR
+   SCROLLBAR, FOCUS & SELECTION
    ============================================= */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--volt); border-radius: 2px; }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--volt);
+  border-radius: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--volt);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--volt);
+  color: #FFFFFF;
+}
+
+/* =============================================
+   PAGE / SECTION RHYTHM
+   ============================================= */
+.page-shell {
+  min-height: 100vh;
+  padding-top: var(--page-top-mobile);
+  padding-bottom: calc(var(--space-9) + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 769px) {
+  .page-shell {
+    padding-top: var(--page-top-desktop);
+  }
+}
+
+.section {
+  margin-bottom: var(--section-gap-mobile);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 769px) {
+  .section {
+    margin-bottom: var(--section-gap-desktop);
+  }
+}
+
+.section-tight { margin-bottom: var(--space-5); }
+.section-loose { margin-bottom: var(--space-11); }
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.section-header__label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+.section-band {
+  border-top: 1px solid var(--iron-light);
+  border-bottom: 1px solid var(--iron-light);
+  padding: var(--space-7) 0;
+}
+
+/* =============================================
+   RIPPLE & SKELETON
+   ============================================= */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  animation: rippleAnim 550ms ease-out forwards;
+}
+
+.skeleton {
+  position: relative;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--iron) 25%, var(--iron-light) 37%, var(--iron) 63%);
+  background-size: 400% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-text   { height: 0.9em; width: 100%; border-radius: 4px; }
+.skeleton-title  { height: 1.4em; width: 60%; border-radius: 6px; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-card   { height: 120px; width: 100%; border-radius: var(--radius-card); }
+.skeleton-thumb  { aspect-ratio: 4 / 3; width: 100%; border-radius: var(--radius-md); }
+
+/* =============================================
+   IMAGE ASPECT RATIOS
+   ============================================= */
+.img-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--iron);
+}
+
+.img-frame > img,
+.img-frame > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.img-frame--square   { aspect-ratio: 1 / 1; }
+.img-frame--portrait { aspect-ratio: 3 / 4; }
+.img-frame--video    { aspect-ratio: 16 / 9; }
+.img-frame--card     { aspect-ratio: 4 / 3; }
+
+/* =============================================
+   TEXT OVERFLOW & RTL POLISH
+   ============================================= */
+.truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.no-shrink-text { min-width: 0; }
+.no-shrink-text * { min-width: 0; }
+
+[dir="rtl"] .display-hero,
+[dir="rtl"] .display-xl,
+[dir="rtl"] .display-lg,
+[dir="rtl"] .display-md,
+[dir="rtl"] .btn {
+  letter-spacing: 0;
+  text-transform: none;
+}
 
 /* =============================================
    REDUCED MOTION
@@ -492,161 +813,3 @@ input, textarea, select { font-family: inherit; }
     transition-duration: 0.01ms !important;
   }
 }
-
-/* =============================================
-   FOCUS
-   ============================================= */
-:focus-visible { outline: 2px solid var(--volt); outline-offset: 3px; }
-
-/* =============================================
-   SELECTION
-   ============================================= */
-::selection { background: var(--volt); color: #fff; }
-
-/* =============================================
-   PAGE / SECTION RHYTHM
-   use on every page instead of one-off paddingTop/marginBottom values
-   ============================================= */
-.page-shell {
-  min-height: 100vh;
-  padding-top: var(--page-top-mobile);
-  padding-bottom: calc(var(--space-9) + env(safe-area-inset-bottom));
-  position: relative;
-  z-index: 1;
-}
-@media (min-width: 769px) {
-  .page-shell { padding-top: var(--page-top-desktop); }
-}
-
-/* a "section" = one distinct block of a page (header, stats, list, etc.)
-   consistent gap below every section -> kills the "20 / 32 / 16" chaos */
-.section { margin-bottom: var(--section-gap-mobile); }
-.section:last-child { margin-bottom: 0; }
-@media (min-width: 769px) {
-  .section { margin-bottom: var(--section-gap-desktop); }
-}
-.section-tight  { margin-bottom: var(--space-5); }
-.section-loose  { margin-bottom: var(--space-11); }
-
-/* editorial section header — breaks up "card over card" monotony by
-   giving each block of content its own labeled header + divider,
-   instead of yet another floating card */
-.section-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-.section-header__label {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ash);
-}
-.section-band {
-  border-top: 1px solid var(--iron-light);
-  border-bottom: 1px solid var(--iron-light);
-  padding: var(--space-7) 0;
-}
-
-/* =============================================
-   ANIMATION UTILITIES — fade / slide / ripple / skeleton
-   apply as className, no JS required
-   ============================================= */
-@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideDown{ from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes rippleAnim {
-  from { transform: scale(0); opacity: 0.45; }
-  to   { transform: scale(2.6); opacity: 0; }
-}
-@keyframes skeletonShimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.anim-fade-in   { animation: fadeIn var(--transition-slow) both; }
-.anim-slide-up  { animation: slideUp var(--transition-slow) both; }
-.anim-slide-down{ animation: slideDown var(--transition-slow) both; }
-
-/* stagger helper — pair with inline style `--i: 0/1/2...` on children */
-.anim-stagger > * {
-  animation: slideUp var(--transition-slow) both;
-  animation-delay: calc(var(--i, 0) * 60ms);
-}
-
-/* ripple — add a <span class="ripple" style={{left,top}} /> on pointerdown */
-.ripple-container { position: relative; overflow: hidden; }
-.ripple {
-  position: absolute;
-  width: 12px; height: 12px;
-  margin-left: -6px; margin-top: -6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  pointer-events: none;
-  animation: rippleAnim 550ms ease-out forwards;
-}
-
-/* skeleton loading — use instead of a spinner while data is fetching */
-.skeleton {
-  position: relative;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--iron) 25%, var(--iron-light) 37%, var(--iron) 63%);
-  background-size: 400% 100%;
-  animation: skeletonShimmer 1.4s ease-in-out infinite;
-}
-.skeleton-text     { height: 0.9em; width: 100%; border-radius: 4px; }
-.skeleton-title    { height: 1.4em; width: 60%; border-radius: 6px; }
-.skeleton-avatar   { width: 40px; height: 40px; border-radius: 50%; }
-.skeleton-card     { height: 120px; width: 100%; border-radius: var(--radius-card); }
-.skeleton-thumb    { aspect-ratio: 4 / 3; width: 100%; border-radius: var(--radius-md); }
-
-/* =============================================
-   IMAGE ASPECT RATIOS — keep every thumbnail/card image consistent
-   wrap <img>/<video> in one of these instead of ad-hoc heights
-   ============================================= */
-.img-frame {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-  background: var(--iron);
-}
-.img-frame > img,
-.img-frame > video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.img-frame--square   { aspect-ratio: 1 / 1; }
-.img-frame--portrait { aspect-ratio: 3 / 4; }
-.img-frame--video    { aspect-ratio: 16 / 9; }
-.img-frame--card     { aspect-ratio: 4 / 3; }
-
-/* =============================================
-   TEXT OVERFLOW — stop labels/numbers from spilling out of cards
-   ============================================= */
-.truncate-1 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-.truncate-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.truncate-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.no-shrink-text { min-width: 0; }
-.no-shrink-text * { min-width: 0; }
