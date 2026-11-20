@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   Dumbbell, Apple, Activity, Calculator, ShieldCheck,
   ArrowRight, Zap, BarChart3, Trophy, ChevronRight,
-  Flame, Star, TrendingUp,
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
@@ -167,7 +166,7 @@ function MarqueeStrip({ items, style, itemStyle, duration = '26s' }) {
         {doubled.map((t, i) => (
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', ...itemStyle }}>
             {t}
-            <span aria-hidden="true" style={{ margin: '0 24px', opacity: 0.5 }}>✦</span>
+            <span aria-hidden="true" style={{ margin: '0 24px', opacity: 0.45 }}>•</span>
           </span>
         ))}
       </div>
@@ -337,14 +336,14 @@ export default function HomePage() {
             alignItems: 'center',
             position: 'relative',
             zIndex: 2,
-            padding: '80px 32px 32px',
+            padding: '84px 32px 36px',
           }}
         >
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 40,
+              gap: 44,
               width: '100%',
               maxWidth: 1200,
               margin: '0 auto',
@@ -354,7 +353,7 @@ export default function HomePage() {
             }}
           >
             {/* TEXT SIDE */}
-            <div style={{ flex: '1 1 360px', minWidth: 280 }}>
+            <div style={{ flex: '1 1 380px', minWidth: 280 }}>
               <motion.div
                 initial={{ opacity: 0, x: ar ? 20 : -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -407,7 +406,7 @@ export default function HomePage() {
                           style={{
                             fontFamily: 'var(--font-display)',
                             fontWeight: 800,
-                            fontSize: user ? 'clamp(2.6rem, 6vw, 4.6rem)' : 'clamp(3.6rem, 9vw, 7.4rem)',
+                            fontSize: user ? 'clamp(2.6rem, 6vw, 4.6rem)' : 'clamp(3.5rem, 8.8vw, 7.2rem)',
                             lineHeight: 1.08,
                             color: i === 2 ? 'transparent' : i === 1 ? 'var(--volt)' : 'var(--chalk)',
                             WebkitTextStroke: i === 2 ? '2px var(--volt)' : '0',
@@ -428,66 +427,26 @@ export default function HomePage() {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
+                transition={{ delay: 0.5 }}
                 style={{
                   color: 'var(--ash-light)',
-                  fontSize: '0.84rem',
+                  fontSize: '0.88rem',
                   lineHeight: 1.75,
-                  maxWidth: 370,
+                  maxWidth: 390,
                   margin: '20px 0 28px',
                   fontFamily: 'var(--font-body)',
                 }}
               >
                 {user
                   ? (ar ? 'كمّل رحلتك من حيث وقفت — صفحتك فيها كل حاجة محتاجها.' : 'Continue your journey — your dashboard has everything you need.')
-                  : (ar ? 'برنامج تدريب وتغذية ذكي، بيتابع كل تقدمك، وسيستيم منافسة يخليك مكمّل.' : 'Smart programs, real-time rep tracking, and friendly competition to keep you going.')}
+                  : (ar ? 'برنامج تدريب وتغذية ذكي، بيتابع كل تقدمك، وبيخليك ملتزم خطوة بخطوة.' : 'Smart programs, real-time rep tracking, and structured progress to keep you consistent.')}
               </motion.p>
-
-              {/* IDENTITY STRIP */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap', marginBottom: 24 }}
-              >
-                {[
-                  { icon: Flame,      label: ar ? 'ستريك'     : 'STREAKS'     },
-                  { icon: Star,       label: 'XP'                            },
-                  { icon: TrendingUp, label: ar ? 'مستويات'   : 'LEVELS'      },
-                  { icon: Trophy,     label: ar ? 'المتصدرين' : 'LEADERBOARD' },
-                ].map(({ icon: Icon, label }, i) => (
-                  <div
-                    key={label}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      paddingInlineStart: i > 0 ? 14 : 0,
-                      paddingInlineEnd: 14,
-                      borderInlineStart: i > 0 ? '1px solid var(--glass-border)' : 'none',
-                    }}
-                  >
-                    <Icon size={12} color="var(--volt)" />
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.62rem',
-                        letterSpacing: ar ? 0 : '0.1em',
-                        textTransform: ar ? 'none' : 'uppercase',
-                        color: 'var(--ash-light)',
-                      }}
-                    >
-                      {label}
-                    </span>
-                  </div>
-                ))}
-              </motion.div>
 
               {/* CTAs */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.58 }}
                 style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}
               >
                 {user ? (
@@ -525,7 +484,7 @@ export default function HomePage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
+                transition={{ delay: 0.68 }}
                 style={{ display: 'flex', gap: 0, paddingTop: 20, borderTop: '1px solid var(--glass-border)' }}
               >
                 {[
@@ -549,6 +508,7 @@ export default function HomePage() {
                         fontSize: 'clamp(1.6rem,3.5vw,2.8rem)',
                         color: 'var(--chalk)',
                         lineHeight: 1,
+                        fontVariantNumeric: 'tabular-nums',
                       }}
                     >
                       <AnimatedCounter target={val} suffix={suf} />
@@ -575,7 +535,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.65 }}
-              style={{ flexShrink: 0, width: '100%', maxWidth: 310, margin: '24px auto 0' }}
+              style={{ flexShrink: 0, width: '100%', maxWidth: 320, margin: '24px auto 0' }}
             >
               <div
                 className="glass-card"
@@ -619,47 +579,53 @@ export default function HomePage() {
                     const level = p.level || 'beginner';
 
                     return (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: 10,
-                          padding: '12px 0',
-                          borderTop: i > 0 ? '1px solid var(--glass-border)' : 'none',
-                        }}
-                      >
-                        <div>
-                          <div
-                            style={{
-                              fontFamily: 'var(--font-display)',
-                              fontWeight: 600,
-                              fontSize: '0.92rem',
-                              color: 'var(--chalk)',
-                            }}
-                          >
-                            {name}
+                      <Link key={i} href="/programs">
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 10,
+                            padding: '12px 6px',
+                            borderTop: i > 0 ? '1px solid var(--glass-border)' : 'none',
+                            borderRadius: 6,
+                            transition: 'background var(--transition-fast)',
+                            cursor: 'pointer',
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <div>
+                            <div
+                              style={{
+                                fontFamily: 'var(--font-display)',
+                                fontWeight: 600,
+                                fontSize: '0.92rem',
+                                color: 'var(--chalk)',
+                              }}
+                            >
+                              {name}
+                            </div>
+                            <div
+                              style={{
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.62rem',
+                                color: 'var(--ash)',
+                                marginTop: 3,
+                                textTransform: ar ? 'none' : 'uppercase',
+                                letterSpacing: ar ? 0 : '0.08em',
+                              }}
+                            >
+                              {days}× {ar ? 'أسبوعياً' : 'WEEK'} · {levelLabel[level] || level}
+                            </div>
                           </div>
-                          <div
-                            style={{
-                              fontFamily: 'var(--font-mono)',
-                              fontSize: '0.62rem',
-                              color: 'var(--ash)',
-                              marginTop: 3,
-                              textTransform: ar ? 'none' : 'uppercase',
-                              letterSpacing: ar ? 0 : '0.08em',
-                            }}
-                          >
-                            {days}× {ar ? 'أسبوعياً' : 'WEEK'} · {levelLabel[level] || level}
-                          </div>
+                          <ChevronRight
+                            size={14}
+                            color="var(--ash)"
+                            style={{ flexShrink: 0, transform: ar ? 'rotate(180deg)' : 'none' }}
+                          />
                         </div>
-                        <ChevronRight
-                          size={14}
-                          color="var(--ash)"
-                          style={{ flexShrink: 0, transform: ar ? 'rotate(180deg)' : 'none' }}
-                        />
-                      </div>
+                      </Link>
                     );
                   });
                 })()}
@@ -667,7 +633,7 @@ export default function HomePage() {
                 <Link href="/programs">
                   <div
                     style={{
-                      marginTop: 14,
+                      marginTop: 12,
                       paddingTop: 14,
                       borderTop: '1px solid var(--glass-border)',
                       display: 'flex',
@@ -1045,26 +1011,11 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ maxWidth: 800, margin: '0 auto', position: 'relative', zIndex: 1 }}
+            style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}
           >
-            <MarqueeStrip
-              items={[ar ? 'مفيش أعذار' : 'NO EXCUSES']}
-              style={{ marginBottom: 24, opacity: 0.65 }}
-              itemStyle={{
-                fontFamily: 'var(--font-display)',
-                fontWeight: 800,
-                fontSize: '1rem',
-                letterSpacing: ar ? 0 : '0.14em',
-                color: '#080808',
-                textTransform: ar ? 'none' : 'uppercase',
-                padding: '0 8px',
-              }}
-              duration="14s"
-            />
-
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32 }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <div style={{ width: 32, height: 3, background: '#fff', borderRadius: 2 }} />
                   <span
                     style={{
@@ -1076,7 +1027,7 @@ export default function HomePage() {
                       color: '#080808',
                     }}
                   >
-                    {ar ? 'مجاناً تماماً' : 'COMPLETELY FREE'}
+                    {ar ? 'مجاناً تماماً • بدون أعذار' : 'COMPLETELY FREE • NO EXCUSES'}
                   </span>
                 </div>
                 <h2
@@ -1084,7 +1035,7 @@ export default function HomePage() {
                     fontFamily: 'var(--font-display)',
                     fontWeight: 800,
                     fontSize: 'clamp(3rem,8vw,6.8rem)',
-                    lineHeight: 0.95,
+                    lineHeight: 0.96,
                     color: '#fff',
                     textTransform: ar ? 'none' : 'uppercase',
                     marginBottom: 16,
@@ -1093,7 +1044,7 @@ export default function HomePage() {
                 >
                   {ar ? 'ابدأ\nرحلتك\nدلوقتي' : 'START\nYOUR\nJOURNEY'}
                 </h2>
-                <p style={{ color: '#080808', fontWeight: 500, fontSize: '0.9rem', lineHeight: 1.7, maxWidth: 380 }}>
+                <p style={{ color: '#080808', fontWeight: 500, fontSize: '0.92rem', lineHeight: 1.7, maxWidth: 390 }}>
                   {ar
                     ? 'انضم لآلاف المتدربين اللي بيحققوا نتائج حقيقية مع GYMZ.'
                     : 'Join thousands of athletes achieving real results with GYMZ.'}
