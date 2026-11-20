@@ -3,7 +3,8 @@
    ============================================= */
 /* Plus Jakarta Sans — display / headings
    Manrope           — body
-   JetBrains Mono    — numbers / mono / labels */
+   JetBrains Mono    — numbers / mono / labels
+   Cairo / IBM Plex Sans Arabic — Arabic fallback */
 
 :root {
   color-scheme: dark;
@@ -22,14 +23,14 @@ html {
 [data-theme="dark"],
 :root {
   --bg:         #080808;
-  --carbon:     #101012;
-  --iron:       #161619;
-  --iron-mid:   #1b1b1f;
-  --iron-light: #242429;
-  --chalk:      #F5F5F5;
-  --chalk-dim:  rgba(245, 245, 245, 0.58);
-  --ash:        #8A8A8E;
-  --ash-light:  #AEAEB4;
+  --carbon:     #0E0E11;
+  --iron:       #151519;
+  --iron-mid:   #1B1B20;
+  --iron-light: #25252C;
+  --chalk:      #F5F4F2;
+  --chalk-dim:  rgba(245, 244, 242, 0.62);
+  --ash:        #84848B;
+  --ash-light:  #AEAEB6;
   --obsidian:   #000000;
 }
 
@@ -55,9 +56,9 @@ html {
 :root {
   /* Primary accent (#FF5A1F) + backward-compatible aliases */
   --volt:          #FF5A1F;
-  --volt-bright:   #FF7747;
-  --volt-dim:      rgba(255, 90, 31, 0.11);
-  --volt-glow:     rgba(255, 90, 31, 0.24);
+  --volt-bright:   #FF7442;
+  --volt-dim:      rgba(255, 90, 31, 0.12);
+  --volt-glow:     rgba(255, 90, 31, 0.25);
 
   --accent:        var(--volt);
   --accent-bright: var(--volt-bright);
@@ -69,32 +70,32 @@ html {
   --fire-dim:      var(--volt-dim);
   --fire-glow:     var(--volt-glow);
 
-  /* Typography */
-  --font-display:  'Plus Jakarta Sans', 'Manrope', sans-serif;
-  --font-body:     'Manrope', 'Helvetica Neue', sans-serif;
-  --font-mono:     'JetBrains Mono', monospace;
-  --font-numeral:  'Plus Jakarta Sans', monospace;
+  /* Typography (Latin + Arabic clean pairing) */
+  --font-display:  'Plus Jakarta Sans', 'IBM Plex Sans Arabic', 'Cairo', 'Manrope', sans-serif;
+  --font-body:     'Manrope', 'IBM Plex Sans Arabic', 'Cairo', 'Helvetica Neue', sans-serif;
+  --font-mono:     'JetBrains Mono', 'IBM Plex Sans Arabic', monospace;
+  --font-numeral:  'Plus Jakarta Sans', 'JetBrains Mono', monospace;
 
   /* Radii */
-  --radius-sm:     6px;
-  --radius-md:     8px;
-  --radius-lg:     10px;
-  --radius-xl:     14px;
-  --radius-card:   12px;
+  --radius-sm:     8px;
+  --radius-md:     10px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --radius-card:   14px;
 
   /* Transitions */
-  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 240ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 360ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Liquid Glass surfaces */
-  --glass-bg:           rgba(18, 18, 22, 0.72);
-  --glass-bg-hover:     rgba(26, 26, 32, 0.86);
-  --glass-border:       rgba(255, 255, 255, 0.09);
-  --glass-border-hover: rgba(255, 90, 31, 0.45);
-  --glass-blur:         14px;
-  --glass-shadow:       inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
-  --glass-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 16px 38px rgba(0, 0, 0, 0.58);
+  --glass-bg:           linear-gradient(155deg, rgba(24, 24, 29, 0.78) 0%, rgba(14, 14, 17, 0.72) 100%);
+  --glass-bg-hover:     linear-gradient(155deg, rgba(32, 32, 39, 0.88) 0%, rgba(18, 18, 22, 0.84) 100%);
+  --glass-border:       rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 90, 31, 0.42);
+  --glass-blur:         16px;
+  --glass-shadow:       inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 34px rgba(0, 0, 0, 0.52);
+  --glass-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 18px 42px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 90, 31, 0.18);
 
   /* 8px Spacing Scale */
   --space-1:  4px;
@@ -130,8 +131,9 @@ body {
   color: var(--chalk);
   font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
@@ -159,35 +161,35 @@ input, textarea, select {
 .display-hero {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(3.5rem, 9vw, 7.5rem);
-  line-height: 1.02;
-  letter-spacing: -0.015em;
+  font-size: clamp(3.2rem, 8.5vw, 7rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
 }
 
 .display-xl {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(2.6rem, 6vw, 5rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  font-size: clamp(2.4rem, 5.5vw, 4.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
   text-transform: uppercase;
 }
 
 .display-lg {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  line-height: 1.08;
-  letter-spacing: -0.005em;
+  font-size: clamp(1.9rem, 3.8vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
 }
 
 .display-md {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  line-height: 1.1;
+  font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+  line-height: 1.15;
   text-transform: uppercase;
 }
 
@@ -195,7 +197,7 @@ input, textarea, select {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--volt);
 }
@@ -203,8 +205,9 @@ input, textarea, select {
 .mono-stat {
   font-family: var(--font-numeral);
   font-weight: 800;
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(2rem, 4vw, 3.4rem);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: var(--chalk);
 }
 
@@ -220,7 +223,7 @@ input, textarea, select {
 
 .rule-full {
   height: 1px;
-  background: linear-gradient(90deg, var(--volt) 0%, rgba(255, 90, 31, 0.12) 60%, transparent 100%);
+  background: linear-gradient(90deg, var(--volt) 0%, rgba(255, 90, 31, 0.14) 60%, transparent 100%);
 }
 
 /* =============================================
@@ -231,12 +234,12 @@ input, textarea, select {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px 28px;
+  padding: 12px 26px;
   border-radius: var(--radius-sm);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
+  font-size: 0.92rem;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   border: 1px solid transparent;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
@@ -250,32 +253,35 @@ input, textarea, select {
 
 .btn-primary,
 .btn-fire {
-  background: var(--volt);
+  background: linear-gradient(180deg, #FF662E 0%, #FF5A1F 100%);
   color: #FFFFFF;
-  box-shadow: 0 8px 24px rgba(255, 90, 31, 0.18);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 22px rgba(255, 90, 31, 0.22);
 }
 
 .btn-primary:hover,
 .btn-fire:hover {
-  background: var(--volt-bright);
-  box-shadow: 0 10px 28px rgba(255, 90, 31, 0.28);
+  background: linear-gradient(180deg, #FF7442 0%, #FF6229 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), 0 12px 28px rgba(255, 90, 31, 0.34);
 }
 
 .btn-outline {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--chalk);
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-outline:hover {
-  background: var(--chalk);
-  color: var(--bg);
-  border-color: var(--chalk);
+  background: rgba(255, 90, 31, 0.1);
+  color: var(--chalk);
+  border-color: rgba(255, 90, 31, 0.45);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--ash);
+  color: var(--ash-light);
   border-color: transparent;
   padding: 8px 16px;
   font-family: var(--font-body);
@@ -286,7 +292,7 @@ input, textarea, select {
 
 .btn-ghost:hover {
   color: var(--chalk);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* =============================================
@@ -299,14 +305,14 @@ input, textarea, select {
   font-weight: 700;
   color: var(--ash-light);
   margin-bottom: 6px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .input {
   width: 100%;
   padding: 12px 16px;
-  background: var(--glass-bg);
+  background: rgba(18, 18, 22, 0.8);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
@@ -323,7 +329,7 @@ input, textarea, select {
 
 .input:focus {
   border-color: var(--volt);
-  background: var(--glass-bg-hover);
+  background: rgba(24, 24, 30, 0.92);
   box-shadow: 0 0 0 3px var(--volt-dim);
 }
 
@@ -378,8 +384,8 @@ input, textarea, select {
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
   background-size: 44px 44px;
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
@@ -390,8 +396,8 @@ input, textarea, select {
   pointer-events: none;
   z-index: 0;
   border-radius: 50%;
-  filter: blur(84px);
-  background: radial-gradient(circle, rgba(255, 90, 31, 0.12) 0%, transparent 70%);
+  filter: blur(88px);
+  background: radial-gradient(circle, rgba(255, 90, 31, 0.14) 0%, transparent 70%);
 }
 
 .hero-scanlines {
@@ -413,7 +419,7 @@ input, textarea, select {
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.03;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
 }
@@ -422,7 +428,7 @@ input, textarea, select {
   position: absolute;
   pointer-events: none;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 90, 31, 0.20) 0%, rgba(255, 90, 31, 0.06) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 90, 31, 0.22) 0%, rgba(255, 90, 31, 0.06) 45%, transparent 70%);
 }
 
 /* =============================================
@@ -460,7 +466,7 @@ input, textarea, select {
    PHONE MOCKUP
    ============================================= */
 .phone-frame {
-  background: rgba(14, 14, 17, 0.85);
+  background: rgba(14, 14, 17, 0.88);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: 28px;
@@ -628,8 +634,8 @@ input, textarea, select {
    SCROLLBAR, FOCUS & SELECTION
    ============================================= */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -637,8 +643,12 @@ input, textarea, select {
 }
 
 ::-webkit-scrollbar-thumb {
+  background: var(--iron-light);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
   background: var(--volt);
-  border-radius: 2px;
 }
 
 :focus-visible {
