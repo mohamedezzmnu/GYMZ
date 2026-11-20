@@ -58,10 +58,66 @@ const PROGRAM_EXERCISE_MAP = {
   'هيب ثراست': 44,
 };
 
+// ══════════════════════════════════════════
+// الأسماء الإنجليزية المعتمدة لتمارين البرامج
+// ══════════════════════════════════════════
+const PROGRAM_EXERCISE_EN_MAP = {
+  'إحماء': 'Warm-up',
+  'تبريد وإطالات': 'Cool-down & Stretch',
+  'أرنولد برس': 'Arnold Press',
+  'أوفر هيد برس': 'Overhead Press',
+  'أوفر هيد برس بار': 'Barbell Overhead Press',
+  'بريتشر كيرل': 'Preacher Curl',
+  'بنش برس': 'Bench Press',
+  'بنش برس بار': 'Barbell Bench Press',
+  'تراسبس بوش داون': 'Tricep Pushdown',
+  'ديد ليفت': 'Deadlift',
+  'ديد ليفت رومانيان': 'Romanian Deadlift',
+  'رفع أمامي': 'Front Raise',
+  'رفع جانبي': 'Lateral Raise',
+  'رفع سمانة': 'Calf Raise',
+  'رفع سمانة جالس': 'Seated Calf Raise',
+  'رفع سمانة واقف': 'Standing Calf Raise',
+  'رومانيان ديد ليفت': 'Romanian Deadlift',
+  'رووينج بار': 'Barbell Row',
+  'سبليت سكوات بلغاري': 'Bulgarian Split Squat',
+  'سكال كراشر': 'Skull Crusher',
+  'سكوات': 'Squat',
+  'سكوات بار': 'Barbell Squat',
+  'سيتد رووينج': 'Seated Row',
+  'ضغط بنش مائل': 'Incline Bench Press',
+  'ضغط بنش مائل دمبل': 'Incline Dumbbell Press',
+  'ضغط كتف': 'Shoulder Press',
+  'ضغط مائل دمبل': 'Incline Dumbbell Press',
+  'عقلة': 'Pull-ups',
+  'عقلة أو كيبل': 'Pull-ups / Lat Pulldown',
+  'فلاي دمبل': 'Dumbbell Fly',
+  'فلاي كيبل': 'Cable Fly',
+  'فيس بولز': 'Face Pulls',
+  'كيبل كيك باك': 'Cable Kickback',
+  'كيرل بار': 'Barbell Curl',
+  'كيرل بايسبس': 'Bicep Curl',
+  'لات بول داون': 'Lat Pulldown',
+  'ليج اكستنشن': 'Leg Extension',
+  'ليج برس': 'Leg Press',
+  'ليج كيرل': 'Leg Curl',
+  'مط تراسبس فوق الرأس': 'Overhead Tricep Extension',
+  'هامر كيرل': 'Hammer Curl',
+  'هيب ثراست': 'Hip Thrust',
+};
+
 function getExerciseImage(name) {
   const id = PROGRAM_EXERCISE_MAP[name];
   if (!id) return null;
   return EXERCISES.find((e) => e.id === id) || null;
+}
+
+function getEnglishExerciseName(arName, exObj) {
+  const fromData = exObj?.name_en || exObj?.englishName;
+  if (fromData) return fromData;
+  if (PROGRAM_EXERCISE_EN_MAP[arName]) return PROGRAM_EXERCISE_EN_MAP[arName];
+  if (exObj?.name && !/[\u0600-\u06FF]/.test(exObj.name)) return exObj.name;
+  return arName;
 }
 
 // ══════════════════════════════════════════
@@ -423,8 +479,7 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {program.days_detail[activeDay].exercises.map((ex, i) => {
                     const exImg = getExerciseImage(ex.name);
-                    const primaryName = exImg?.name_en || exImg?.title_en || ex.name;
-                    const secondaryName = primaryName !== ex.name ? ex.name : null;
+                    const enTitle = getEnglishExerciseName(ex.name, exImg);
 
                     return (
                       <div
@@ -454,36 +509,28 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                         <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                           <div>
                             <div
+                              dir="ltr"
                               style={{
-                                fontSize: '0.9rem',
+                                fontSize: '0.92rem',
                                 color: 'var(--chalk)',
                                 fontFamily: 'var(--font-display)',
                                 fontWeight: 700,
-                                marginBottom: 2,
+                                textAlign: 'left',
+                                marginBottom: 3,
                               }}
                             >
-                              {primaryName}
+                              {enTitle}
                             </div>
-                            {secondaryName && (
-                              <div
-                                style={{
-                                  fontSize: '0.76rem',
-                                  color: 'var(--ash-light)',
-                                  fontFamily: 'var(--font-body)',
-                                  marginBottom: 2,
-                                }}
-                              >
-                                {secondaryName}
-                              </div>
-                            )}
-                            <div style={{ fontSize: '0.74rem', color: 'var(--ash)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)' }}>
+                              {ex.detail}
+                            </div>
                           </div>
                           {exImg && (
                             <motion.button
                               whileHover={{ scale: 1.04 }}
                               whileTap={{ scale: 0.95 }}
                               transition={{ duration: 0.12 }}
-                              onClick={() => setPreviewExercise(exImg)}
+                              onClick={() => setPreviewExercise({ ...exImg, enTitle })}
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -664,19 +711,24 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               </button>
               <img
                 src={previewExercise.img}
-                alt={previewExercise.name_en || previewExercise.name_ar}
+                alt={previewExercise.enTitle || previewExercise.name_ar}
                 loading="lazy"
                 style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', background: 'var(--iron)' }}
               />
               <div style={{ padding: '16px 18px', direction: 'rtl' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--chalk)', marginBottom: 4 }}>
-                  {previewExercise.name_en || previewExercise.name_ar}
+                <div
+                  dir="ltr"
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: '1.05rem',
+                    color: 'var(--chalk)',
+                    textAlign: 'left',
+                    marginBottom: 6,
+                  }}
+                >
+                  {previewExercise.enTitle || previewExercise.name_ar}
                 </div>
-                {previewExercise.name_en && previewExercise.name_ar && (
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', marginBottom: 6 }}>
-                    {previewExercise.name_ar}
-                  </div>
-                )}
                 {previewExercise.tips && (
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
                     <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
