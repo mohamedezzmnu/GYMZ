@@ -19,6 +19,104 @@ import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { PROGRAMS } from '../data/programs';
+import { EXERCISES } from '../data/exercises';
+
+const PROGRAM_EXERCISE_ID_MAP = {
+  'أرنولد برس': 19,
+  'أوفر هيد برس': 14,
+  'أوفر هيد برس بار': 14,
+  'بريتشر كيرل': 24,
+  'بنش برس': 1,
+  'بنش برس بار': 1,
+  'تراسبس بوش داون': 31,
+  'ديد ليفت': 7,
+  'ديد ليفت رومانيان': 37,
+  'رفع أمامي': 17,
+  'رفع جانبي': 16,
+  'رفع سمانة': 56,
+  'رفع سمانة جالس': 57,
+  'رفع سمانة واقف': 56,
+  'رومانيان ديد ليفت': 37,
+  'رووينج بار': 9,
+  'سبليت سكوات بلغاري': 41,
+  'سكال كراشر': 30,
+  'سكوات': 35,
+  'سكوات بار': 35,
+  'سيتد رووينج': 11,
+  'ضغط بنش مائل': 2,
+  'ضغط بنش مائل دمبل': 2,
+  'ضغط كتف': 14,
+  'ضغط مائل دمبل': 2,
+  'عقلة': 8,
+  'عقلة أو كيبل': 8,
+  'فلاي دمبل': 5,
+  'فلاي كيبل': 4,
+  'فيس بولز': 13,
+  'كيبل كيك باك': 46,
+  'كيرل بار': 21,
+  'كيرل بايسبس': 22,
+  'لات بول داون': 10,
+  'ليج اكستنشن': 39,
+  'ليج برس': 36,
+  'ليج كيرل': 38,
+  'مط تراسبس فوق الرأس': 32,
+  'هامر كيرل': 23,
+  'هيب ثراست': 44,
+};
+
+const PROGRAM_EXERCISE_EN_MAP = {
+  'إحماء': 'Warm-up',
+  'تبريد وإطالات': 'Cool-down & Stretch',
+  'أرنولد برس': 'Arnold Press',
+  'أوفر هيد برس': 'Overhead Press',
+  'أوفر هيد برس بار': 'Barbell Overhead Press',
+  'بريتشر كيرل': 'Preacher Curl',
+  'بنش برس': 'Bench Press',
+  'بنش برس بار': 'Barbell Bench Press',
+  'تراسبس بوش داون': 'Tricep Pushdown',
+  'ديد ليفت': 'Deadlift',
+  'ديد ليفت رومانيان': 'Romanian Deadlift',
+  'رفع أمامي': 'Front Raise',
+  'رفع جانبي': 'Lateral Raise',
+  'رفع سمانة': 'Calf Raise',
+  'رفع سمانة جالس': 'Seated Calf Raise',
+  'رفع سمانة واقف': 'Standing Calf Raise',
+  'رومانيان ديد ليفت': 'Romanian Deadlift',
+  'رووينج بار': 'Barbell Row',
+  'سبليت سكوات بلغاري': 'Bulgarian Split Squat',
+  'سكال كراشر': 'Skull Crusher',
+  'سكوات': 'Squat',
+  'سكوات بار': 'Barbell Squat',
+  'سيتد رووينج': 'Seated Row',
+  'ضغط بنش مائل': 'Incline Bench Press',
+  'ضغط بنش مائل دمبل': 'Incline Dumbbell Press',
+  'ضغط كتف': 'Shoulder Press',
+  'ضغط مائل دمبل': 'Incline Dumbbell Press',
+  'عقلة': 'Pull-ups',
+  'عقلة أو كيبل': 'Pull-ups / Lat Pulldown',
+  'فلاي دمبل': 'Dumbbell Fly',
+  'فلاي كيبل': 'Cable Fly',
+  'فيس بولز': 'Face Pulls',
+  'كيبل كيك باك': 'Cable Kickback',
+  'كيرل بار': 'Barbell Curl',
+  'كيرل بايسبس': 'Bicep Curl',
+  'لات بول داون': 'Lat Pulldown',
+  'ليج اكستنشن': 'Leg Extension',
+  'ليج برس': 'Leg Press',
+  'ليج كيرل': 'Leg Curl',
+  'مط تراسبس فوق الرأس': 'Overhead Tricep Extension',
+  'هامر كيرل': 'Hammer Curl',
+  'هيب ثراست': 'Hip Thrust',
+};
+
+function getEnglishExerciseName(rawName) {
+  const id = PROGRAM_EXERCISE_ID_MAP[rawName];
+  const exObj = id ? EXERCISES.find((e) => e.id === id) : null;
+  if (exObj?.name_en) return exObj.name_en;
+  if (exObj?.name && !/[\u0600-\u06FF]/.test(exObj.name)) return exObj.name;
+  if (PROGRAM_EXERCISE_EN_MAP[rawName]) return PROGRAM_EXERCISE_EN_MAP[rawName];
+  return rawName;
+}
 
 // ── بناء أيام وتمارين البرنامج من نفس بيانات صفحة البرامج ──
 function getProgramDays(programTitle) {
@@ -26,9 +124,9 @@ function getProgramDays(programTitle) {
   const norm = (s) => (s || '').toLowerCase().trim();
   const t = norm(programTitle);
 
-  let prog = PROGRAMS.find(p => norm(p.subtitle) === t || norm(p.title) === t);
+  let prog = PROGRAMS.find((p) => norm(p.subtitle) === t || norm(p.title) === t);
   if (!prog) {
-    prog = PROGRAMS.find(p => t.includes(norm(p.subtitle)) || norm(p.subtitle).includes(t));
+    prog = PROGRAMS.find((p) => t.includes(norm(p.subtitle)) || norm(p.subtitle).includes(t));
   }
   if (!prog) return null;
 
@@ -46,7 +144,7 @@ function stripEmoji(text) {
 
 function parseDayLabel(raw) {
   const clean = stripEmoji(raw);
-  const parts = clean.split('—').map(s => s.trim()).filter(Boolean);
+  const parts = clean.split('—').map((s) => s.trim()).filter(Boolean);
   if (parts.length >= 2 && /[a-zA-Z]/.test(parts[1])) {
     return { primary: parts[1].toUpperCase(), subtitle: parts[0] };
   }
@@ -54,7 +152,7 @@ function parseDayLabel(raw) {
 }
 
 function parseExerciseDetail(detail) {
-  const parts = (detail || '').split('—').map(s => s.trim()).filter(Boolean);
+  const parts = (detail || '').split('—').map((s) => s.trim()).filter(Boolean);
   if (parts.length >= 2) return { meta: parts[0], muscle: parts[1] };
   return { meta: parts[0] || detail || '', muscle: '' };
 }
@@ -95,6 +193,7 @@ function GlassCard({ children, style = {}, accent }) {
 // ── مكون تمرين واحد ──────────────────────────────────────
 function ExerciseRow({ index, exercise, checked, onToggle, delay, isLast }) {
   const { meta, muscle } = parseExerciseDetail(exercise.detail);
+  const enName = getEnglishExerciseName(exercise.name);
 
   return (
     <motion.div
@@ -109,7 +208,7 @@ function ExerciseRow({ index, exercise, checked, onToggle, delay, isLast }) {
         padding: '13px 4px',
         cursor: 'pointer',
         borderBottom: isLast ? 'none' : '1px solid var(--glass-border)',
-        background: checked ? 'rgba(74, 222, 128, 0.04)' : 'transparent',
+        background: checked ? 'var(--volt-dim)' : 'transparent',
         transition: 'background 0.2s',
         direction: 'rtl',
       }}
@@ -118,7 +217,7 @@ function ExerciseRow({ index, exercise, checked, onToggle, delay, isLast }) {
         style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '0.68rem',
-          color: 'var(--ash)',
+          color: checked ? 'var(--volt)' : 'var(--ash)',
           width: 20,
           flexShrink: 0,
           textAlign: 'center',
@@ -129,16 +228,18 @@ function ExerciseRow({ index, exercise, checked, onToggle, delay, isLast }) {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
+          dir="ltr"
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 700,
             fontSize: '0.96rem',
-            color: checked ? 'var(--ash-light)' : 'var(--chalk)',
+            color: checked ? 'var(--volt-bright)' : 'var(--chalk)',
             textDecoration: checked ? 'line-through' : 'none',
+            textAlign: 'left',
             transition: 'color 0.2s',
           }}
         >
-          {exercise.name}
+          {enName}
         </div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash)', marginTop: 3 }}>
           {meta}
@@ -152,7 +253,7 @@ function ExerciseRow({ index, exercise, checked, onToggle, delay, isLast }) {
       </div>
 
       <motion.div
-        animate={{ scale: checked ? [1, 1.18, 1] : 1 }}
+        animate={{ scale: checked ? [1, 1.15, 1] : 1 }}
         transition={{ duration: 0.2 }}
         style={{
           width: 40,
@@ -196,7 +297,7 @@ function DayCard({ dayIndex, dayLabel, exercises, isOpen, onToggle, onSave, isSa
   const totalCount = exercises.length;
   const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
 
-  const toggleEx = (name) => setChecked(prev => ({ ...prev, [name]: !prev[name] }));
+  const toggleEx = (name) => setChecked((prev) => ({ ...prev, [name]: !prev[name] }));
 
   const { primary, subtitle } = parseDayLabel(dayLabel);
   const active = isOpen;
@@ -258,9 +359,9 @@ function DayCard({ dayIndex, dayLabel, exercises, isOpen, onToggle, onSave, isSa
                   fontWeight: 700,
                   padding: '2px 7px',
                   borderRadius: 4,
-                  background: 'rgba(74,222,128,0.12)',
-                  border: '1px solid rgba(74,222,128,0.3)',
-                  color: '#4ade80',
+                  background: 'var(--volt-dim)',
+                  border: '1px solid rgba(255, 90, 31, 0.35)',
+                  color: 'var(--volt-bright)',
                 }}
               >
                 <CheckCircle2 size={9} /> اتسجل
@@ -280,7 +381,7 @@ function DayCard({ dayIndex, dayLabel, exercises, isOpen, onToggle, onSave, isSa
                 style={{
                   height: '100%',
                   borderRadius: 2,
-                  background: pct === 100 ? '#4ade80' : 'var(--volt)',
+                  background: pct === 100 ? 'var(--volt-bright)' : 'var(--volt)',
                 }}
               />
             </div>
@@ -296,7 +397,7 @@ function DayCard({ dayIndex, dayLabel, exercises, isOpen, onToggle, onSave, isSa
               TIME
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.98rem', color: 'var(--chalk)' }}>
-              <Clock size={13} color="var(--ash-light)" /> {formatTime(elapsed)}
+              <Clock size={13} color="var(--volt)" /> {formatTime(elapsed)}
             </div>
           </div>
         )}
@@ -343,18 +444,16 @@ function DayCard({ dayIndex, dayLabel, exercises, isOpen, onToggle, onSave, isSa
                   background: doneCount === 0
                     ? 'rgba(255, 255, 255, 0.03)'
                     : pct === 100
-                      ? 'rgba(74, 222, 128, 0.14)'
+                      ? 'rgba(255, 90, 31, 0.18)'
                       : 'var(--volt-dim)',
                   color: doneCount === 0
                     ? 'var(--ash)'
-                    : pct === 100
-                      ? '#4ade80'
-                      : 'var(--volt)',
+                    : 'var(--volt-bright)',
                   border: `1px solid ${
                     doneCount === 0
                       ? 'var(--glass-border)'
                       : pct === 100
-                        ? 'rgba(74, 222, 128, 0.35)'
+                        ? 'rgba(255, 90, 31, 0.5)'
                         : 'var(--glass-border-hover)'
                   }`,
                   fontFamily: 'var(--font-display)',
@@ -401,7 +500,7 @@ export default function WorkoutPage() {
   const [newWeight, setNewWeight]         = useState('');
   const [openDay, setOpenDay]             = useState(null);
   const [savingDay, setSavingDay]         = useState(null);
-  const [logingWeight, setLogingWeight]   = useState(false);
+  const [loggingWeight, setLoggingWeight] = useState(false);
   const [activeProgram, setActiveProgram] = useState(0);
   const [loading, setLoading]             = useState(true);
 
@@ -453,7 +552,7 @@ export default function WorkoutPage() {
     if (error) {
       toast.error('حصل خطأ، جرب تاني');
     } else {
-      toast.success(done ? '🔥 جلسة كاملة! عظيم' : '✅ اتسجلت الجلسة');
+      toast.success(done ? 'جلسة كاملة — عظيم' : 'اتسجلت الجلسة');
       await fetchAll();
     }
     setSavingDay(null);
@@ -466,7 +565,7 @@ export default function WorkoutPage() {
       toast.error('أدخل وزن صحيح');
       return;
     }
-    setLogingWeight(true);
+    setLoggingWeight(true);
     const { error } = await supabase.from('weight_log').insert({
       user_id:   user.id,
       weight:    parsed,
@@ -475,21 +574,21 @@ export default function WorkoutPage() {
     if (error) {
       toast.error('حصل خطأ');
     } else {
-      toast.success('✅ اتسجل الوزن');
+      toast.success('اتسجل الوزن');
       setNewWeight('');
       await fetchAll();
     }
-    setLogingWeight(false);
+    setLoggingWeight(false);
   };
 
   const now = new Date();
   const todayStr = now.toDateString();
-  const todaySessions = sessions.filter(s => new Date(s.created_at).toDateString() === todayStr);
+  const todaySessions = sessions.filter((s) => new Date(s.created_at).toDateString() === todayStr);
   const currentWeight = weightLog[0]?.weight;
   const prevWeight = weightLog[1]?.weight;
   const weightDiff = currentWeight && prevWeight ? (currentWeight - prevWeight).toFixed(1) : null;
 
-  const savedTodayLabels = new Set(todaySessions.map(s => s.day_label));
+  const savedTodayLabels = new Set(todaySessions.map((s) => s.day_label));
 
   const activeProgObj = userPrograms[activeProgram];
   const activeProgramName = activeProgObj?.program_title || '';
@@ -520,7 +619,7 @@ export default function WorkoutPage() {
           zIndex: 0,
           pointerEvents: 'none',
           background:
-            'radial-gradient(ellipse 60% 40% at 20% 20%, var(--volt-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(74,222,128,0.04) 0%, transparent 60%)',
+            'radial-gradient(ellipse 60% 40% at 20% 20%, var(--volt-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, var(--volt-glow) 0%, transparent 60%)',
         }}
       />
 
@@ -571,7 +670,7 @@ export default function WorkoutPage() {
                           dayLabel={dayLabel}
                           exercises={exercises}
                           isOpen={openDay === dayLabel}
-                          onToggle={() => setOpenDay(prev => (prev === dayLabel ? null : dayLabel))}
+                          onToggle={() => setOpenDay((prev) => (prev === dayLabel ? null : dayLabel))}
                           onSave={saveSession}
                           isSaving={savingDay === dayLabel}
                           savedToday={savedTodayLabels.has(dayLabel)}
@@ -668,7 +767,7 @@ export default function WorkoutPage() {
                               </div>
                             </div>
                             {s.done
-                              ? <CheckCircle2 size={15} color="#4ade80" style={{ flexShrink: 0 }} />
+                              ? <CheckCircle2 size={15} color="var(--volt)" style={{ flexShrink: 0 }} />
                               : <Circle size={15} color="var(--ash)" style={{ flexShrink: 0 }} />}
                           </div>
                         );
@@ -688,14 +787,14 @@ export default function WorkoutPage() {
                     {
                       icon: Calendar,
                       label: 'الشهر',
-                      value: sessions.filter(s => new Date(s.created_at).getMonth() === now.getMonth()).length,
-                      color: '#FFFFFF',
+                      value: sessions.filter((s) => new Date(s.created_at).getMonth() === now.getMonth()).length,
+                      color: 'var(--volt-bright)',
                     },
                     {
                       icon: Scale,
                       label: 'الوزن',
                       value: currentWeight ? `${currentWeight}kg` : '—',
-                      color: '#4ade80',
+                      color: 'var(--chalk)',
                     },
                   ].map(({ icon: Icon, label, value, color }) => (
                     <GlassCard key={label} style={{ padding: '16px', textAlign: 'center' }}>
@@ -720,14 +819,14 @@ export default function WorkoutPage() {
                         width: 34,
                         height: 34,
                         borderRadius: 10,
-                        background: 'rgba(74,222,128,0.1)',
-                        border: '1px solid rgba(74,222,128,0.25)',
+                        background: 'var(--volt-dim)',
+                        border: '1px solid rgba(255, 90, 31, 0.28)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}
                     >
-                      <Scale size={16} color="#4ade80" />
+                      <Scale size={16} color="var(--volt)" />
                     </div>
                     <div>
                       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', color: 'var(--chalk)' }}>
@@ -738,7 +837,7 @@ export default function WorkoutPage() {
                           style={{
                             fontFamily: 'var(--font-mono)',
                             fontSize: '0.62rem',
-                            color: +weightDiff < 0 ? '#4ade80' : '#FFFFFF',
+                            color: 'var(--volt-bright)',
                             marginTop: 2,
                           }}
                         >
@@ -755,8 +854,8 @@ export default function WorkoutPage() {
                       step="0.1"
                       placeholder="الوزن بالكيلو"
                       value={newWeight}
-                      onChange={e => setNewWeight(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && logWeight()}
+                      onChange={(e) => setNewWeight(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && logWeight()}
                       style={{
                         flex: 1,
                         padding: '10px 14px',
@@ -767,23 +866,14 @@ export default function WorkoutPage() {
                     />
                     <motion.button
                       type="button"
-                      whileHover={{ scale: 1.03 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.96 }}
                       onClick={logWeight}
-                      disabled={logingWeight}
+                      disabled={loggingWeight}
+                      className="btn btn-primary"
                       style={{
                         padding: '10px 16px',
-                        borderRadius: 8,
-                        border: '1px solid rgba(74,222,128,0.35)',
-                        background: 'rgba(74,222,128,0.12)',
-                        color: '#4ade80',
-                        fontFamily: 'var(--font-display)',
-                        fontWeight: 700,
                         fontSize: '0.85rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
                         whiteSpace: 'nowrap',
                       }}
                     >
@@ -795,8 +885,8 @@ export default function WorkoutPage() {
                   {last7.length > 1 && (
                     <div style={{ marginTop: 14, display: 'flex', gap: 6, alignItems: 'flex-end', direction: 'ltr', height: 40 }}>
                       {last7.map((w, i) => {
-                        const min = Math.min(...last7.map(x => Number(x.weight)));
-                        const max = Math.max(...last7.map(x => Number(x.weight)));
+                        const min = Math.min(...last7.map((x) => Number(x.weight)));
+                        const max = Math.max(...last7.map((x) => Number(x.weight)));
                         const range = max - min || 1;
                         const h = 10 + ((Number(w.weight) - min) / range) * 28;
                         return (
@@ -806,7 +896,7 @@ export default function WorkoutPage() {
                                 width: '100%',
                                 height: h,
                                 borderRadius: 4,
-                                background: i === last7.length - 1 ? '#4ade80' : 'rgba(74,222,128,0.25)',
+                                background: i === last7.length - 1 ? 'var(--volt)' : 'rgba(255, 90, 31, 0.25)',
                                 transition: 'all 0.3s',
                               }}
                             />
