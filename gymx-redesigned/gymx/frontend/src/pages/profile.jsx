@@ -12,7 +12,6 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import DeleteAccountSection from '../components/DeleteAccountSection';
 
 // ── helper ──────────────────────────────────────────────────
 function Reveal({ children, delay = 0 }) {
@@ -53,7 +52,6 @@ function GlassCard({ children, style = {}, hover = true }) {
 }
 
 // ── الإنجازات: تعريف موحّد + مقدار التقدم لكل واحد ────────────
-// (المفتاح "key" لازم يفضل زي ما هو — ده اللي بيتسجل في جدول user_achievements)
 const ACHIEVEMENT_DEFS = [
   { key: 'first_workout', icon: '🔥', label: 'أول تمرين',       target: 1,  getCurrent: (d) => d.length },
   { key: 'streak_7',      icon: '💪', label: '7 أيام متتالية',  target: 7,  getCurrent: (d, streak) => streak },
@@ -63,8 +61,6 @@ const ACHIEVEMENT_DEFS = [
   { key: 'sessions_50',   icon: '🌟', label: 'محترف (50 جلسة)',  target: 50, getCurrent: (d) => d.length },
 ];
 
-// ── أيقونات حقيقية للعرض فقط — ach.icon (الإيموجي) يفضل زي ما هو
-// لأنه بيتخزن في notifications.title، مبنلمسوش هنا ──
 const ACHIEVEMENT_ICON_MAP = {
   first_workout: Flame,
   streak_7:      Dumbbell,
@@ -161,7 +157,7 @@ function AchievementCelebration({ achievement, onClose }) {
 
 // ── Calendar Heatmap للاستمرارية (زي GitHub) ──────────────────
 function CalendarHeatmap({ sessions }) {
-  const days = 84; // 12 أسبوع
+  const days = 84;
   const dateSet = new Set(sessions.map(s => new Date(s.created_at).toDateString()));
   const cells = [];
   const today = new Date();
@@ -521,6 +517,125 @@ function AllAchievementsModal({ achievements, onClose }) {
         )}
       </motion.div>
     </motion.div>
+  );
+}
+
+// ── قسم حذف الحساب المدمج داخل الصفحة ─────────────────────────
+function InlineDeleteAccountSection({ user, onDeleted }) {
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (confirmText.trim() !== 'DELETE') {
+      toast.error('اكتب كلمة DELETE للتأكيد');
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      const res = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ userId: user?.id }),
+      });
+
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload?.error || 'تعذر إتمام حذف الحساب');
+      }
+
+      toast.success('تم حذف الحساب بنجاح');
+      if (onDeleted) await onDeleted();
+    } catch (err) {
+      toast.error(err.message || 'حدث خطأ أثناء حذف الحساب');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        marginTop: 18,
+        padding: 14,
+        borderRadius: 'var(--radius-sm)',
+        background: 'rgba(248,113,113,0.06)',
+        border: '1px solid rgba(248,113,113,0.22)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: '#f87171' }}>
+            حذف الحساب نهائياً
+          </p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', marginTop: 2 }}>
+            سيتم مسح بياناتك وجلساتك ولا يمكن التراجع
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          style={{
+            padding: '7px 12px',
+            borderRadius: 6,
+            border: '1px solid rgba(248,113,113,0.35)',
+            background: 'rgba(248,113,113,0.12)',
+            color: '#f87171',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.7rem',
+            cursor: 'pointer',
+          }}
+        >
+          {open ? 'إغلاق' : 'حذف'}
+        </button>
+      </div>
+
+      {open && (
+        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <input
+            type="text"
+            placeholder="اكتب DELETE للتأكيد"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '9px 12px',
+              borderRadius: 6,
+              background: 'var(--iron)',
+              border: '1px solid var(--iron-light)',
+              color: 'var(--chalk)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.8rem',
+              outline: 'none',
+            }}
+          />
+          <button
+            type="button"
+            disabled={deleting}
+            onClick={handleDelete}
+            style={{
+              padding: '9px 14px',
+              borderRadius: 6,
+              border: 'none',
+              background: '#ef4444',
+              color: '#fff',
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.9rem',
+              cursor: deleting ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {deleting ? 'جاري الحذف...' : 'تأكيد الحذف النهائي'}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -980,9 +1095,7 @@ export default function ProfilePage() {
                     ))}
                   </div>
 
-                  <div style={{ marginTop: 18 }}>
-                    <DeleteAccountSection />
-                  </div>
+                  <InlineDeleteAccountSection user={user} onDeleted={handleLogout} />
                 </GlassCard>
               </Reveal>
 
