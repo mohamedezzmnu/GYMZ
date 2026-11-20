@@ -1,7 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Calendar, Users, Target, Zap, CheckCircle2, ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell } from 'lucide-react';
+import {
+  ChevronDown, Calendar, Users, Target, Zap, CheckCircle2,
+  ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell,
+} from 'lucide-react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabaseClient';
@@ -58,18 +61,45 @@ const PROGRAM_EXERCISE_MAP = {
 function getExerciseImage(name) {
   const id = PROGRAM_EXERCISE_MAP[name];
   if (!id) return null;
-  return EXERCISES.find(e => e.id === id) || null;
+  return EXERCISES.find((e) => e.id === id) || null;
 }
-
 
 // ══════════════════════════════════════════
 // الهيكل الأساسي لأي يوم تمرين
 // ══════════════════════════════════════════
 const DAY_STRUCTURE = [
-  { step: '01', title: 'الإحماء', subtitle: 'تسخين الجسم', desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.', color: '#4ade80', Icon: Flame },
-  { step: '02', title: 'التمارين الأساسية', subtitle: 'التمارين الكبيرة', desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.', color: '#FFFFFF', Icon: Dumbbell },
-  { step: '03', title: 'التمارين المساعدة', subtitle: 'تمارين عضلة واحدة', desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.', color: '#facc15', Icon: Target },
-  { step: '04', title: 'التبريد والإطالات', subtitle: 'تهدئة الجسم', desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.', color: '#f87171', Icon: Snowflake },
+  {
+    step: '01',
+    title: 'الإحماء',
+    subtitle: 'تسخين الجسم',
+    desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.',
+    color: 'var(--volt)',
+    Icon: Flame,
+  },
+  {
+    step: '02',
+    title: 'التمارين الأساسية',
+    subtitle: 'التمارين الكبيرة',
+    desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.',
+    color: 'var(--chalk)',
+    Icon: Dumbbell,
+  },
+  {
+    step: '03',
+    title: 'التمارين المساعدة',
+    subtitle: 'تمارين عضلة واحدة',
+    desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.',
+    color: 'var(--volt-bright)',
+    Icon: Target,
+  },
+  {
+    step: '04',
+    title: 'التبريد والإطالات',
+    subtitle: 'تهدئة الجسم',
+    desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.',
+    color: 'var(--ash-light)',
+    Icon: Snowflake,
+  },
 ];
 
 // ══════════════════════════════════════════
@@ -87,63 +117,75 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
   const [previewExercise, setPreviewExercise] = useState(null);
   const { user } = useAuth();
 
-  // هل البرنامج ده هو المسجل فيه؟
   const isMyProgram = enrolledTitle === (program.subtitle || program.title);
-  // هل مسجل في برنامج تاني؟
   const hasOtherProgram = enrolledTitle && !isMyProgram;
 
-  // تحقق لو منضم قبل كده
   useEffect(() => {
     if (!user) return;
-    supabase.from('user_programs')
+    supabase
+      .from('user_programs')
       .select('id')
       .eq('user_id', user.id)
       .eq('program_title', program.subtitle || program.title)
       .single()
-      .then(({ data }) => { if (data) setJoined(true); });
-  }, [user]);
+      .then(({ data }) => {
+        if (data) setJoined(true);
+      });
+  }, [user, program]);
 
-  // تحقق لو سجّل جلسة النهارده قبل كده
   useEffect(() => {
     if (!user) return;
     const today = new Date().toISOString().split('T')[0];
-    supabase.from('workout_sessions')
+    supabase
+      .from('workout_sessions')
       .select('id')
       .eq('user_id', user.id)
       .eq('program_title', program.subtitle || program.title)
       .eq('session_day', today)
       .single()
-      .then(({ data }) => { if (data) setSessionDone(true); });
-  }, [user]);
+      .then(({ data }) => {
+        if (data) setSessionDone(true);
+      });
+  }, [user, program]);
 
   const handleJoin = async (e) => {
     e.stopPropagation();
-    if (!user) { toast.error('سجّل دخول الأول'); return; }
+    if (!user) {
+      toast.error('سجّل دخول الأول');
+      return;
+    }
     setJoining(true);
-    // استخرج الرقم من days (مثلاً "3 أيام أسبوعياً" → 3)
-    const daysNum = parseInt(program.days) || 3;
-    // حوّل الـ level للإنجليزي
-    const levelMap = { 'مبتدئ': 'beginner', 'متوسط': 'intermediate', 'متقدم': 'advanced' };
+    const daysNum = parseInt(program.days, 10) || 3;
+    const levelMap = { مبتدئ: 'beginner', متوسط: 'intermediate', متقدم: 'advanced' };
     const levelEn = levelMap[program.level] || program.level;
-    const { error } = await supabase.from('user_programs').upsert({
-      user_id: user.id,
-      program_title: program.subtitle || program.title,
-      program_title_ar: program.title,
-      days_per_week: daysNum,
-      level: levelEn,
-      progress: 0,
-      is_active: true,
-    }, { onConflict: 'user_id,program_title' });
+    const { error } = await supabase.from('user_programs').upsert(
+      {
+        user_id: user.id,
+        program_title: program.subtitle || program.title,
+        program_title_ar: program.title,
+        days_per_week: daysNum,
+        level: levelEn,
+        progress: 0,
+        is_active: true,
+      },
+      { onConflict: 'user_id,program_title' }
+    );
     setJoining(false);
-    if (error) { toast.error('حصل خطأ: ' + error.message); return; }
+    if (error) {
+      toast.error('حصل خطأ: ' + error.message);
+      return;
+    }
     setJoined(true);
     setEnrolledTitle(program.subtitle || program.title);
-    toast.success(`انضممت لبرنامج ${program.title} ✅`);
+    toast.success(`انضممت لبرنامج ${program.title}`);
   };
 
   const handleLogSession = async (e) => {
     e.stopPropagation();
-    if (!user) { toast.error('سجّل دخول الأول'); return; }
+    if (!user) {
+      toast.error('سجّل دخول الأول');
+      return;
+    }
     setSavingSession(true);
     const today = new Date().toISOString().split('T')[0];
     const dayLabel = program.days_detail?.[activeDay]?.day || `يوم ${activeDay + 1}`;
@@ -155,79 +197,163 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
       done: true,
     });
     setSavingSession(false);
-    if (error) { toast.error('حصل خطأ'); return; }
+    if (error) {
+      toast.error('حصل خطأ');
+      return;
+    }
     setSessionDone(true);
-    toast.success('تم تسجيل جلسة النهارده 💪');
+    toast.success('تم تسجيل جلسة النهارده');
   };
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 28 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      id={'program-' + program.subtitle} style={{ marginBottom: 16 }}
+      transition={{ duration: 0.45, delay: index * 0.08 }}
+      id={'program-' + program.subtitle}
+      style={{ marginBottom: 16 }}
     >
       {/* Card Header */}
-      <motion.div
-        whileHover={{ borderColor: 'var(--glass-border-hover)' }}
-        transition={{ duration: 0.12 }}
-        style={{ position: 'relative', overflow: 'hidden', background: 'var(--carbon)', border: highlighted ? '1px solid rgba(255,77,46,0.4)' : '1px solid var(--glass-border)', borderRadius: open ? '10px 10px 0 0' : 10, transition: 'border-color 150ms ease, background 150ms ease', cursor: 'pointer', padding: '24px 28px' }}
+      <div
+        className="glass-card"
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderColor: highlighted || isMyProgram ? 'rgba(255, 90, 31, 0.42)' : undefined,
+          borderRadius: open ? '14px 14px 0 0' : 14,
+          cursor: 'pointer',
+          padding: '24px 28px',
+        }}
         onClick={() => setOpen(!open)}
       >
-        {/* large background number — editorial identity instead of an emoji icon */}
-        <div style={{
-          position: 'absolute', top: -6, insetInlineEnd: 18,
-          fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(64px,8vw,96px)',
-          lineHeight: 1, color: 'var(--iron-light)', userSelect: 'none', pointerEvents: 'none', zIndex: 0,
-        }}>
+        {/* Editorial index number */}
+        <div
+          style={{
+            position: 'absolute',
+            top: -6,
+            insetInlineEnd: 18,
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 'clamp(64px,8vw,96px)',
+            lineHeight: 1,
+            color: 'rgba(255, 255, 255, 0.035)',
+            userSelect: 'none',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
           {String(index + 1).padStart(2, '0')}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, position: 'relative', zIndex: 1 }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'var(--accent-dim)', border: '1px solid rgba(255,77,46,0.2)', color: 'var(--accent-bright)' }}>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontFamily: 'var(--font-mono)',
+                  padding: '3px 10px',
+                  borderRadius: 6,
+                  background: 'var(--volt-dim)',
+                  border: '1px solid rgba(255, 90, 31, 0.25)',
+                  color: 'var(--volt-bright)',
+                }}
+              >
                 {program.subtitle}
               </span>
-              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: program.levelColor.bg, border: '1px solid ' + program.levelColor.border, color: program.levelColor.text }}>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontFamily: 'var(--font-mono)',
+                  padding: '3px 10px',
+                  borderRadius: 6,
+                  background: program.levelColor?.bg || 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid ' + (program.levelColor?.border || 'var(--glass-border)'),
+                  color: program.levelColor?.text || 'var(--ash-light)',
+                }}
+              >
                 {program.level}
               </span>
               {isMyProgram && (
-                <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '3px 10px',
+                    borderRadius: 6,
+                    background: 'rgba(255, 90, 31, 0.14)',
+                    border: '1px solid rgba(255, 90, 31, 0.45)',
+                    color: 'var(--volt-bright)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
                   <CheckCircle2 size={11} /> برنامجك الحالي
                 </span>
               )}
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', color: 'var(--chalk)', margin: '0 0 4px 0', lineHeight: 1.2 }}>
+
+            <h2
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: '1.4rem',
+                letterSpacing: '-0.02em',
+                color: 'var(--chalk)',
+                margin: '0 0 4px 0',
+                lineHeight: 1.2,
+              }}
+            >
               {program.title}
             </h2>
-            <div style={{ fontSize: '0.8rem', color: program.accentColor, fontFamily: 'var(--font-body)', marginBottom: 12, opacity: 0.85, direction: 'rtl' }}>
+            <div
+              style={{
+                fontSize: '0.8rem',
+                color: 'var(--volt-bright)',
+                fontFamily: 'var(--font-body)',
+                marginBottom: 12,
+                opacity: 0.9,
+                direction: 'rtl',
+              }}
+            >
               {program.subtitleAr || program.subtitle}
             </div>
-            <p style={{ fontSize: '0.88rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: '0 0 14px 0', direction: 'rtl', fontFamily: 'var(--font-body)', maxWidth: 600 }}>
+            <p
+              style={{
+                fontSize: '0.88rem',
+                color: 'var(--ash-light)',
+                lineHeight: 1.7,
+                margin: '0 0 14px 0',
+                direction: 'rtl',
+                fontFamily: 'var(--font-body)',
+                maxWidth: 600,
+              }}
+            >
               {program.description}
             </p>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Calendar size={13} color='var(--ash)' />
+                <Calendar size={13} color="var(--ash)" />
                 <span style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{program.days}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Users size={13} color='var(--ash)' />
+                <Users size={13} color="var(--ash)" />
                 <span style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)', direction: 'rtl' }}>{program.suitable}</span>
               </div>
             </div>
           </div>
+
           <motion.div
             animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-            style={{ color: program.accentColor, flexShrink: 0, marginTop: 4 }}
+            transition={{ duration: 0.25 }}
+            style={{ color: 'var(--volt)', flexShrink: 0, marginTop: 4 }}
           >
             <ChevronDown size={22} />
           </motion.div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Expanded Content */}
       <AnimatePresence>
@@ -236,18 +362,39 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ background: 'var(--carbon)', border: '1px solid var(--glass-border)', borderTop: 'none', borderRadius: '0 0 10px 10px', padding: '24px 28px' }}>
+            <div
+              className="glass-card"
+              style={{
+                borderTop: '1px solid var(--glass-border)',
+                borderRadius: '0 0 14px 14px',
+                padding: '24px 28px',
+                boxShadow: 'none',
+              }}
+            >
               {/* Day tabs */}
               <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
                 {program.days_detail.map((d, i) => (
                   <motion.button
                     key={i}
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.12 }}
                     onClick={() => setActiveDay(i)}
-                    style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', border: '1px solid', transition: 'all 200ms ease', background: activeDay === i ? program.accentColor + '22' : 'transparent', borderColor: activeDay === i ? program.accentColor + '88' : 'rgba(255,255,255,0.1)', color: activeDay === i ? program.accentColor : 'rgba(255,255,255,0.4)' }}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontFamily: 'var(--font-mono)',
+                      padding: '6px 14px',
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                      border: '1px solid',
+                      transition: 'all 180ms ease',
+                      background: activeDay === i ? 'var(--volt-dim)' : 'rgba(255, 255, 255, 0.02)',
+                      borderColor: activeDay === i ? 'rgba(255, 90, 31, 0.55)' : 'var(--glass-border)',
+                      color: activeDay === i ? 'var(--volt-bright)' : 'var(--ash)',
+                    }}
                   >
                     يوم {i + 1}
                   </motion.button>
@@ -257,35 +404,100 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               {/* Active day */}
               <motion.div
                 key={activeDay}
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.22 }}
               >
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: program.accentColor, marginBottom: 16, direction: 'rtl', fontWeight: 'bold' }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '0.95rem',
+                    color: 'var(--volt-bright)',
+                    marginBottom: 16,
+                    direction: 'rtl',
+                    fontWeight: 700,
+                  }}
+                >
                   {program.days_detail[activeDay].day}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {program.days_detail[activeDay].exercises.map((ex, i) => {
                     const exImg = getExerciseImage(ex.name);
+                    const primaryName = exImg?.name_en || exImg?.title_en || ex.name;
+                    const secondaryName = primaryName !== ex.name ? ex.name : null;
+
                     return (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderRadius: 8, background: 'var(--carbon)', border: '1px solid var(--iron-light)', direction: 'rtl' }}>
-                        <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: program.accentColor, opacity: 0.7, minWidth: 22, paddingTop: 2 }}>
+                      <div
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 12,
+                          padding: '12px 14px',
+                          borderRadius: 10,
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--glass-border)',
+                          direction: 'rtl',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontFamily: 'var(--font-mono)',
+                            color: 'var(--volt)',
+                            minWidth: 22,
+                            paddingTop: 2,
+                          }}
+                        >
                           {String(i + 1).padStart(2, '0')}
                         </span>
                         <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                           <div>
-                            <div style={{ fontSize: '0.88rem', color: 'var(--chalk)', fontFamily: 'var(--font-body)', marginBottom: 2 }}>{ex.name}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
+                            <div
+                              style={{
+                                fontSize: '0.9rem',
+                                color: 'var(--chalk)',
+                                fontFamily: 'var(--font-display)',
+                                fontWeight: 700,
+                                marginBottom: 2,
+                              }}
+                            >
+                              {primaryName}
+                            </div>
+                            {secondaryName && (
+                              <div
+                                style={{
+                                  fontSize: '0.76rem',
+                                  color: 'var(--ash-light)',
+                                  fontFamily: 'var(--font-body)',
+                                  marginBottom: 2,
+                                }}
+                              >
+                                {secondaryName}
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.74rem', color: 'var(--ash)', fontFamily: 'var(--font-body)' }}>{ex.detail}</div>
                           </div>
                           {exImg && (
                             <motion.button
-                              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.92 }} transition={{ duration: 0.12 }}
+                              whileHover={{ scale: 1.04 }}
+                              whileTap={{ scale: 0.95 }}
+                              transition={{ duration: 0.12 }}
                               onClick={() => setPreviewExercise(exImg)}
                               style={{
-                                display: 'flex', alignItems: 'center', gap: 4, padding: '5px 9px', flexShrink: 0,
-                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
-                                borderRadius: 7, color: 'var(--ash-light)', cursor: 'pointer',
-                                fontFamily: 'var(--font-mono)', fontSize: '0.62rem', whiteSpace: 'nowrap',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                padding: '5px 10px',
+                                flexShrink: 0,
+                                background: 'rgba(255, 255, 255, 0.04)',
+                                border: '1px solid var(--glass-border)',
+                                borderRadius: 7,
+                                color: 'var(--ash-light)',
+                                cursor: 'pointer',
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.62rem',
+                                whiteSpace: 'nowrap',
                               }}
                             >
                               <ImageIcon size={12} /> صورة
@@ -298,26 +510,29 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                 </div>
               </motion.div>
 
-              {/* banner لو مسجل في برنامج تاني */}
+              {/* Banner لو مسجل في برنامج تاني */}
               {hasOtherProgram && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8 }}
+                  initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   style={{
-                    marginBottom: 16, padding: '10px 14px',
-                    background: 'rgba(250,204,21,0.07)',
-                    border: '1px solid rgba(250,204,21,0.25)',
+                    marginTop: 18,
+                    padding: '12px 14px',
+                    background: 'rgba(255, 90, 31, 0.07)',
+                    border: '1px solid rgba(255, 90, 31, 0.28)',
                     borderRadius: 10,
-                    display: 'flex', alignItems: 'center', gap: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
                     direction: 'rtl',
                   }}
                 >
-                  <AlertTriangle size={16} color="#facc15" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <AlertTriangle size={16} color="var(--volt)" style={{ flexShrink: 0 }} />
                   <div>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#facc15', margin: 0 }}>
-                      إنت مسجل حالياً في برنامج <strong>{enrolledTitle}</strong>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--chalk)', margin: 0 }}>
+                      إنت مسجل حالياً في برنامج <strong style={{ color: 'var(--volt-bright)' }}>{enrolledTitle}</strong>
                     </p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', margin: '3px 0 0' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', margin: '3px 0 0' }}>
                       لو انضممت لده هيتغير برنامجك الأساسي
                     </p>
                   </div>
@@ -328,39 +543,63 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
               <motion.button
                 onClick={handleJoin}
                 disabled={joining || joined}
-                whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.12 }}
+                className={joined ? 'btn btn-outline' : 'btn btn-primary'}
                 style={{
-                  marginTop: 20, width: '100%', padding: '13px',
-                  background: joined ? 'rgba(74,222,128,0.1)' : 'var(--accent)',
-                  border: joined ? '1px solid rgba(74,222,128,0.3)' : 'none',
-                  borderRadius: 12, cursor: joined ? 'default' : 'pointer',
-                  color: joined ? '#4ade80' : '#fff',
-                  fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.95rem',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  marginTop: 20,
+                  width: '100%',
+                  padding: '13px',
+                  borderRadius: 10,
+                  cursor: joined ? 'default' : 'pointer',
+                  background: joined ? 'rgba(255, 90, 31, 0.1)' : undefined,
+                  borderColor: joined ? 'rgba(255, 90, 31, 0.4)' : undefined,
+                  color: joined ? 'var(--volt-bright)' : '#fff',
                 }}
               >
-                {joined ? <><CheckCircle2 size={16} /> منضم للبرنامج</> : joining ? 'جاري الانضمام...' : <><Zap size={15} /> ابدأ البرنامج</>}
+                {joined ? (
+                  <>
+                    <CheckCircle2 size={16} /> منضم للبرنامج
+                  </>
+                ) : joining ? (
+                  'جاري الانضمام...'
+                ) : (
+                  <>
+                    <Zap size={15} /> ابدأ البرنامج
+                  </>
+                )}
               </motion.button>
 
               {/* زرار تسجيل الجلسة */}
               <motion.button
                 onClick={handleLogSession}
                 disabled={savingSession || sessionDone}
-                whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.12 }}
+                className="btn btn-outline"
                 style={{
-                  marginTop: 10, width: '100%', padding: '12px',
-                  background: sessionDone ? 'rgba(74,222,128,0.06)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${sessionDone ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.1)'}`,
-                  borderRadius: 12, cursor: sessionDone ? 'default' : 'pointer',
-                  color: sessionDone ? '#4ade80' : 'var(--ash-light)',
-                  fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.06em',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  marginTop: 10,
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: 10,
+                  cursor: sessionDone ? 'default' : 'pointer',
+                  background: sessionDone ? 'rgba(255, 90, 31, 0.06)' : 'rgba(255, 255, 255, 0.02)',
+                  borderColor: sessionDone ? 'rgba(255, 90, 31, 0.35)' : 'var(--glass-border)',
+                  color: sessionDone ? 'var(--volt-bright)' : 'var(--ash-light)',
+                  fontSize: '0.88rem',
                 }}
               >
-                {sessionDone
-                  ? <><CheckCircle2 size={15} /> تمت جلسة النهارده 💪</>
-                  : savingSession ? 'جاري الحفظ...'
-                  : <><CheckCircle2 size={15} /> سجّل جلسة النهارده</>}
+                {sessionDone ? (
+                  <>
+                    <CheckCircle2 size={15} /> تمت جلسة النهارده
+                  </>
+                ) : savingSession ? (
+                  'جاري الحفظ...'
+                ) : (
+                  <>
+                    <CheckCircle2 size={15} /> سجّل جلسة النهارده
+                  </>
+                )}
               </motion.button>
             </div>
           </motion.div>
@@ -371,42 +610,73 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
       <AnimatePresence>
         {previewExercise && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setPreviewExercise(null)}
             style={{
-              position: 'fixed', inset: 0, zIndex: 200,
-              background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+              position: 'fixed',
+              inset: 0,
+              zIndex: 200,
+              background: 'rgba(0, 0, 0, 0.78)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 20,
             }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.18 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="glass-card"
               style={{
-                width: '100%', maxWidth: 380, background: 'var(--carbon)', border: '1px solid var(--glass-border)',
-                borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative',
+                width: '100%',
+                maxWidth: 380,
+                overflow: 'hidden',
+                position: 'relative',
               }}
             >
               <button
                 onClick={() => setPreviewExercise(null)}
                 style={{
-                  position: 'absolute', top: 10, left: 10, zIndex: 2,
-                  width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.55)',
-                  border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', cursor: 'pointer',
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  zIndex: 2,
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'rgba(8, 8, 8, 0.72)',
+                  border: '1px solid var(--glass-border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  cursor: 'pointer',
                 }}
               >
                 <X size={15} />
               </button>
               <img
-                src={previewExercise.img} alt={previewExercise.name_ar} loading="lazy"
+                src={previewExercise.img}
+                alt={previewExercise.name_en || previewExercise.name_ar}
+                loading="lazy"
                 style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', background: 'var(--iron)' }}
               />
               <div style={{ padding: '16px 18px', direction: 'rtl' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--chalk)', marginBottom: 6 }}>
-                  {previewExercise.name_ar}
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--chalk)', marginBottom: 4 }}>
+                  {previewExercise.name_en || previewExercise.name_ar}
                 </div>
+                {previewExercise.name_en && previewExercise.name_ar && (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', marginBottom: 6 }}>
+                    {previewExercise.name_ar}
+                  </div>
+                )}
                 {previewExercise.tips && (
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
                     <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
@@ -426,24 +696,43 @@ function StructureStep({ step, index }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
   const { Icon } = step;
+
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
-      style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '20px 24px', background: 'var(--carbon)', border: '1px solid var(--iron-light)', borderRadius: 10 }}
+      transition={{ duration: 0.45, delay: index * 0.08 }}
+      className="glass-card"
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 16,
+        padding: '20px 24px',
+      }}
     >
-      <div style={{ width: 40, height: 40, borderRadius: 8, background: step.color + '18', border: '1px solid ' + step.color + '44', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 10,
+          background: 'var(--volt-dim)',
+          border: '1px solid rgba(255, 90, 31, 0.28)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
         <Icon size={18} color={step.color} strokeWidth={2} />
       </div>
       <div style={{ flex: 1, direction: 'rtl' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: step.color, opacity: 0.8 }}>{step.step}</span>
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: 'var(--chalk)', fontWeight: 'bold' }}>{step.title}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>— {step.subtitle}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--volt)', fontWeight: 700 }}>{step.step}</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: 'var(--chalk)', fontWeight: 700 }}>{step.title}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash)' }}>— {step.subtitle}</span>
         </div>
-        <p style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: 0, fontFamily: 'var(--font-body)' }}>{step.desc}</p>
+        <p style={{ fontSize: '0.84rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0, fontFamily: 'var(--font-body)' }}>{step.desc}</p>
       </div>
     </motion.div>
   );
@@ -451,6 +740,7 @@ function StructureStep({ step, index }) {
 
 // ══════════════════════════════════════════
 // Main Page
+// ══════════════════════════════════════════
 export default function ProgramsPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -459,28 +749,52 @@ export default function ProgramsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('user_programs')
+    supabase
+      .from('user_programs')
       .select('program_title')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .limit(1)
       .single()
-      .then(({ data }) => { if (data) setEnrolledTitle(data.program_title); });
+      .then(({ data }) => {
+        if (data) setEnrolledTitle(data.program_title);
+      });
   }, [user]);
+
+  const visiblePrograms = filterProgram
+    ? PROGRAMS.filter((p) => p.title === filterProgram || p.subtitle === filterProgram)
+    : PROGRAMS;
 
   return (
     <>
-      <Head><title>Programs - GYMZ</title></Head>
+      <Head>
+        <title>Programs - GYMZ</title>
+      </Head>
 
       {/* Hero */}
-      <section style={{ padding: '60px 0 40px', borderBottom: '1px solid var(--glass-border)' }}>
-        <div className="container">
+      <section style={{ padding: '64px 0 40px', borderBottom: '1px solid var(--glass-border)', position: 'relative' }}>
+        <div className="bg-grid" />
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-            <div className="mono" style={{ color: 'var(--ash)', marginBottom: 12 }}>Training programs</div>
-            <h1 className="display-lg" style={{ marginBottom: 16 }}>اختار <span style={{ color: 'var(--accent)' }}>برنامجك</span></h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div className="rule-orange" />
+              <span className="label-tag">Training programs</span>
+            </div>
+            <h1 className="display-lg" style={{ marginBottom: 16 }}>
+              اختار <span style={{ color: 'var(--volt)' }}>برنامجك</span>
+            </h1>
             <p style={{ fontSize: '1rem', color: 'var(--ash-light)', maxWidth: 560, lineHeight: 1.8, direction: 'rtl', fontFamily: 'var(--font-body)' }}>
               4 برامج تمرين جاهزة — كل واحد ليه أسلوبه وناسه. اختار اللي يناسب مستواك ووقتك وابدأ.
             </p>
+            {filterProgram && (
+              <button
+                onClick={() => router.replace('/programs', undefined, { shallow: true })}
+                className="btn btn-outline"
+                style={{ marginTop: 18, padding: '8px 16px', fontSize: '0.78rem' }}
+              >
+                عرض كل البرامج
+              </button>
+            )}
           </motion.div>
         </div>
       </section>
@@ -488,8 +802,15 @@ export default function ProgramsPage() {
       {/* Programs */}
       <section style={{ padding: '40px 0' }}>
         <div className="container">
-          {(filterProgram ? PROGRAMS.filter(p => p.title === filterProgram || p.subtitle === filterProgram) : PROGRAMS).map((p, i) => (
-            <ProgramCard key={p.id} program={p} index={i} enrolledTitle={enrolledTitle} setEnrolledTitle={setEnrolledTitle} />
+          {visiblePrograms.map((p, i) => (
+            <ProgramCard
+              key={p.id}
+              program={p}
+              index={i}
+              highlighted={Boolean(filterProgram)}
+              enrolledTitle={enrolledTitle}
+              setEnrolledTitle={setEnrolledTitle}
+            />
           ))}
         </div>
       </section>
@@ -497,12 +818,25 @@ export default function ProgramsPage() {
       {/* Day Structure */}
       <section style={{ padding: '0 0 80px' }}>
         <div className="container">
-          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3 }} style={{ marginBottom: 32 }}>
-            <div className="mono" style={{ color: 'var(--ash)', marginBottom: 8 }}>هيكل أي يوم تمرين</div>
-            <h2 className="display-sm" style={{ margin: 0 }}>الترتيب <span style={{ color: 'var(--accent)' }}>الصح</span></h2>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3 }}
+            style={{ marginBottom: 32 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <div className="rule-orange" />
+              <span className="label-tag">هيكل أي يوم تمرين</span>
+            </div>
+            <h2 className="display-md" style={{ margin: 0 }}>
+              الترتيب <span style={{ color: 'var(--volt)' }}>الصح</span>
+            </h2>
           </motion.div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {DAY_STRUCTURE.map((s, i) => <StructureStep key={i} step={s} index={i} />)}
+            {DAY_STRUCTURE.map((s, i) => (
+              <StructureStep key={i} step={s} index={i} />
+            ))}
           </div>
         </div>
       </section>
