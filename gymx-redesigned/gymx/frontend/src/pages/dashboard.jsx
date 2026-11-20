@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
-  Dumbbell, Flame, Target, ChevronRight,
-  Plus, BarChart2, Clock, CheckCircle, Zap, Scale,
+  Dumbbell, Flame, Target, ChevronRight, Plus, BarChart2,
+  Clock, CheckCircle, Zap, Scale, ClipboardList, Utensils, Calculator,
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -32,7 +32,7 @@ function GlassCard({ children, style = {}, accentColor }) {
   return (
     <motion.div
       whileHover={{
-        borderColor: accentColor ? `${accentColor}55` : 'var(--glass-border-hover)',
+        borderColor: accentColor ? `${accentColor}66` : 'var(--glass-border-hover)',
         y: -2,
       }}
       transition={{ duration: 0.2 }}
@@ -58,8 +58,8 @@ function StatBox({ icon: Icon, label, value, sub, accent = 'var(--volt)', delay 
               width: 38,
               height: 38,
               borderRadius: 10,
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid var(--glass-border)',
+              background: 'var(--volt-dim)',
+              border: '1px solid rgba(255, 90, 31, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -72,11 +72,11 @@ function StatBox({ icon: Icon, label, value, sub, accent = 'var(--volt)', delay 
               style={{
                 fontSize: '0.6rem',
                 fontFamily: 'var(--font-mono)',
-                color: '#4ade80',
+                color: 'var(--volt-bright)',
                 padding: '2px 7px',
                 borderRadius: 4,
-                background: 'rgba(74,222,128,0.1)',
-                border: '1px solid rgba(74,222,128,0.2)',
+                background: 'var(--volt-dim)',
+                border: '1px solid rgba(255, 90, 31, 0.35)',
               }}
             >
               {sub}
@@ -112,7 +112,7 @@ function StatBox({ icon: Icon, label, value, sub, accent = 'var(--volt)', delay 
 function WeightChart({ data }) {
   if (!data || data.length < 2) return null;
 
-  const weights = data.map(d => Number(d.weight)).filter(n => !Number.isNaN(n)).reverse();
+  const weights = data.map((d) => Number(d.weight)).filter((n) => !Number.isNaN(n)).reverse();
   if (weights.length < 2) return null;
 
   const min = Math.min(...weights) - 1;
@@ -175,10 +175,11 @@ function WeightEntry({ date, weight, change }) {
           style={{
             fontSize: '0.62rem',
             fontFamily: 'var(--font-mono)',
-            color: positive ? '#f87171' : '#4ade80',
+            color: positive ? 'var(--volt-bright)' : 'var(--chalk)',
             padding: '2px 7px',
             borderRadius: 4,
-            background: positive ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)',
+            background: positive ? 'rgba(255, 90, 31, 0.14)' : 'rgba(255, 255, 255, 0.06)',
+            border: positive ? '1px solid rgba(255, 90, 31, 0.3)' : '1px solid var(--glass-border)',
           }}
         >
           {positive ? '+' : ''}{change.toFixed(1)}
@@ -194,14 +195,14 @@ export default function DashboardPage() {
   const ar = lang === 'ar';
   const router = useRouter();
 
-  const [programs, setPrograms]         = useState([]);
-  const [sessions, setSessions]         = useState([]);
-  const [weightLog, setWeightLog]       = useState([]);
-  const [newWeight, setNewWeight]       = useState('');
+  const [programs, setPrograms] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [weightLog, setWeightLog] = useState([]);
+  const [newWeight, setNewWeight] = useState('');
   const [loadingWeight, setLoadingWeight] = useState(false);
-  const [weekDays, setWeekDays]         = useState([]);
-  const [streak, setStreak]             = useState(0);
-  const [goalWeight, setGoalWeight]     = useState(null);
+  const [weekDays, setWeekDays] = useState([]);
+  const [streak, setStreak] = useState(0);
+  const [goalWeight, setGoalWeight] = useState(null);
 
   const dateLocale = ar ? 'ar-EG' : 'en-US';
 
@@ -232,7 +233,7 @@ export default function DashboardPage() {
         if (!active || !data) return;
         setSessions(data);
 
-        const sessionDates = [...new Set(data.map(s => new Date(s.created_at).toDateString()))];
+        const sessionDates = [...new Set(data.map((s) => new Date(s.created_at).toDateString()))];
         let count = 0;
         const today = new Date();
         for (let i = 0; i < 90; i++) {
@@ -316,33 +317,34 @@ export default function DashboardPage() {
     if (data) setWeightLog(data);
     setNewWeight('');
     setLoadingWeight(false);
-    toast.success(ar ? '✅ اتسجل الوزن' : '✅ Weight logged');
+    toast.success(ar ? 'تم تسجيل الوزن' : 'Weight logged');
   };
 
   const now = new Date();
   const thisMonth = now.getMonth();
-  const thisYear  = now.getFullYear();
+  const thisYear = now.getFullYear();
 
-  const totalSessions = sessions.filter(s => {
+  const totalSessions = sessions.filter((s) => {
     const d = new Date(s.created_at);
     return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
   }).length;
 
-  const trainedToday = sessions.some(s => new Date(s.created_at).toDateString() === now.toDateString());
+  const trainedToday = sessions.some((s) => new Date(s.created_at).toDateString() === now.toDateString());
   const currentWeight = weightLog[0]?.weight ?? '—';
 
-  const startWeight = weightLog.length ? Math.max(...weightLog.map(w => Number(w.weight))) : null;
-  const progressPct = startWeight && goalWeight && currentWeight !== '—' && startWeight !== goalWeight
-    ? Math.min(100, Math.max(0, Math.round(((startWeight - Number(currentWeight)) / (startWeight - Number(goalWeight))) * 100)))
-    : 0;
+  const startWeight = weightLog.length ? Math.max(...weightLog.map((w) => Number(w.weight))) : null;
+  const progressPct =
+    startWeight && goalWeight && currentWeight !== '—' && startWeight !== goalWeight
+      ? Math.min(100, Math.max(0, Math.round(((startWeight - Number(currentWeight)) / (startWeight - Number(goalWeight))) * 100)))
+      : 0;
 
   const lastSession = sessions[0];
 
   const quickLinks = [
-    { href: '/exercises', label: ar ? 'التمارين' : 'Exercises',   icon: '🏋️', color: 'var(--volt)' },
-    { href: '/programs',  label: ar ? 'البرامج'  : 'Programs',    icon: '📋', color: '#FFFFFF'     },
-    { href: '/nutrition', label: ar ? 'التغذية'  : 'Nutrition',   icon: '🥗', color: '#4ade80'     },
-    { href: '/tools',     label: ar ? 'الحاسبات' : 'Calculators', icon: '🧮', color: '#FFFFFF'     },
+    { href: '/exercises', label: ar ? 'التمارين' : 'Exercises', Icon: Dumbbell },
+    { href: '/programs', label: ar ? 'البرامج' : 'Programs', Icon: ClipboardList },
+    { href: '/nutrition', label: ar ? 'التغذية' : 'Nutrition', Icon: Utensils },
+    { href: '/tools', label: ar ? 'الحاسبات' : 'Calculators', Icon: Calculator },
   ];
 
   if (!user) return null;
@@ -393,7 +395,7 @@ export default function DashboardPage() {
                   lineHeight: 1.05,
                 }}
               >
-                {user.email?.split('@')[0] || (ar ? 'بطل' : 'CHAMP')} <span style={{ color: 'var(--volt)' }}>💪</span>
+                {user.email?.split('@')[0] || (ar ? 'بطل' : 'CHAMP')}
               </h1>
             </div>
           </Reveal>
@@ -406,7 +408,7 @@ export default function DashboardPage() {
                   {ar ? 'أيام الأسبوع' : 'THIS WEEK'}
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--volt)' }}>
-                  {streak} {ar ? 'أيام متتالية' : 'DAY STREAK'} 🔥
+                  {streak} {ar ? 'أيام متتالية' : 'DAY STREAK'}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
@@ -417,11 +419,11 @@ export default function DashboardPage() {
                         width: '100%',
                         aspectRatio: '1',
                         borderRadius: 8,
-                        border: `1px solid ${d.today ? 'var(--volt)' : d.done ? 'rgba(74,222,128,0.4)' : 'var(--glass-border)'}`,
+                        border: `1px solid ${d.today ? 'var(--volt)' : d.done ? 'rgba(255, 90, 31, 0.45)' : 'var(--glass-border)'}`,
                         background: d.today
                           ? 'var(--volt-dim)'
                           : d.done
-                            ? 'rgba(74,222,128,0.08)'
+                            ? 'rgba(255, 90, 31, 0.1)'
                             : 'rgba(255,255,255,0.02)',
                         display: 'flex',
                         alignItems: 'center',
@@ -429,7 +431,7 @@ export default function DashboardPage() {
                         marginBottom: 5,
                       }}
                     >
-                      {d.done && !d.today && <span style={{ fontSize: '0.65rem', color: '#4ade80' }}>✓</span>}
+                      {d.done && !d.today && <span style={{ fontSize: '0.65rem', color: 'var(--volt-bright)' }}>✓</span>}
                       {d.today && <span style={{ fontSize: '0.65rem', color: 'var(--volt)' }}>●</span>}
                     </div>
                     <span
@@ -438,7 +440,7 @@ export default function DashboardPage() {
                         display: 'block',
                         fontSize: '0.56rem',
                         fontFamily: 'var(--font-mono)',
-                        color: d.today ? 'var(--volt)' : d.done ? '#4ade80' : 'var(--ash)',
+                        color: d.today ? 'var(--volt)' : d.done ? 'var(--volt-bright)' : 'var(--ash)',
                       }}
                     >
                       {d.label.slice(0, 3)}
@@ -455,19 +457,19 @@ export default function DashboardPage() {
               icon={Flame}
               label={ar ? 'الاستمرارية' : 'STREAK'}
               value={streak ? `${streak} ${ar ? 'يوم' : 'd'}` : '—'}
-              sub={trainedToday ? (ar ? '+1 اليوم 🔥' : '+1 today 🔥') : null}
+              sub={trainedToday ? (ar ? '+1 اليوم' : '+1 today') : null}
               accent="var(--volt)"
               delay={0.05}
             />
-            <StatBox icon={Dumbbell} label={ar ? 'جلسات الشهر' : 'SESSIONS/MO'} value={totalSessions || '—'} accent="#FFFFFF" delay={0.1} />
+            <StatBox icon={Dumbbell} label={ar ? 'جلسات الشهر' : 'SESSIONS/MO'} value={totalSessions || '—'} accent="var(--volt-bright)" delay={0.1} />
             <StatBox
               icon={Scale}
               label={ar ? 'الوزن الحالي' : 'CURRENT WEIGHT'}
               value={currentWeight !== '—' ? `${currentWeight}` : '—'}
-              accent="#4ade80"
+              accent="var(--chalk)"
               delay={0.15}
             />
-            <StatBox icon={Target} label={ar ? 'برامج نشطة' : 'ACTIVE PROGRAMS'} value={programs.length || '—'} accent="#FFFFFF" delay={0.2} />
+            <StatBox icon={Target} label={ar ? 'برامج نشطة' : 'ACTIVE PROGRAMS'} value={programs.length || '—'} accent="var(--volt)" delay={0.2} />
           </div>
 
           {/* LAST WORKOUT */}
@@ -527,8 +529,8 @@ export default function DashboardPage() {
                     step="0.1"
                     placeholder={ar ? 'وزنك اليوم (kg)' : "Today's weight (kg)"}
                     value={newWeight}
-                    onChange={e => setNewWeight(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && logWeight()}
+                    onChange={(e) => setNewWeight(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && logWeight()}
                     style={{ flex: 1, padding: '9px 12px', fontSize: '0.875rem' }}
                   />
                   <motion.button
@@ -673,7 +675,7 @@ export default function DashboardPage() {
               <Reveal delay={0.2}>
                 <GlassCard style={{ padding: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                    <Clock size={15} color="#FFFFFF" />
+                    <Clock size={15} color="var(--volt)" />
                     <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem' }}>
                       {ar ? 'آخر الجلسات' : 'RECENT SESSIONS'}
                     </h2>
@@ -695,7 +697,7 @@ export default function DashboardPage() {
                           borderBottom: '1px solid var(--glass-border)',
                         }}
                       >
-                        <CheckCircle size={14} color="#4ade80" style={{ flexShrink: 0 }} />
+                        <CheckCircle size={14} color="var(--volt)" style={{ flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div className="truncate-1" style={{ fontSize: '0.8rem', color: 'var(--chalk)' }}>
                             {s.name || s.program_name || (ar ? 'جلسة تمرين' : 'Workout session')}
@@ -722,7 +724,7 @@ export default function DashboardPage() {
                     {ar ? 'روابط سريعة' : 'QUICK LINKS'}
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    {quickLinks.map(({ href, label, icon, color }) => (
+                    {quickLinks.map(({ href, label, Icon }) => (
                       <Link
                         key={href}
                         href={href}
@@ -741,8 +743,8 @@ export default function DashboardPage() {
                           transition: 'border-color 150ms, background 150ms',
                         }}
                       >
-                        <span>{icon}</span>
-                        <span style={{ color }}>{label}</span>
+                        <Icon size={15} color="var(--volt)" />
+                        <span>{label}</span>
                       </Link>
                     ))}
                   </div>
