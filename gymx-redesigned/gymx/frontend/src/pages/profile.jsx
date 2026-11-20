@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import DeleteAccountSection from '../components/DeleteAccountSection';
 
 // ── helper ──────────────────────────────────────────────────
 function Reveal({ children, delay = 0 }) {
@@ -168,7 +169,6 @@ function CalendarHeatmap({ sessions }) {
     const d = new Date(today); d.setDate(today.getDate() - i);
     cells.push({ date: d, active: dateSet.has(d.toDateString()) });
   }
-  // رتّبهم في أعمدة أسبوعية (7 صفوف × 12 عمود)
   const weeks = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
@@ -192,7 +192,6 @@ function CalendarHeatmap({ sessions }) {
   );
 }
 
-
 // ── CHANGE PASSWORD MODAL ────────────────────────────────────
 function ChangePasswordModal({ onClose }) {
   const [form, setForm] = useState({ current: '', next: '', confirm: '' });
@@ -204,11 +203,9 @@ function ChangePasswordModal({ onClose }) {
     if (form.next.length < 8) { toast.error('الباسورد الجديد 8 حروف على الأقل'); return; }
     if (form.next !== form.confirm) { toast.error('الباسوردين مش متطابقين'); return; }
     setLoading(true);
-    // تأكد إن الباسورد الحالي صح عن طريق re-login
     const { data: { user: u } } = await supabase.auth.getUser();
     const { error: signInErr } = await supabase.auth.signInWithPassword({ email: u.email, password: form.current });
     if (signInErr) { toast.error('الباسورد الحالي غلط'); setLoading(false); return; }
-    // غيّر الباسورد
     const { error } = await supabase.auth.updateUser({ password: form.next });
     if (error) { toast.error('فشل تغيير الباسورد'); setLoading(false); return; }
     toast.success('تم تغيير الباسورد ✅');
@@ -336,22 +333,19 @@ function StatsModal({ sessions, onClose }) {
   const weekChange  = pctChange(last7.length, prev7.length);
   const monthChange = pctChange(last30.length, prev30.length);
 
-  // أكتر يوم بتتمرن فيه
   const weekdayCounts = new Array(7).fill(0);
   sessions.forEach(s => weekdayCounts[new Date(s.created_at).getDay()]++);
   const bestDayIdx = weekdayCounts.reduce((best, v, i) => v > weekdayCounts[best] ? i : best, 0);
   const hasAnyDay = weekdayCounts.some(v => v > 0);
 
-  // متوسط مدة الجلسة
   const withDuration = sessions.filter(s => s.duration_min > 0);
   const avgDuration = withDuration.length
     ? Math.round(withDuration.reduce((sum, s) => sum + s.duration_min, 0) / withDuration.length)
     : null;
 
-  // آخر 8 أسابيع — عدد جلسات كل أسبوع
   const tomorrowStart = new Date(now); tomorrowStart.setHours(24, 0, 0, 0);
   const weeklyBars = Array.from({ length: 8 }, (_, i) => {
-    const weeksFromNow = 7 - i; // 7 = أقدم أسبوع، 0 = الأسبوع الحالي
+    const weeksFromNow = 7 - i;
     const bucketEnd   = new Date(tomorrowStart.getTime() - weeksFromNow * 7 * 86400000);
     const bucketStart = new Date(bucketEnd.getTime() - 7 * 86400000);
     return sessions.filter(s => {
@@ -423,7 +417,6 @@ function StatsModal({ sessions, onClose }) {
               <Row icon={Clock} label="متوسط مدة الجلسة" value={`${avgDuration} دقيقة`} />
             )}
 
-            {/* Bar chart — آخر 8 أسابيع */}
             <div style={{ marginTop: 20 }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash)', letterSpacing: '0.05em', marginBottom: 10 }}>
                 جلسات آخر 8 أسابيع
@@ -543,7 +536,7 @@ export default function ProfilePage() {
   const [realStats, setRealStats]               = useState({ sessions: 0, streak: 0, programs: 0 });
   const [achievements, setAchievements]         = useState([]);
   const [allSessions, setAllSessions]           = useState([]);
-  const [celebrationQueue, setCelebrationQueue] = useState([]); // إنجازات جديدة لسه ما اتعرضتش
+  const [celebrationQueue, setCelebrationQueue] = useState([]);
   const [showPassModal, setShowPassModal]        = useState(false);
   const [showStatsModal, setShowStatsModal]      = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
@@ -552,7 +545,6 @@ export default function ProfilePage() {
     if (authLoading) return;
     if (!user) return;
 
-    // برامج اليوزر
     supabase.from('user_programs').select('*').eq('user_id', user.id).then(({ data }) => {
       if (data) {
         setEnrolledPrograms(data);
@@ -560,7 +552,6 @@ export default function ProfilePage() {
       }
     });
 
-    // كل الجلسات — للإحصائيات الحقيقية
     supabase.from('workout_sessions').select('*').eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .then(async ({ data }) => {
@@ -569,7 +560,6 @@ export default function ProfilePage() {
         setAllSessions(data);
         setRealStats(s => ({ ...s, sessions: data.length }));
 
-        // ── streak حقيقي ─────────────────────────────────────────────
         const dates = [...new Set(data.map(s => new Date(s.created_at).toDateString()))];
         let streak = 0;
         const today = new Date();
@@ -580,13 +570,11 @@ export default function ProfilePage() {
         }
         setRealStats(s => ({ ...s, streak }));
 
-        // ── احسب حالة كل إنجاز + مقدار التقدم ─────────────────────────
         const computed = ACHIEVEMENT_DEFS.map(def => {
           const current = def.getCurrent(data, streak);
           return { ...def, current: Math.min(current, def.target), earned: current >= def.target };
         });
 
-        // ── قارن بالمسجل فعليًا في الداتابيز — سجل أي إنجاز جديد واحتفل بيه ──
         const { data: savedRows } = await supabase
           .from('user_achievements')
           .select('achievement_key, earned_at')
@@ -610,11 +598,9 @@ export default function ProfilePage() {
           setCelebrationQueue(q => [...q, ...newlyEarned]);
         }
 
-        // ── حدّث الإنجازات بتاريخ الفتح الحقيقي من الداتابيز ──────────
         setAchievements(computed.map(a => ({ ...a, earnedAt: savedMap.get(a.key) || null })));
       });
 
-    // بيانات الـ onboarding
     supabase.from('user_onboarding').select('*').eq('user_id', user.id).single()
       .then(({ data }) => { if (data) setOnboarding(data); });
 
@@ -625,7 +611,6 @@ export default function ProfilePage() {
     router.push('/login');
   };
 
-  // Still checking the session — avoid flashing "please log in" at a real user
   if (authLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -635,7 +620,6 @@ export default function ProfilePage() {
     );
   }
 
-  // Redirect if not logged in
   if (!user) {
     return (
       <div style={{
@@ -676,7 +660,7 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      <div style={{ minHeight: '100vh', paddingTop: 80, paddingBottom: 60, position: 'relative' }}>
+      <div dir="rtl" style={{ minHeight: '100vh', paddingTop: 80, paddingBottom: 60, position: 'relative' }}>
         {/* Ambient */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
@@ -688,11 +672,9 @@ export default function ProfilePage() {
           {/* ── HERO HEADER ─────────────────────── */}
           <Reveal>
             <GlassCard hover={false} style={{ padding: '32px', marginBottom: 24 }}>
-              {/* volt accent top */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--accent)' }} />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-                {/* Avatar */}
                 <div style={{
                   width: 72, height: 72, borderRadius: '50%',
                   background: 'var(--accent)',
@@ -704,7 +686,6 @@ export default function ProfilePage() {
                   {initials}
                 </div>
 
-                {/* Info */}
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
                     <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em' }}>
@@ -722,7 +703,6 @@ export default function ProfilePage() {
                   </p>
                 </div>
 
-                {/* Logout */}
                 <motion.button
                   onClick={handleLogout}
                   whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }}
@@ -742,7 +722,7 @@ export default function ProfilePage() {
             </GlassCard>
           </Reveal>
 
-          {/* ── STATS ROW — editorial numbers, no per-metric cards ── */}
+          {/* ── STATS ROW ────────────────────────── */}
           <Reveal delay={0.05}>
             <div style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
@@ -893,7 +873,7 @@ export default function ProfilePage() {
                         padding: '10px 12px',
                         background: 'var(--iron)',
                         borderRadius: 8,
-                        borderLeft: `3px solid ${a.done ? 'var(--accent)' : 'var(--iron-light)'}`,
+                        borderInlineStart: `3px solid ${a.done ? 'var(--accent)' : 'var(--iron-light)'}`,
                       }}>
                         <div style={{ color: a.done ? '#4ade80' : 'var(--ash)', flexShrink: 0 }}>
                           {a.done ? <CheckCircle size={15} /> : <Clock size={15} />}
@@ -998,6 +978,10 @@ export default function ProfilePage() {
                         <ChevronRight size={14} color="var(--ash)" />
                       </motion.button>
                     ))}
+                  </div>
+
+                  <div style={{ marginTop: 18 }}>
+                    <DeleteAccountSection />
                   </div>
                 </GlassCard>
               </Reveal>
