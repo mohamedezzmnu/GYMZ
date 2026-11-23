@@ -64,10 +64,10 @@ export const PROTEIN_OPTIONS = [
 
 export const CARB_OPTIONS = [
   { name: '100جم أرز أبيض مطبوخ',       protein: 2.7, carbs: 28,   fat: 0.3, cal: 130 },
-  { name: '150جم مكرونة مطبوخة',         protein: 5,   carbs: 36,   fat: 1,   cal: 174 },
-  { name: '80جم شوفان',                  protein: 5,   carbs: 54,   fat: 3.5, cal: 267 },
+  { name: '150جم مكرونة عادية مسلوقة سادة', protein: 8.7, carbs: 46.29, fat: 1.4, cal: 237 },
+  { name: '80جم شوفان جاف عادي', protein: 10.52, carbs: 54.16, fat: 5.22, cal: 303 },
   { name: '2 رغيف بلدي',                 protein: 8,   carbs: 60,   fat: 2,   cal: 290 },
-  { name: '300جم بطاطس مسلوقة',          protein: 6,   carbs: 51,   fat: 0.4, cal: 231 },
+  { name: '300جم بطاطس مسلوقة سادة متقشرة بدون زيت', protein: 5.13, carbs: 60.03, fat: 0.3, cal: 258 },
   { name: '150جم كوسة مطبوخة + خبز',    protein: 4,   carbs: 28,   fat: 1,   cal: 140 },
   { name: '100جم عدس مطبوخ',             protein: 9,   carbs: 20,   fat: 0.4, cal: 116 },
   { name: '100جم أرز بني مطبوخ',         protein: 2.7, carbs: 26,   fat: 1,   cal: 124 },
@@ -78,7 +78,7 @@ export const CARB_OPTIONS = [
   { name: '100جم ذرة مسلوقة',            protein: 3.4, carbs: 21,   fat: 1.5, cal: 111 },
   { name: '250جم فول مدمس بدون زيت',    protein: 19,  carbs: 45,   fat: 1.8, cal: 272 },
   { name: '100جم حمص مسلوق',             protein: 8.9, carbs: 27,   fat: 2.6, cal: 167 },
-  { name: '150جم مكرونة قمح كامل مطبوخة',protein: 8,   carbs: 37.5, fat: 0.8, cal: 189 },
+  { name: '150جم مكرونة قمح كامل مسلوقة سادة', protein: 8.98, carbs: 45.11, fat: 2.56, cal: 224 },
   { name: '100جم توست أسمر',             protein: 13,  carbs: 41,   fat: 3.4, cal: 247 },
   // 💰 خيارات اقتصادية
   { name: '200جم كشري (أرز+عدس+مكرونة)', protein: 10,  carbs: 65,   fat: 3,   cal: 330 },
@@ -87,17 +87,17 @@ export const CARB_OPTIONS = [
   { name: '100جم دقيق شوفان اقتصادي',    protein: 6.3, carbs: 68,   fat: 4.4, cal: 335 },
 
   // 📋 من الجدول الغذائي
-  { name: "100جم الشوفان النئ", protein: 14, carbs: 57, fat: 7, cal: 347 },
+  { name: "100جم شوفان جاف عادي", protein: 13.15, carbs: 67.7, fat: 6.52, cal: 379 },
   { name: "100جم الفول المسلوق", protein: 7.6, carbs: 19.7, fat: 0.4, cal: 110 },
   { name: "100جم الارز الابيض المسلوق", protein: 2.66, carbs: 27.9, fat: 0.28, cal: 129 },
   { name: "100جم الارز البنى المسلوق", protein: 2.32, carbs: 23.51, fat: 0.83, cal: 112 },
   { name: "100جم الارز البسمتى المسلوق", protein: 3.52, carbs: 25.08, fat: 0.38, cal: 120 },
-  { name: "100جم المكرونة المسلوقة", protein: 3, carbs: 28, fat: 1, cal: 126 },
+  { name: "100جم مكرونة عادية مسلوقة سادة", protein: 5.8, carbs: 30.86, fat: 0.93, cal: 158 },
   { name: "100جم الخبز البني الكامل", protein: 9, carbs: 55, fat: 2.6, cal: 266 },
   { name: "100جم خبز السن", protein: 8, carbs: 82, fat: 1.3, cal: 366 },
   { name: "100جم الخبز الابيض", protein: 7.64, carbs: 50.61, fat: 3.29, cal: 275 },
   { name: "100جم البطاطا المطهية", protein: 1.37, carbs: 17.72, fat: 0.14, cal: 76 },
-  { name: "100جم البطاطس المسلوقة", protein: 1.81, carbs: 19.52, fat: 2.24, cal: 103 },
+  { name: "100جم بطاطس مسلوقة سادة متقشرة بدون زيت", protein: 1.71, carbs: 20.01, fat: 0.1, cal: 86 },
   { name: "100جم البطاطس المقلية", protein: 4, carbs: 44, fat: 16, cal: 340 },
   { name: "100جم البقسماط", protein: 13.35, carbs: 71.98, fat: 5.3, cal: 395 },
   { name: "100جم الكاتشاب", protein: 1.7, carbs: 25.08, fat: 0.38, cal: 97 },
