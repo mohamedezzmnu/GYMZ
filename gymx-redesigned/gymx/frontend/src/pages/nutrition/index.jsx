@@ -13,6 +13,8 @@ import { supabase } from '../../lib/supabaseClient';
 import { PROTEIN_OPTIONS, CARB_OPTIONS, FAT_OPTIONS } from '../../data/foods';
 import { normalizeArabic } from '../../utils/arabic';
 import { mealBaseCalories, scaleFoodItem, sumDay } from '../../utils/portions';
+import { calculateCalorieEstimate, validateCalorieInput, CALORIE_SCOPE, SCOPE_CONFIRMATION } from '../../utils/calories';
+import { readNutritionCache, writeNutritionCache, clearNutritionCache } from '../../utils/nutritionCache';
 
 // ── شاشة غير مشترك ────────────────────────────────────────
 function PremiumGate({ user }) {
@@ -267,118 +269,91 @@ async function saveCommunityFood(barcode, food, userId) {
   }
 }
 
-const NUTRITION_STORAGE_KEY = 'gymz_nutrition_userdata';
-
-function loadSavedUserData() {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(NUTRITION_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveUserData(data) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(NUTRITION_STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // تجاهل
-  }
-}
-
-function clearSavedUserData() {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.removeItem(NUTRITION_STORAGE_KEY);
-  } catch {
-    // تجاهل
-  }
-}
-
-function calcTDEE({ weight, height, age, gender, activity }) {
-  const bmr = gender === 'male'
-    ? 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age
-    : 447.593 + 9.247 * weight + 3.098 * height - 4.330 * age;
-  const activityMap = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, veryActive: 1.9 };
-  return Math.round(bmr * (activityMap[activity] || 1.55));
-}
-
-function generatePlans(tdee) {
+function generatePlans(estimate) {
+  const { tdee, goals } = estimate;
   const plans = {
     cut_strong: {
-      label: `${tdee - 600} سعرة`,
-      goal: 'نزول وزن بسرعة',
+      label: `${goals.cut_strong.targetCal} سعرة`,
+      goal: 'نزول تقديري 20٪',
       goalType: 'cut',
       color: '#f87171',
       icon: '🔥',
-      deficit: -600,
-      targetCal: tdee - 600,
+      deficit: goals.cut_strong.deficit,
+      targetCal: goals.cut_strong.targetCal,
+      available: goals.cut_strong.available,
+      reason: goals.cut_strong.reason,
       macros: {
-        protein: Math.round(((tdee - 600) * 0.40) / 4),
-        carbs:   Math.round(((tdee - 600) * 0.35) / 4),
-        fat:     Math.round(((tdee - 600) * 0.25) / 9),
+        protein: Math.round(((goals.cut_strong.targetCal) * 0.40) / 4),
+        carbs:   Math.round(((goals.cut_strong.targetCal) * 0.35) / 4),
+        fat:     Math.round(((goals.cut_strong.targetCal) * 0.25) / 9),
       },
       meals: buildMeals('cut_strong'),
     },
     cut_light: {
-      label: `${tdee - 300} سعرة`,
-      goal: 'نزول وزن بالراحة',
+      label: `${goals.cut_light.targetCal} سعرة`,
+      goal: 'نزول تقديري 10٪',
       goalType: 'cut',
       color: '#fb923c',
       icon: '⚡',
-      deficit: -300,
-      targetCal: tdee - 300,
+      deficit: goals.cut_light.deficit,
+      targetCal: goals.cut_light.targetCal,
+      available: goals.cut_light.available,
+      reason: goals.cut_light.reason,
       macros: {
-        protein: Math.round(((tdee - 300) * 0.38) / 4),
-        carbs:   Math.round(((tdee - 300) * 0.37) / 4),
-        fat:     Math.round(((tdee - 300) * 0.25) / 9),
+        protein: Math.round(((goals.cut_light.targetCal) * 0.38) / 4),
+        carbs:   Math.round(((goals.cut_light.targetCal) * 0.37) / 4),
+        fat:     Math.round(((goals.cut_light.targetCal) * 0.25) / 9),
       },
       meals: buildMeals('cut_light'),
     },
     maintain: {
-      label: `${tdee} سعرة`,
+      label: `${goals.maintain.targetCal} سعرة`,
       goal: 'ثبات على وزنك',
       goalType: 'maintain',
       color: '#facc15',
       icon: '⚖️',
-      deficit: 0,
-      targetCal: tdee,
+      deficit: goals.maintain.deficit,
+      targetCal: goals.maintain.targetCal,
+      available: goals.maintain.available,
+      reason: goals.maintain.reason,
       macros: {
-        protein: Math.round((tdee * 0.30) / 4),
-        carbs:   Math.round((tdee * 0.45) / 4),
-        fat:     Math.round((tdee * 0.25) / 9),
+        protein: Math.round((goals.maintain.targetCal * 0.30) / 4),
+        carbs:   Math.round((goals.maintain.targetCal * 0.45) / 4),
+        fat:     Math.round((goals.maintain.targetCal * 0.25) / 9),
       },
       meals: buildMeals('maintain'),
     },
     bulk_lean: {
-      label: `${tdee + 300} سعرة`,
-      goal: 'زيادة عضل بالراحة',
+      label: `${goals.bulk_lean.targetCal} سعرة`,
+      goal: 'زيادة تقديرية 10٪',
       goalType: 'bulk',
       color: '#4ade80',
       icon: '💪',
-      deficit: +300,
-      targetCal: tdee + 300,
+      deficit: goals.bulk_lean.deficit,
+      targetCal: goals.bulk_lean.targetCal,
+      available: goals.bulk_lean.available,
+      reason: goals.bulk_lean.reason,
       macros: {
-        protein: Math.round(((tdee + 300) * 0.30) / 4),
-        carbs:   Math.round(((tdee + 300) * 0.48) / 4),
-        fat:     Math.round(((tdee + 300) * 0.22) / 9),
+        protein: Math.round(((goals.bulk_lean.targetCal) * 0.30) / 4),
+        carbs:   Math.round(((goals.bulk_lean.targetCal) * 0.48) / 4),
+        fat:     Math.round(((goals.bulk_lean.targetCal) * 0.22) / 9),
       },
       meals: buildMeals('bulk_lean'),
     },
     bulk_strong: {
-      label: `${tdee + 600} سعرة`,
-      goal: 'زيادة عضل بسرعة',
+      label: `${goals.bulk_strong.targetCal} سعرة`,
+      goal: 'زيادة تقديرية 20٪',
       goalType: 'bulk',
       color: '#a78bfa',
       icon: '🏆',
-      deficit: +600,
-      targetCal: tdee + 600,
+      deficit: goals.bulk_strong.deficit,
+      targetCal: goals.bulk_strong.targetCal,
+      available: goals.bulk_strong.available,
+      reason: goals.bulk_strong.reason,
       macros: {
-        protein: Math.round(((tdee + 600) * 0.28) / 4),
-        carbs:   Math.round(((tdee + 600) * 0.50) / 4),
-        fat:     Math.round(((tdee + 600) * 0.22) / 9),
+        protein: Math.round(((goals.bulk_strong.targetCal) * 0.28) / 4),
+        carbs:   Math.round(((goals.bulk_strong.targetCal) * 0.50) / 4),
+        fat:     Math.round(((goals.bulk_strong.targetCal) * 0.22) / 9),
       },
       meals: buildMeals('bulk_strong'),
     },
@@ -388,6 +363,10 @@ function generatePlans(tdee) {
     const baseCal = mealBaseCalories(plans[key].meals);
     plans[key].baseCal = baseCal;
     plans[key].scale = baseCal > 0 ? plans[key].targetCal / baseCal : 1;
+    if (plans[key].available && sumDay(plans[key].meals, {}, plans[key].scale).cal < estimate.minimum) {
+      plans[key].available = false;
+      plans[key].reason = 'إجمالي الوجبات بعد تقريب الكميات أقل من حد العرض للتطبيق. راجع مختص.';
+    }
   }
   return plans;
 }
@@ -1690,6 +1669,7 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
   const [gender, setGender]     = useState('male');
   const [activity, setActivity] = useState('moderate');
   const [error, setError]       = useState('');
+  const [scopeAccepted, setScopeAccepted] = useState(false);
   const [expanded, setExpanded] = useState(!initialData);
   const autoCollapsedRef = useRef(false);
 
@@ -1739,15 +1719,11 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
   ];
 
   const handleCalc = () => {
-    const w = parseFloat(weight);
-    const h = parseFloat(height);
-    const a = parseFloat(age);
-    if (!w || !h || !a || w < 30 || w > 250 || h < 100 || h > 250 || a < 10 || a > 100) {
-      setError('اكتب بيانات صح: وزن (30-250كج)، طول (100-250سم)، سن (10-100)');
-      return;
-    }
+    const checked = validateCalorieInput({ weight, height, age, gender, activity });
+    if (checked.error) { setError(checked.error); return; }
+    if (!scopeAccepted) { setError('راجع شروط الاستخدام التقديري ووافق عليها الأول.'); return; }
     setError('');
-    onCalculate({ weight: w, height: h, age: a, gender, activity });
+    onCalculate(checked.data);
     setExpanded(false);
   };
 
@@ -1868,13 +1844,13 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
         {[
-          { label: 'الوزن (كجم)', val: weight, set: setWeight, ph: '75' },
-          { label: 'الطول (سم)',  val: height, set: setHeight, ph: '175' },
-          { label: 'السن',         val: age,    set: setAge,    ph: '25' },
-        ].map(({ label, val, set, ph }) => (
+          { key: 'weight', label: 'الوزن (كجم)', val: weight, set: setWeight, ph: '75', min: 30, max: 250 },
+          { key: 'height', label: 'الطول (سم)', val: height, set: setHeight, ph: '175', min: 100, max: 250 },
+          { key: 'age', label: 'السن', val: age, set: setAge, ph: '25', min: 18, max: 100 },
+        ].map(({ key, label, val, set, ph, min, max }) => (
           <div key={label}>
-            <span style={labelStyle}>{label}</span>
-            <input type="number" value={val} onChange={e => set(e.target.value)} placeholder={ph} style={inputStyle} />
+            <label htmlFor={`nutrition-${key}`} style={labelStyle}>{label}</label>
+            <input id={`nutrition-${key}`} min={min} max={max} step={key === 'age' ? 1 : 'any'} type="number" value={val} onChange={e => set(e.target.value)} placeholder={ph} style={inputStyle} />
           </div>
         ))}
       </div>
@@ -1914,6 +1890,10 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
         </div>
       </div>
 
+      <p style={{ fontSize: '0.78rem', lineHeight: 1.8, color: 'var(--ash-light)' }}>{CALORIE_SCOPE}</p>
+      <label style={{ display: 'flex', gap: 8, fontSize: '0.78rem', lineHeight: 1.8, margin: '12px 0' }}>
+        <input type="checkbox" checked={scopeAccepted} onChange={e => setScopeAccepted(e.target.checked)} />{SCOPE_CONFIRMATION}
+      </label>
       {error && (
         <div
           style={{
@@ -1945,7 +1925,6 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.12 }}
           onClick={() => {
-            clearSavedUserData();
             onClear?.();
             setWeight('');
             setHeight('');
@@ -1979,6 +1958,12 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
 
 // ── Main Page ──────────────────────────────────────────────
 export default function NutritionPage() {
+  const { user } = useAuth();
+  // A new identity gets a fresh tree before any previous plan can render.
+  return <NutritionForUser key={user?.id || 'signed-out'} />;
+}
+
+function NutritionForUser() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [isPremium, setIsPremium] = useState(false);
@@ -1989,6 +1974,7 @@ export default function NutritionPage() {
   const [userData, setUserData]   = useState(null);
   const [savedData, setSavedData] = useState(null);
   const [autoLoaded, setAutoLoaded] = useState(false);
+  const [calculationError, setCalculationError] = useState('');
   // اختيارات المستخدم في الوجبات لكل خطة: { 'cut_light-2': { protein: 5 } }
   const [selections, setSelections] = useState({});
 
@@ -2018,45 +2004,41 @@ export default function NutritionPage() {
   }, [user, authLoading, router]);
 
   const handleCalculate = useCallback(({ weight, height, age, gender, activity }) => {
-    const calculatedTdee = calcTDEE({ weight, height, age, gender, activity });
-    setTdee(calculatedTdee);
-    setPlans(generatePlans(calculatedTdee));
-    setActivePlan('maintain');
+    if (!user?.id || !isPremium) return;
+    let estimate;
+    try { estimate = calculateCalorieEstimate({ weight, height, age, gender, activity }); }
+    catch (e) { setCalculationError(e.message); return; }
+    const nextPlans = generatePlans(estimate);
+    setCalculationError('');
+    setTdee(estimate.tdee);
+    setPlans(nextPlans);
+    setActivePlan(nextPlans.maintain.available ? 'maintain' : null);
     setSelections({});
     const data = { weight, height, age, gender, activity };
     setUserData(data);
     setSavedData(data);
-    saveUserData(data);
-    saveUserDataToSupabase(user?.id, data);
+    writeNutritionCache(user.id, data);
+    // Only an explicit calculate action saves remotely. Loading never uploads.
+    saveUserDataToSupabase(user.id, data);
     setTimeout(() => document.getElementById('plans-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
-  }, [user?.id]);
+  }, [user?.id, isPremium]);
 
   useEffect(() => {
-    if (!isPremium || autoLoaded) return;
+    if (!isPremium || !user?.id || autoLoaded) return;
     let cancelled = false;
-
     (async () => {
-      const remote = user?.id ? await loadUserDataFromSupabase(user.id) : null;
+      const remote = await loadUserDataFromSupabase(user.id);
       if (cancelled) return;
-      if (remote) {
-        setSavedData(remote);
-        saveUserData(remote);
-        handleCalculate(remote);
-      } else {
-        const local = loadSavedUserData();
-        if (local) {
-          setSavedData(local);
-          handleCalculate(local);
-          saveUserDataToSupabase(user?.id, local);
-        }
+      const checked = remote ? validateCalorieInput(remote) : null;
+      const data = checked?.data || readNutritionCache(user.id);
+      if (data) {
+        setSavedData(data);
+        writeNutritionCache(user.id, data);
       }
       setAutoLoaded(true);
     })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isPremium, autoLoaded, user?.id, handleCalculate]);
+    return () => { cancelled = true; };
+  }, [isPremium, autoLoaded, user?.id]);
 
   if (authLoading || checking) {
     return (
@@ -2124,7 +2106,7 @@ export default function NutritionPage() {
               <span style={{ color: 'var(--volt)' }}>على قد إيدك</span>
             </h1>
             <p style={{ color: 'var(--ash-light)', marginTop: 10, fontSize: '0.85rem', lineHeight: 1.7 }}>
-              خطتك حسب بياناتك وهدفك — هنحسبلك احتياجك اليومي من السعرات ونديك النظام المناسب.
+              تقدير مبدئي للسعرات حسب بياناتك وهدفك، مش نظام علاجي أو ضمان ملاءمة طبية.
             </p>
           </motion.div>
 
@@ -2137,10 +2119,18 @@ export default function NutritionPage() {
             initialData={savedData}
             onClear={() => {
               setSavedData(null);
+              setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); setSelections({});
+              clearNutritionCache(user?.id);
               clearUserDataFromSupabase(user?.id);
             }}
           />
 
+          {calculationError && <p role="alert" style={{ color: '#f87171' }}>{calculationError}</p>}
+          {plans && <div style={{ fontSize: '0.78rem', lineHeight: 1.8, marginBottom: 18, color: 'var(--ash-light)' }}>
+            التقدير بمعادلة Mifflin-St Jeor × النشاط. النزول 10٪ أو 20٪، والزيادة 10٪ أو 20٪. حدود العرض 1200 للأنثى و1500 للذكر احتياط للتطبيق، مش ضمان أمان أو بديل لمختص.
+            {Object.values(plans).filter(p => !p.available).map(p => <p key={p.goal}>{p.goal}: {p.reason}</p>)}
+            {!activePlan && <p>مش هننشئ خطة آلية للحالة دي. راجع مختص.</p>}
+          </div>}
           {plans && activePlan && plan && (
             <div id="plans-section">
               {userData && <WaterCard weight={userData.weight} />}
@@ -2187,7 +2177,7 @@ export default function NutritionPage() {
                   </motion.button>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--ash-light)', marginTop: 6 }}>
-                  {plan.label} — {plan.goal} · على أساس {tdee} سعرة/يوم احتياجك الأساسي
+                  {plan.label} — {plan.goal} · على أساس {tdee} سعرة/يوم احتياجك اليومي التقديري
                 </div>
               </motion.div>
 
@@ -2207,13 +2197,16 @@ export default function NutritionPage() {
                   return (
                     <div
                       key={key}
-                      onClick={() => setActivePlan(key)}
+                      onClick={() => p.available && setActivePlan(key)}
+                      role="button" tabIndex={p.available ? 0 : -1} aria-disabled={!p.available}
+                      onKeyDown={e => { if (p.available && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setActivePlan(key); } }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: '13px 16px',
-                        cursor: 'pointer',
+                        cursor: p.available ? 'pointer' : 'not-allowed',
+                        opacity: p.available ? 1 : 0.55,
                         background: active ? 'var(--volt-dim)' : 'transparent',
                         borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--glass-border)',
                         borderInlineStart: active ? '2px solid var(--volt)' : '2px solid transparent',
@@ -2221,7 +2214,7 @@ export default function NutritionPage() {
                       }}
                     >
                       <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.88rem', color: active ? 'var(--volt)' : 'var(--chalk)' }}>
-                        {p.label}
+                        {p.goal}{!p.available && ' (غير متاح)'}
                       </span>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: active ? 'var(--volt)' : 'var(--ash-light)' }}>
                         {p.targetCal}
@@ -2329,7 +2322,7 @@ export default function NutritionPage() {
               >
                 <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
                 <span>
-                  <strong style={{ color: 'var(--chalk)' }}>نصيحة:</strong> الأرقام تقريبية بناءً على معادلة هاريس-بينيديكت. لو وزنك اتغير، اضغط &quot;غيّر&quot; وحسب من جديد.
+                  <strong style={{ color: 'var(--chalk)' }}>نصيحة:</strong> الأرقام تقريبية بناءً على معادلة Mifflin-St Jeor ومعامل النشاط. لو وزنك اتغير، اضغط &quot;غيّر&quot; وحسب من جديد.
                 </span>
               </div>
             </div>

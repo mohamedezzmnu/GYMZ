@@ -1,12 +1,20 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
+import { clearNutritionCache, removeLegacyNutritionCache } from '../utils/nutritionCache';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const previousNutritionOwner = useRef(null);
+  useEffect(() => {
+    const previous = previousNutritionOwner.current;
+    if (previous && previous !== user?.id) clearNutritionCache(previous);
+    previousNutritionOwner.current = user?.id || null;
+  }, [user?.id]);
 
   async function buildUser(supabaseUser) {
     if (!supabaseUser) return null;
@@ -39,6 +47,7 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    removeLegacyNutritionCache();
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(await buildUser(session.user));
@@ -48,6 +57,7 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
+        removeLegacyNutritionCache();
         setUser(null);
         setLoading(false);
         return;
@@ -95,6 +105,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    clearNutritionCache(user?.id);
     await supabase.auth.signOut();
     setUser(null);
     toast.success('تم تسجيل الخروج');

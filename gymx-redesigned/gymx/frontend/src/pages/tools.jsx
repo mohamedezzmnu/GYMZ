@@ -2,29 +2,28 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calculator, Zap, Target, Scale, Activity } from 'lucide-react';
 import Head from 'next/head';
+import { calculateCalorieEstimate, CALORIE_SCOPE, SCOPE_CONFIRMATION } from '../utils/calories';
 
 // ── TDEE Calculator ────────────────────────────────────────
 function TDEECalc() {
-  const [form, setForm] = useState({ age:'', weight:'', height:'', gender:'male', activity:'1.55' });
+  const [form, setForm] = useState({ age:'', weight:'', height:'', gender:'male', activity:'moderate' });
   const [result, setResult] = useState(null);
 
+  const [error, setError] = useState('');
+  const [scopeAccepted, setScopeAccepted] = useState(false);
   const activityLevels = [
-    { value:'1.2',  label:'🛋️ خامل تماماً (بدون رياضة)' },
-    { value:'1.375',label:'🚶 خفيف (1-3 أيام/أسبوع)' },
-    { value:'1.55', label:'🏋️ معتدل (3-5 أيام/أسبوع)' },
-    { value:'1.725',label:'🔥 نشيط (6-7 أيام/أسبوع)' },
-    { value:'1.9',  label:'⚡ نشيط جداً (وظيفة جسدية)' },
+    { value:'sedentary', label:'خامل (بدون رياضة)' },
+    { value:'light', label:'خفيف (1-3 أيام/أسبوع)' },
+    { value:'moderate', label:'معتدل (3-5 أيام/أسبوع)' },
+    { value:'active', label:'نشيط (6-7 أيام/أسبوع)' },
+    { value:'veryActive', label:'نشيط جداً (شغل جسدي)' },
   ];
-
+  const updateForm = (next) => { setForm(next); setResult(null); setError(''); };
   const calculate = () => {
-    const { age, weight, height, gender, activity } = form;
-    if (!age || !weight || !height) return;
-    // Mifflin-St Jeor
-    let bmr = gender === 'male'
-      ? 10 * +weight + 6.25 * +height - 5 * +age + 5
-      : 10 * +weight + 6.25 * +height - 5 * +age - 161;
-    const tdee = Math.round(bmr * +activity);
-    setResult({ maintenance: tdee, cut: Math.round(tdee * 0.8), bulk: Math.round(tdee * 1.1) });
+    setResult(null);
+    if (!scopeAccepted) { setError('راجع شروط الاستخدام التقديري ووافق عليها الأول.'); return; }
+    try { setResult(calculateCalorieEstimate(form)); setError(''); }
+    catch (e) { setError(e.message); }
   };
 
   return (
@@ -36,9 +35,9 @@ function TDEECalc() {
           { key:'height', label:'الطول (cm)', ph:'175', type:'number' },
         ].map(({ key, label, ph, type }) => (
           <div key={key} style={key === 'height' ? { gridColumn:'1/-1' } : {}}>
-            <label style={labelStyle}>{label}</label>
-            <input type={type} placeholder={ph} value={form[key]}
-              onChange={e => setForm({ ...form, [key]: e.target.value })}
+            <label htmlFor={`tdee-${key}`} style={labelStyle}>{label}</label>
+            <input id={`tdee-${key}`} min={key === 'age' ? 18 : key === 'weight' ? 30 : 100} max={key === 'age' ? 100 : 250} step={key === 'age' ? 1 : 'any'} type={type} placeholder={ph} value={form[key]}
+              onChange={e => updateForm({ ...form, [key]: e.target.value })}
               style={inputStyle} />
           </div>
         ))}
@@ -48,36 +47,42 @@ function TDEECalc() {
         <label style={labelStyle}>الجنس</label>
         <div style={{ display:'flex', gap:8 }}>
           {[{ v:'male', l:'ذكر 👨' },{ v:'female', l:'أنثى 👩' }].map(({ v, l }) => (
-            <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => setForm({ ...form, gender: v })}
+            <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => updateForm({ ...form, gender: v })}
               style={{ ...toggleStyle, ...(form.gender === v ? toggleActive : {}) }}>{l}</motion.button>
           ))}
         </div>
       </div>
 
       <div style={{ marginBottom:16 }}>
-        <label style={labelStyle}>مستوى النشاط</label>
-        <select value={form.activity} onChange={e => setForm({ ...form, activity: e.target.value })} style={inputStyle}>
+        <label htmlFor="tdee-activity" style={labelStyle}>مستوى النشاط</label>
+        <select id="tdee-activity" value={form.activity} onChange={e => updateForm({ ...form, activity: e.target.value })} style={inputStyle}>
           {activityLevels.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
         </select>
       </div>
 
+      <p style={{ fontSize: '0.78rem', lineHeight: 1.8, color: 'var(--ash-light)' }}>{CALORIE_SCOPE}</p>
+      <label style={{ display: 'flex', gap: 8, fontSize: '0.78rem', lineHeight: 1.8, margin: '12px 0' }}>
+        <input type="checkbox" checked={scopeAccepted} onChange={e => { setScopeAccepted(e.target.checked); setResult(null); }} />{SCOPE_CONFIRMATION}
+      </label>
+      {error && <p role="alert" style={{ color: '#f87171', lineHeight: 1.8 }}>{error}</p>}
       <motion.button onClick={calculate} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} style={calcBtn}>
         احسب احتياجك من الأكل
       </motion.button>
 
+      <p style={{ fontSize: '0.72rem', lineHeight: 1.8, color: 'var(--ash-light)' }}>معادلة Mifflin-St Jeor × معامل النشاط. النزول 20٪ أقل، والزيادة 10٪ أعلى. دي بداية تقديرية مش ضمان نتيجة أو ملاءمة طبية.</p>
       <AnimatePresence>
         {result && (
-          <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16, display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+          <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16, display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(115px,1fr))', gap:10 }}>
             {[
-              { label:'عشان تفضل زي ما انت', value: result.maintenance, color:'var(--accent)', icon:'⚖️' },
-              { label:'عشان تنزل وزن', value: result.cut,          color:'#f87171',       icon:'🔥' },
-              { label:'عشان تزود عضل', value: result.bulk,         color:'#4ade80',       icon:'💪' },
+              { label:'عشان تفضل زي ما انت', value: result.goals.maintain, color:'var(--accent)', icon:'⚖️' },
+              { label:'عشان تنزل وزن', value: result.goals.cut_strong,          color:'#f87171',       icon:'🔥' },
+              { label:'عشان تزود عضل', value: result.goals.bulk_lean,         color:'#4ade80',       icon:'💪' },
             ].map(({ label, value, color, icon }) => (
               <div key={label} style={{ padding:'14px', background:`${color}0f`, border:`1px solid ${color}25`, borderRadius:'var(--radius-sm)', textAlign:'center' }}>
                 <div style={{ fontSize:'1.2rem', marginBottom:4 }}>{icon}</div>
-                <div style={{ fontFamily:'var(--font-display)', fontSize:'1.5rem', color }}>{value}</div>
+                <div style={{ fontFamily:'var(--font-display)', fontSize:'1.5rem', color }}>{value.available ? value.targetCal : 'راجع مختص'}</div>
                 <div style={{ fontSize:'0.65rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginTop:2 }}>سعرة/يوم</div>
-                <div style={{ fontSize:'0.7rem', color:'var(--ash-light)', marginTop:4 }}>{label}</div>
+                <div style={{ fontSize:'0.7rem', color:'var(--ash-light)', marginTop:4 }}>{label}</div>{!value.available && <p style={{ fontSize: '0.7rem', lineHeight: 1.7 }}>{value.reason}</p>}
               </div>
             ))}
           </motion.div>
@@ -373,4 +378,4 @@ export default function ToolsPage() {
       </div>
     </>
   );
-}
+        }
