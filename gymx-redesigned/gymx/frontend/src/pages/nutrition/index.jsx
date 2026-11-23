@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 import { PROTEIN_OPTIONS, CARB_OPTIONS, FAT_OPTIONS } from '../../data/foods';
 import { normalizeArabic } from '../../utils/arabic';
+import { mealBaseCalories, scaleFoodItem, sumDay } from '../../utils/portions';
 
 // ── شاشة غير مشترك ────────────────────────────────────────
 function PremiumGate({ user }) {
@@ -305,7 +306,7 @@ function calcTDEE({ weight, height, age, gender, activity }) {
 }
 
 function generatePlans(tdee) {
-  return {
+  const plans = {
     cut_strong: {
       label: `${tdee - 600} سعرة`,
       goal: 'نزول وزن بسرعة',
@@ -382,6 +383,13 @@ function generatePlans(tdee) {
       meals: buildMeals('bulk_strong'),
     },
   };
+  // كميات القوالب ثابتة، فبنحسب معامل لكل خطة يخلي مجموع الوجبات يطابق الهدف
+  for (const key of Object.keys(plans)) {
+    const baseCal = mealBaseCalories(plans[key].meals);
+    plans[key].baseCal = baseCal;
+    plans[key].scale = baseCal > 0 ? plans[key].targetCal / baseCal : 1;
+  }
+  return plans;
 }
 
 function buildMeals(type) {
@@ -434,23 +442,16 @@ function buildMeals(type) {
 }
 
 // ── Meal Card ──────────────────────────────────────────────
-function MealCard({ meal, planColor, mealIndex }) {
-  const [proteinChoice, setProteinChoice] = useState(meal.proteinKey);
-  const [carbChoice, setCarbChoice]       = useState(meal.carbKey);
-  const [fatChoice, setFatChoice]         = useState(meal.fatKey);
+function MealCard({ meal, planColor, mealIndex, scale = 1, selection, onSelect }) {
+  const proteinChoice = selection?.protein ?? meal.proteinKey;
+  const carbChoice    = selection?.carb ?? meal.carbKey;
+  const fatChoice     = selection?.fat ?? meal.fatKey;
   const [open, setOpen]                   = useState(false);
   const [swapping, setSwapping]           = useState(null);
 
-  useEffect(() => {
-    setProteinChoice(meal.proteinKey);
-    setCarbChoice(meal.carbKey);
-    setFatChoice(meal.fatKey);
-    setSwapping(null);
-  }, [meal]);
-
-  const currentProtein = proteinChoice !== null ? PROTEIN_OPTIONS[proteinChoice] : null;
-  const currentCarb    = carbChoice !== null ? CARB_OPTIONS[carbChoice] : null;
-  const currentFat     = fatChoice !== null ? FAT_OPTIONS[fatChoice] : null;
+  const currentProtein = proteinChoice !== null ? scaleFoodItem(PROTEIN_OPTIONS[proteinChoice], scale) : null;
+  const currentCarb    = carbChoice !== null ? scaleFoodItem(CARB_OPTIONS[carbChoice], scale) : null;
+  const currentFat     = fatChoice !== null ? scaleFoodItem(FAT_OPTIONS[fatChoice], scale) : null;
 
   const mealCal = (currentProtein?.cal || 0) + (currentCarb?.cal || 0) + (currentFat?.cal || 0);
 
@@ -562,8 +563,9 @@ function MealCard({ meal, planColor, mealIndex }) {
                   setSwapping={setSwapping}
                   options={PROTEIN_OPTIONS}
                   currentIndex={proteinChoice}
+                  scale={scale}
                   onSelect={(i) => {
-                    setProteinChoice(i);
+                    onSelect?.('protein', i);
                     setSwapping(null);
                   }}
                 />
@@ -579,8 +581,9 @@ function MealCard({ meal, planColor, mealIndex }) {
                   setSwapping={setSwapping}
                   options={CARB_OPTIONS}
                   currentIndex={carbChoice}
+                  scale={scale}
                   onSelect={(i) => {
-                    setCarbChoice(i);
+                    onSelect?.('carb', i);
                     setSwapping(null);
                   }}
                 />
@@ -596,8 +599,9 @@ function MealCard({ meal, planColor, mealIndex }) {
                   setSwapping={setSwapping}
                   options={FAT_OPTIONS}
                   currentIndex={fatChoice}
+                  scale={scale}
                   onSelect={(i) => {
-                    setFatChoice(i);
+                    onSelect?.('fat', i);
                     setSwapping(null);
                   }}
                 />
@@ -653,7 +657,7 @@ function MealCard({ meal, planColor, mealIndex }) {
 }
 
 // ── مكون صف الأكل القابل للتبديل ─────────────────────────
-function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, currentIndex, onSelect }) {
+function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, currentIndex, onSelect, scale = 1 }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginBottom: 6 }}>
@@ -704,7 +708,9 @@ function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, 
             exit={{ opacity: 0 }}
             style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}
           >
-            {options.map((opt, i) => (
+            {options.map((opt, i) => {
+              const scaled = scaleFoodItem(opt, scale);
+              return (
               <motion.button
                 type="button"
                 key={opt.name || i}
@@ -727,14 +733,49 @@ function FoodRow({ label, item, color, swapKey, swapping, setSwapping, options, 
                 }}
               >
                 <span style={{ fontSize: '0.62rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>
-                  {opt.cal} كال · {opt.protein}g بروتين
+                  {scaled.cal} كال · {scaled.protein}g بروتين
                 </span>
-                {opt.name}
+                {scaled.name}
               </motion.button>
-            ))}
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ── إجمالي وجبات اليوم (فعليًا، بعد ضبط الكميات) ──────────
+function DayTotalsCard({ totals, targetCal, planColor }) {
+  const diff = totals.cal - targetCal;
+  const within = Math.abs(diff) <= targetCal * 0.1;
+  return (
+    <div
+      className="glass-card"
+      style={{
+        marginBottom: 24,
+        borderRadius: 10,
+        padding: '14px 16px',
+        borderInlineStart: `2px solid ${within ? '#4ade80' : '#facc15'}`,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', letterSpacing: '0.1em' }}>
+          إجمالي وجبات اليوم
+        </span>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: planColor }}>
+          ≈ {totals.cal} كال
+          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 400, fontSize: '0.68rem', color: 'var(--ash-light)' }}>
+            {' '}من أصل {targetCal} هدفك
+          </span>
+        </span>
+      </div>
+      <div style={{ display: 'flex', gap: 16, marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', flexWrap: 'wrap' }}>
+        <span style={{ color: '#f87171' }}>بروتين {totals.protein}g</span>
+        <span style={{ color: '#facc15' }}>كارب {totals.carbs}g</span>
+        <span style={{ color: '#4ade80' }}>دهون {totals.fat}g</span>
+      </div>
     </div>
   );
 }
@@ -1948,6 +1989,8 @@ export default function NutritionPage() {
   const [userData, setUserData]   = useState(null);
   const [savedData, setSavedData] = useState(null);
   const [autoLoaded, setAutoLoaded] = useState(false);
+  // اختيارات المستخدم في الوجبات لكل خطة: { 'cut_light-2': { protein: 5 } }
+  const [selections, setSelections] = useState({});
 
   useEffect(() => {
     if (authLoading) return;
@@ -1979,6 +2022,7 @@ export default function NutritionPage() {
     setTdee(calculatedTdee);
     setPlans(generatePlans(calculatedTdee));
     setActivePlan('maintain');
+    setSelections({});
     const data = { weight, height, age, gender, activity };
     setUserData(data);
     setSavedData(data);
@@ -2035,6 +2079,14 @@ export default function NutritionPage() {
   }
 
   const plan = plans && activePlan ? plans[activePlan] : null;
+  const activeSelections = plan
+    ? Object.fromEntries(
+        plan.meals
+          .map((_, i) => [i, selections[`${activePlan}-${i}`]])
+          .filter(([, sel]) => sel)
+      )
+    : {};
+  const dayTotals = plan ? sumDay(plan.meals, activeSelections, plan.scale) : null;
   const goalBadge = plan
     ? plan.goalType === 'cut'
       ? { label: 'نزول وزن', color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
@@ -2232,6 +2284,8 @@ export default function NutritionPage() {
                 </motion.div>
               </AnimatePresence>
 
+              <DayTotalsCard totals={dayTotals} targetCal={plan.targetCal} planColor={plan.color} />
+
               <SupplementsCard goalType={plan.goalType} />
 
               <div style={{ marginBottom: 8, fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ash-light)' }}>
@@ -2241,7 +2295,20 @@ export default function NutritionPage() {
               <AnimatePresence mode="wait">
                 <motion.div key={activePlan} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   {plan.meals.map((meal, i) => (
-                    <MealCard key={`${activePlan}-${meal.name}-${i}`} meal={meal} planColor={plan.color} mealIndex={i} />
+                    <MealCard
+                      key={`${activePlan}-${meal.name}-${i}`}
+                      meal={meal}
+                      planColor={plan.color}
+                      mealIndex={i}
+                      scale={plan.scale}
+                      selection={selections[`${activePlan}-${i}`]}
+                      onSelect={(swapKey, idx) =>
+                        setSelections((prev) => ({
+                          ...prev,
+                          [`${activePlan}-${i}`]: { ...prev[`${activePlan}-${i}`], [swapKey]: idx },
+                        }))
+                      }
+                    />
                   ))}
                 </motion.div>
               </AnimatePresence>
@@ -2272,3 +2339,6 @@ export default function NutritionPage() {
     </>
   );
 }
+
+// exports for the local preview page and tests
+export { generatePlans, MealCard, DayTotalsCard };
