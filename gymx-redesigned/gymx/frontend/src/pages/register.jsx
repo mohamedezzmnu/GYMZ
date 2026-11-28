@@ -116,7 +116,7 @@ export default function RegisterPage() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
-            <button type="button" onClick={() => setShowPass(!showPass)} style={eyeBtnStyle}>
+            <button type="button" aria-label={showPass ? (ar ? 'إخفاء الباسورد' : 'Hide password') : (ar ? 'إظهار الباسورد' : 'Show password')} onClick={() => setShowPass(!showPass)} style={eyeBtnStyle}>
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
