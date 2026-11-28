@@ -4,7 +4,7 @@ import {
   Users, Dumbbell, LayoutGrid, ShieldAlert,
   TrendingUp, Trash2, Search, RefreshCw, Crown,
   UserCheck, UserX, ChevronDown, Activity, Apple, Plus, Play,
-  Barcode, Pencil, Send,
+  Barcode, Pencil, Send, Check, X,
 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -108,6 +108,10 @@ export default function AdminPage() {
   const [addingExerciseEmail, setAddingExerciseEmail] = useState(false);
   const [removingExerciseEmail, setRemovingExerciseEmail] = useState(null);
 
+  // ── طلبات الاشتراك (من زر "اشترك" في الموقع) ───────────────
+  const [requests, setRequests] = useState([]);
+  const [actingRequest, setActingRequest] = useState(null);
+
   // ── منتجات الباركود المحلية ────────────────────────────────
   const [communityFoods, setCommunityFoods] = useState([]);
   const [foodSearch, setFoodSearch] = useState('');
@@ -149,6 +153,7 @@ export default function AdminPage() {
 
       fetchPremiumEmails();
       fetchExercisePremiumEmails();
+      fetchPaymentRequests();
       fetchCommunityFoods();
     } catch (e) {
       toast.error('خطأ في جلب البيانات');
@@ -172,6 +177,54 @@ export default function AdminPage() {
       .select('id, email, added_at')
       .order('added_at', { ascending: false });
     setExercisePremiumEmails(data || []);
+  }
+
+  // ── طلبات الاشتراك ─────────────────────────────────────────
+  async function fetchPaymentRequests() {
+    const { data, error } = await supabase
+      .from('payment_requests')
+      .select('id, email, phone, plan, amount, status, created_at')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+    if (error) { setRequests([]); return; }
+    setRequests(data || []);
+  }
+
+  async function activateRequest(req) {
+    const email = (req.email || '').toLowerCase();
+    if (!email) { toast.error('الطلب مالوش إيميل'); return; }
+    setActingRequest(req.id);
+    const [videos, nutrition] = await Promise.all([
+      supabase.from('exercise_premium').insert({ email }),
+      supabase.from('nutrition_premium').insert({ email }),
+    ]);
+    const failed = [videos, nutrition].find((r) => r.error && r.error.code !== '23505');
+    if (failed) {
+      toast.error('فشل التفعيل - راجع صلاحيات الجدولين');
+      setActingRequest(null);
+      return;
+    }
+    const { error } = await supabase
+      .from('payment_requests')
+      .update({ status: 'active', activated_at: new Date().toISOString() })
+      .eq('id', req.id);
+    if (error) toast.error('اتفعّل، بس الطلب ماتقفلش');
+    else toast.success('اتفعّل في التغذية ومكتبة التمارين');
+    setActingRequest(null);
+    fetchPaymentRequests();
+    fetchPremiumEmails();
+    fetchExercisePremiumEmails();
+  }
+
+  async function rejectRequest(req) {
+    setActingRequest(req.id);
+    const { error } = await supabase
+      .from('payment_requests')
+      .update({ status: 'rejected' })
+      .eq('id', req.id);
+    if (error) toast.error('فشل قفل الطلب');
+    else { toast.success('اتقفل الطلب'); fetchPaymentRequests(); }
+    setActingRequest(null);
   }
 
   useEffect(() => {
@@ -605,6 +658,87 @@ export default function AdminPage() {
                     >
                       {removingExerciseEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
                     </motion.button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── طلبات الاشتراك ── */}
+        <Reveal delay={0.2}>
+          <GlassCard accent="var(--volt)" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Send size={16} color="var(--volt)" />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                  طلبات الاشتراك ({requests.length})
+                </span>
+              </div>
+              <motion.button
+                onClick={fetchPaymentRequests}
+                whileTap={{ scale: 0.94 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                  borderRadius: 6, color: 'var(--ash-light)', fontFamily: 'var(--font-mono)',
+                  fontSize: '0.62rem', cursor: 'pointer',
+                }}
+              >
+                <RefreshCw size={11} /> تحديث
+              </motion.button>
+            </div>
+
+            {requests.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '18px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                مفيش طلبات جديدة
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {requests.map(r => (
+                  <div key={r.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                    flexWrap: 'wrap', padding: '10px 14px', background: 'rgba(255,90,31,0.06)',
+                    border: '1px solid rgba(255,90,31,0.2)', borderRadius: 8,
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--chalk)', direction: 'ltr', textAlign: 'right', wordBreak: 'break-all' }}>{r.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', marginTop: 2 }}>
+                        {new Date(r.created_at).toLocaleString('ar-EG')}
+                        {r.phone ? ` · ${r.phone}` : ''}
+                        {r.amount ? ` · ${r.amount} جنيه` : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <motion.button
+                        onClick={() => activateRequest(r)}
+                        disabled={actingRequest === r.id}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px',
+                          background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.35)',
+                          borderRadius: 6, color: '#4ade80', fontFamily: 'var(--font-mono)',
+                          fontSize: '0.68rem', cursor: actingRequest === r.id ? 'not-allowed' : 'pointer',
+                          opacity: actingRequest === r.id ? 0.5 : 1,
+                        }}
+                      >
+                        {actingRequest === r.id ? <RefreshCw size={11} /> : <Check size={11} />}
+                        <span>تفعيل</span>
+                      </motion.button>
+                      <motion.button
+                        onClick={() => rejectRequest(r)}
+                        disabled={actingRequest === r.id}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          width: 28, height: 28, background: 'rgba(248,113,113,0.08)',
+                          border: '1px solid rgba(248,113,113,0.25)', borderRadius: 6,
+                          cursor: 'pointer', color: '#f87171',
+                        }}
+                      >
+                        <X size={12} />
+                      </motion.button>
+                    </div>
                   </div>
                 ))}
               </div>
