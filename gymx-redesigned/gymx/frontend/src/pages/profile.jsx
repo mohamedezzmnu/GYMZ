@@ -4,7 +4,7 @@ import {
   Mail, Calendar, Target, Dumbbell, TrendingUp,
   Award, Clock, ChevronRight, LogOut, Shield,
   Zap, BarChart2, CheckCircle, Lock, Eye, EyeOff, ArrowRight, Flame, Loader,
-  Trophy, Star, X,
+  Trophy, Star, X, Trash2,
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -826,6 +826,22 @@ export default function ProfilePage() {
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
 
+  // برنامج واحد بس — مسح البرنامج من البروفايل (سجل التمارين بيفضل)
+  const leaveProgram = async (prog) => {
+    if (!user?.id || !prog) return;
+    const title = prog.program_title || prog.program_title_ar || 'البرنامج';
+    if (!confirm(`هتمسح ${title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
+    await supabase.from('user_programs').delete().eq('user_id', user.id);
+    const { data: left } = await supabase.from('user_programs').select('id').eq('user_id', user.id);
+    if (left && left.length > 0) {
+      toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
+      return;
+    }
+    setEnrolledPrograms([]);
+    setRealStats((s) => ({ ...s, programs: 0 }));
+    toast.success('تمسح البرنامج');
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) return;
@@ -1190,19 +1206,41 @@ export default function ProfilePage() {
                                 {prog.days_per_week} أيام/أسبوع · بدأ {new Date(prog.started_at).toLocaleDateString('ar-EG')}
                               </p>
                             </div>
-                            <span
-                              style={{
-                                fontSize: '0.6rem',
-                                fontFamily: 'var(--font-mono)',
-                                padding: '3px 7px',
-                                borderRadius: 4,
-                                background: 'var(--volt-dim)',
-                                border: '1px solid rgba(255, 90, 31, 0.3)',
-                                color: 'var(--volt-bright)',
-                              }}
-                            >
-                              {prog.level || 'active'}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span
+                                style={{
+                                  fontSize: '0.6rem',
+                                  fontFamily: 'var(--font-mono)',
+                                  padding: '3px 7px',
+                                  borderRadius: 4,
+                                  background: 'var(--volt-dim)',
+                                  border: '1px solid rgba(255, 90, 31, 0.3)',
+                                  color: 'var(--volt-bright)',
+                                }}
+                              >
+                                {prog.level || 'active'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => leaveProgram(prog)}
+                                aria-label={`امسح برنامج ${primaryTitle}`}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 4,
+                                  padding: '5px 8px',
+                                  borderRadius: 6,
+                                  background: 'rgba(248, 113, 113, 0.07)',
+                                  border: '1px solid rgba(248, 113, 113, 0.3)',
+                                  color: '#f87171',
+                                  fontFamily: 'var(--font-mono)',
+                                  fontSize: '0.62rem',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Trash2 size={11} /> امسح
+                              </button>
+                            </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <div className="progress-bar" style={{ flex: 1 }}>
