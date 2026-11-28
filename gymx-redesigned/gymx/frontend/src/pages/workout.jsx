@@ -522,7 +522,7 @@ export default function WorkoutPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user?.id) {
-      router.push('/login');
+      router.push('/login?from=/workout');
       return;
     }
     let active = true;
