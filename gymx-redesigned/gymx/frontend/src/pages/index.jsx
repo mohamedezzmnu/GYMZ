@@ -1,1086 +1,1026 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import Head from 'next/head';
-import Link from 'next/link';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import {
-  Dumbbell, Apple, Activity, Calculator, ShieldCheck,
-  ArrowRight, Zap, BarChart3, Trophy, ChevronRight, Pause, Play,
+  Users, Dumbbell, LayoutGrid, ShieldAlert,
+  TrendingUp, Trash2, Search, RefreshCw, Crown,
+  UserCheck, UserX, ChevronDown, Activity, Apple, Plus, Play,
+  Barcode, Pencil, Send, Check, X,
 } from 'lucide-react';
-import { useLang } from '../context/LangContext';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabaseClient';
-import { EXERCISES } from '../data/exercises';
-import PROGRAMS from '../data/programs';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
+import toast from 'react-hot-toast';
 
-/* ─────────────────────────────────────────────
-   ANIMATED COUNTER
-───────────────────────────────────────────── */
-function AnimatedCounter({ target, suffix = '', duration = 1600 }) {
-  const [display, setDisplay] = useState(0);
+// ── helpers ──────────────────────────────────────────────
+function Reveal({ children, delay = 0 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!inView || !target) return;
-    let current = 0;
-    const totalFrames = Math.max(1, Math.round(duration / 16));
-    const step = Math.max(1, Math.ceil(target / totalFrames));
-    const id = setInterval(() => {
-      current = Math.min(current + step, target);
-      setDisplay(current);
-      if (current >= target) clearInterval(id);
-    }, 16);
-    return () => clearInterval(id);
-  }, [inView, target, duration]);
-
-  return <span ref={ref}>{display.toLocaleString()}{suffix}</span>;
-}
-
-/* ─────────────────────────────────────────────
-   SERVICE ROW ITEM
-───────────────────────────────────────────── */
-function ServiceRow({ s, i, ar }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-50px' });
-
+  const inView = useInView(ref, { once: true, margin: '-40px' });
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: ar ? 24 : -24 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.45, delay: i * 0.06 }}
-    >
-      <Link href={s.href}>
-        <div className="service-row" style={{ direction: ar ? 'rtl' : 'ltr', cursor: 'pointer' }}>
-          <div className="service-num">{s.num}</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <s.icon size={16} color="var(--volt)" />
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
-                    fontSize: '1.35rem',
-                    letterSpacing: ar ? 0 : '0.04em',
-                    color: 'var(--chalk)',
-                    textTransform: ar ? 'none' : 'uppercase',
-                  }}
-                >
-                  {s.title}
-                </h3>
-              </div>
-              <p style={{ color: 'var(--ash-light)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: 500 }}>
-                {s.desc}
-              </p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--volt)', flexShrink: 0, marginTop: 4 }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  letterSpacing: ar ? 0 : '0.14em',
-                  textTransform: ar ? 'none' : 'uppercase',
-                }}
-              >
-                {ar ? 'اكتشف' : 'EXPLORE'}
-              </span>
-              <ChevronRight size={14} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   STEP ITEM — timeline marker on a connecting rail
-───────────────────────────────────────────── */
-function StepItem({ s, i, ar }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-
-  return (
-    <motion.div
-      ref={ref}
+    <motion.div ref={ref}
       initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.45, delay: i * 0.1 }}
-      style={{ position: 'relative', paddingTop: 50 }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: ar ? 'auto' : 0,
-          right: ar ? 0 : 'auto',
-          width: 68,
-          height: 68,
-          borderRadius: '50%',
-          background: 'var(--glass-bg)',
-          backdropFilter: 'blur(var(--glass-blur))',
-          WebkitBackdropFilter: 'blur(var(--glass-blur))',
-          border: '2px solid var(--volt)',
-          boxShadow: '0 8px 24px rgba(255, 90, 31, 0.14)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'var(--font-display)',
-          fontWeight: 800,
-          fontSize: '1.2rem',
-          color: 'var(--volt)',
-          zIndex: 2,
-        }}
-      >
-        {s.num}
-      </div>
-      <h3
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 700,
-          fontSize: '1.3rem',
-          letterSpacing: ar ? 0 : '0.03em',
-          color: 'var(--chalk)',
-          textTransform: ar ? 'none' : 'uppercase',
-          marginBottom: 10,
-        }}
-      >
-        {s.title}
-      </h3>
-      <p style={{ color: 'var(--ash-light)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: 260 }}>
-        {s.desc}
-      </p>
-    </motion.div>
+      transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    >{children}</motion.div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   MARQUEE STRIP — editorial ticker texture
-───────────────────────────────────────────── */
-function MarqueeStrip({ items, style, itemStyle, duration = '26s' }) {
-  const { lang } = useLang();
-  const ar = lang === 'ar';
-  const [paused, setPaused] = useState(false);
-  const doubled = [...items, ...items];
-
+function GlassCard({ children, style = {}, accent }) {
   return (
-    <div className="marquee-strip" style={style} data-paused={paused || undefined}>
-      {/* screen readers get the items once, statically; the moving track is decorative */}
-      <span className="sr-only">{items.join(' • ')}</span>
-      <div className="marquee-track" style={{ animationDuration: duration }} aria-hidden="true">
-        {doubled.map((t, i) => (
-          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', ...itemStyle }}>
-            {t}
-            <span style={{ margin: '0 24px', opacity: 0.45 }}>•</span>
-          </span>
-        ))}
-      </div>
-      <button
-        type="button"
-        className="marquee-pause-btn"
-        aria-pressed={paused}
-        aria-label={paused
-          ? (ar ? 'تشغيل الشريط المتحرك' : 'Play scrolling strip')
-          : (ar ? 'إيقاف الشريط المتحرك' : 'Pause scrolling strip')}
-        onClick={() => setPaused(p => !p)}
-      >
-        {paused ? <Play size={15} /> : <Pause size={15} />}
-      </button>
+    <div style={{
+      background: 'var(--glass-bg)',
+      border: `1px solid ${accent ? accent + '30' : 'var(--glass-border)'}`,
+      borderRadius: 'var(--radius-md)',
+      boxShadow: 'var(--glass-shadow)',
+      position: 'relative',
+      overflow: 'hidden',
+      ...style,
+    }}>
+      {children}
     </div>
   );
 }
 
-export default function HomePage() {
-  const { lang } = useLang();
-  const { user } = useAuth();
-  const ar = lang === 'ar';
+function StatBox({ icon: Icon, label, value, accent = 'var(--accent)', delay = 0 }) {
+  return (
+    <Reveal delay={delay}>
+      <GlassCard accent={accent} style={{ padding: '20px 22px' }}>
+        <div style={{ width: 38, height: 38, borderRadius: 10, background: accent + '18', border: `1px solid ${accent}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+          <Icon size={17} color={accent} />
+        </div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', letterSpacing: '0.02em', color: 'var(--chalk)', lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.07em', marginTop: 6 }}>{label}</div>
+      </GlassCard>
+    </Reveal>
+  );
+}
 
-  const [stats,    setStats]    = useState({ members: 0, exercises: 0, programs: 0 });
-  const [programs, setPrograms] = useState([]);
+// ── ستايل موحد لخانات فورم المنتجات ─────────────────────────
+const foodInputStyle = {
+  padding: '10px 12px', background: 'rgba(255,255,255,0.04)',
+  border: '1px solid var(--glass-border)', borderRadius: 8,
+  color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+  fontSize: '0.75rem', outline: 'none',
+};
+
+// ── role badge ────────────────────────────────────────────
+function RoleBadge({ role }) {
+  const isAdmin = role === 'admin';
+  return (
+    <span style={{
+      fontSize: '0.6rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em',
+      padding: '3px 8px', borderRadius: 4,
+      background: isAdmin ? 'rgba(255,77,46,0.12)' : 'rgba(255,77,46,0.10)',
+      border: `1px solid ${isAdmin ? 'rgba(255,77,46,0.35)' : 'rgba(255,77,46,0.25)'}`,
+      color: isAdmin ? 'var(--accent)' : 'var(--accent)',
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+    }}>
+      {isAdmin && <Crown size={9} />}
+      {isAdmin ? 'ADMIN' : 'USER'}
+    </span>
+  );
+}
+
+// ── main ──────────────────────────────────────────────────
+export default function AdminPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState({ totalUsers: 0, totalPrograms: 0, totalSessions: 0, newToday: 0 });
+  const [search, setSearch] = useState('');
+  const [loadingData, setLoadingData] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
+  const [broadcastTitle, setBroadcastTitle] = useState('');
+  const [broadcastBody, setBroadcastBody]   = useState('');
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
+
+  // ── nutrition premium ─────────────────────────────────────
+  const [premiumEmails, setPremiumEmails] = useState([]);
+  const [newEmail, setNewEmail] = useState('');
+  const [addingEmail, setAddingEmail] = useState(false);
+  const [removingEmail, setRemovingEmail] = useState(null);
+
+  // ── exercise videos premium ────────────────────────────────
+  const [exercisePremiumEmails, setExercisePremiumEmails] = useState([]);
+  const [newExerciseEmail, setNewExerciseEmail] = useState('');
+  const [addingExerciseEmail, setAddingExerciseEmail] = useState(false);
+  const [removingExerciseEmail, setRemovingExerciseEmail] = useState(null);
+
+  // ── طلبات الاشتراك (من زر "اشترك" في الموقع) ───────────────
+  const [requests, setRequests] = useState([]);
+  const [actingRequest, setActingRequest] = useState(null);
+
+  // ── منتجات الباركود المحلية ────────────────────────────────
+  const [communityFoods, setCommunityFoods] = useState([]);
+  const [foodSearch, setFoodSearch] = useState('');
+  const [showFoodForm, setShowFoodForm] = useState(false);
+  const [editingBarcode, setEditingBarcode] = useState(null);
+  const [foodForm, setFoodForm] = useState({ barcode: '', name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+  const [savingFood, setSavingFood] = useState(false);
+  const [deletingFoodBarcode, setDeletingFoodBarcode] = useState(null);
+
+  // ── guard ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!loading) {
+      if (!user) { router.push('/login?from=/admin'); return; }
+      if (user.role !== 'admin') { router.push('/dashboard'); return; }
+    }
+  }, [user, loading]);
+
+  // ── fetch data ───────────────────────────────────────────
+  async function fetchData() {
+    setLoadingData(true);
+    try {
+      const [usersRes, programsRes, sessionsRes] = await Promise.all([
+        supabase.from('users').select('id, email, name, role, created_at').order('created_at', { ascending: false }),
+        supabase.from('user_programs').select('id', { count: 'exact', head: true }),
+        supabase.from('workout_sessions').select('id', { count: 'exact', head: true }),
+      ]);
+
+      const allUsers = usersRes.data || [];
+      const today = new Date().toISOString().split('T')[0];
+      const newToday = allUsers.filter(u => u.created_at?.startsWith(today)).length;
+
+      setUsers(allUsers);
+      setStats({
+        totalUsers: allUsers.length,
+        totalPrograms: programsRes.count || 0,
+        totalSessions: sessionsRes.count || 0,
+        newToday,
+      });
+
+      fetchPremiumEmails();
+      fetchExercisePremiumEmails();
+      fetchPaymentRequests();
+      fetchCommunityFoods();
+    } catch (e) {
+      toast.error('خطأ في جلب البيانات');
+    }
+    setLoadingData(false);
+  }
+
+  // ── nutrition premium emails ───────────────────────────────
+  async function fetchPremiumEmails() {
+    const { data } = await supabase
+      .from('nutrition_premium')
+      .select('id, email, added_at')
+      .order('added_at', { ascending: false });
+    setPremiumEmails(data || []);
+  }
+
+  // ── exercise videos premium emails ─────────────────────────
+  async function fetchExercisePremiumEmails() {
+    const { data } = await supabase
+      .from('exercise_premium')
+      .select('id, email, added_at')
+      .order('added_at', { ascending: false });
+    setExercisePremiumEmails(data || []);
+  }
+
+  // ── طلبات الاشتراك ─────────────────────────────────────────
+  async function fetchPaymentRequests() {
+    const { data, error } = await supabase
+      .from('payment_requests')
+      .select('id, email, phone, plan, amount, status, created_at')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+    if (error) { setRequests([]); return; }
+    setRequests(data || []);
+  }
+
+  async function activateRequest(req) {
+    const email = (req.email || '').toLowerCase();
+    if (!email) { toast.error('الطلب مالوش إيميل'); return; }
+    setActingRequest(req.id);
+    const [videos, nutrition] = await Promise.all([
+      supabase.from('exercise_premium').insert({ email }),
+      supabase.from('nutrition_premium').insert({ email }),
+    ]);
+    const failed = [videos, nutrition].find((r) => r.error && r.error.code !== '23505');
+    if (failed) {
+      toast.error('فشل التفعيل - راجع صلاحيات الجدولين');
+      setActingRequest(null);
+      return;
+    }
+    const { error } = await supabase
+      .from('payment_requests')
+      .update({ status: 'active', activated_at: new Date().toISOString() })
+      .eq('id', req.id);
+    if (error) toast.error('اتفعّل، بس الطلب ماتقفلش');
+    else toast.success('اتفعّل في التغذية ومكتبة التمارين');
+    setActingRequest(null);
+    fetchPaymentRequests();
+    fetchPremiumEmails();
+    fetchExercisePremiumEmails();
+  }
+
+  async function rejectRequest(req) {
+    setActingRequest(req.id);
+    const { error } = await supabase
+      .from('payment_requests')
+      .update({ status: 'rejected' })
+      .eq('id', req.id);
+    if (error) toast.error('فشل قفل الطلب');
+    else { toast.success('اتقفل الطلب'); fetchPaymentRequests(); }
+    setActingRequest(null);
+  }
 
   useEffect(() => {
-    let active = true;
-    supabase.from('users').select('id', { count: 'exact', head: true }).then(({ count }) => {
-      if (active) setStats(s => ({ ...s, members: count || 0 }));
+    if (user?.role === 'admin') fetchData();
+  }, [user]);
+
+  // ── toggle role ──────────────────────────────────────────
+  async function toggleRole(uid, currentRole) {    if (uid === user.id) { toast.error('مش تقدر تغير role نفسك'); return; }
+    setTogglingId(uid);
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    const { error } = await supabase.from('users').update({ role: newRole }).eq('id', uid);
+    if (error) { toast.error('فشل تغيير الـ role'); }
+    else {
+      toast.success(`تم التغيير لـ ${newRole}`);
+      setUsers(prev => prev.map(u => u.id === uid ? { ...u, role: newRole } : u));
+    }
+    setTogglingId(null);
+  }
+
+  // ── delete user ──────────────────────────────────────────
+  async function deleteUser(uid) {
+    if (uid === user.id) { toast.error('مش تقدر تحذف نفسك'); return; }
+    if (!confirm('متأكد إنك عايز تحذف اليوزر ده؟')) return;
+    setDeletingId(uid);
+    const { error } = await supabase.rpc('delete_user_permanently', { user_id: uid });
+    if (error) { toast.error('فشل الحذف — تحقق من الـ RLS policies'); }
+    else {
+      toast.success('تم حذف اليوزر');
+      setUsers(prev => prev.filter(u => u.id !== uid));
+      setStats(s => ({ ...s, totalUsers: s.totalUsers - 1 }));
+    }
+    setDeletingId(null);
+  }
+
+  // ── nutrition premium handlers ────────────────────────────
+  async function addPremiumEmail() {
+    const email = newEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      toast.error('اكتب إيميل صحيح');
+      return;
+    }
+    setAddingEmail(true);
+    const { error } = await supabase.from('nutrition_premium').insert({ email });
+    if (error) {
+      if (error.code === '23505') toast.error('الإيميل ده مضاف قبل كده');
+      else toast.error('فشلت الإضافة');
+    } else {
+      toast.success('تم تفعيل الاشتراك ✅');
+      setNewEmail('');
+      fetchPremiumEmails();
+    }
+    setAddingEmail(false);
+  }
+
+  async function removePremiumEmail(id) {
+    setRemovingEmail(id);
+    const { error } = await supabase.from('nutrition_premium').delete().eq('id', id);
+    if (error) toast.error('فشل الحذف');
+    else {
+      toast.success('تم إلغاء الاشتراك');
+      setPremiumEmails(prev => prev.filter(p => p.id !== id));
+    }
+    setRemovingEmail(null);
+  }
+
+  // ── exercise videos premium handlers ──────────────────────
+  async function addExercisePremiumEmail() {
+    const email = newExerciseEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      toast.error('اكتب إيميل صحيح');
+      return;
+    }
+    setAddingExerciseEmail(true);
+    const { error } = await supabase.from('exercise_premium').insert({ email });
+    if (error) {
+      if (error.code === '23505') toast.error('الإيميل ده مضاف قبل كده');
+      else toast.error('فشلت الإضافة');
+    } else {
+      toast.success('تم تفعيل الاشتراك ✅');
+      setNewExerciseEmail('');
+      fetchExercisePremiumEmails();
+    }
+    setAddingExerciseEmail(false);
+  }
+
+  async function removeExercisePremiumEmail(id) {
+    setRemovingExerciseEmail(id);
+    const { error } = await supabase.from('exercise_premium').delete().eq('id', id);
+    if (error) toast.error('فشل الحذف');
+    else {
+      toast.success('تم إلغاء الاشتراك');
+      setExercisePremiumEmails(prev => prev.filter(p => p.id !== id));
+    }
+    setRemovingExerciseEmail(null);
+  }
+
+  // ── منتجات الباركود المحلية ────────────────────────────────
+  async function fetchCommunityFoods() {
+    const { data } = await supabase
+      .from('community_foods')
+      .select('barcode, name, cal, protein, carbs, fat, serving, updated_at')
+      .order('updated_at', { ascending: false });
+    setCommunityFoods(data || []);
+  }
+
+  function resetFoodForm() {
+    setFoodForm({ barcode: '', name: '', cal: '', protein: '', carbs: '', fat: '', serving: '100 جرام' });
+    setEditingBarcode(null);
+  }
+
+  function startEditFood(f) {
+    setFoodForm({
+      barcode: f.barcode, name: f.name,
+      cal: String(f.cal ?? ''), protein: String(f.protein ?? ''),
+      carbs: String(f.carbs ?? ''), fat: String(f.fat ?? ''),
+      serving: f.serving || '100 جرام',
     });
-    supabase.from('programs').select('title_ar,title_en,days_per_week,level').limit(3).then(({ data }) => {
-      if (active && data?.length) setPrograms(data);
+    setEditingBarcode(f.barcode);
+    setShowFoodForm(true);
+  }
+
+  async function saveFoodEntry() {
+    const barcode = foodForm.barcode.trim();
+    const name = foodForm.name.trim();
+    const cal = parseFloat(foodForm.cal);
+    if (!barcode || !name || !cal) {
+      toast.error('اكتب الباركود والاسم والسعرات على الأقل');
+      return;
+    }
+    setSavingFood(true);
+    const { error } = await supabase.from('community_foods').upsert({
+      barcode,
+      name,
+      cal,
+      protein: parseFloat(foodForm.protein) || 0,
+      carbs: parseFloat(foodForm.carbs) || 0,
+      fat: parseFloat(foodForm.fat) || 0,
+      serving: foodForm.serving.trim() || '100 جرام',
+      created_by: user.id,
+      updated_at: new Date().toISOString(),
     });
-    return () => {
-      active = false;
-    };
-  }, []);
+    if (error) toast.error('فشل الحفظ');
+    else {
+      toast.success(editingBarcode ? 'تم التعديل ✅' : 'تم إضافة المنتج ✅');
+      resetFoodForm();
+      setShowFoodForm(false);
+      fetchCommunityFoods();
+    }
+    setSavingFood(false);
+  }
 
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const heroY       = useTransform(scrollYProgress, [0, 1], ['0%', '15%']);
+  async function deleteFoodEntry(barcode) {
+    if (!confirm('متأكد إنك عايز تحذف المنتج ده؟')) return;
+    setDeletingFoodBarcode(barcode);
+    const { error } = await supabase.from('community_foods').delete().eq('barcode', barcode);
+    if (error) toast.error('فشل الحذف');
+    else {
+      toast.success('تم الحذف');
+      setCommunityFoods(prev => prev.filter(f => f.barcode !== barcode));
+    }
+    setDeletingFoodBarcode(null);
+  }
 
-  const userName = user?.name || user?.email?.split('@')[0] || '';
+  // ── filter ───────────────────────────────────────────────
+  const filtered = users.filter(u =>
+    u.name?.toLowerCase().includes(search.toLowerCase()) ||
+    u.email?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const services = ar ? [
-    { num: '01', icon: Dumbbell,    title: 'برامج التدريب',    desc: 'برامج مبنية على هدفك ومستواك — خسارة وزن، بناء عضل، أو قوة. جدول أسبوعي واضح.',            href: '/programs'  },
-    { num: '02', icon: Apple,       title: 'التغذية والوجبات', desc: 'خطط غذائية بمكونات مصرية جاهزة. اختار هدفك وعدّل الوجبات بحرية كاملة.',                     href: '/nutrition' },
-    { num: '03', icon: Activity,    title: 'تتبع التقدم',      desc: 'سجّل وزنك وقياساتك أسبوعياً. شوف كيف جسمك بيتغير بأرقام حقيقية على مدار الوقت.',            href: '/dashboard' },
-    { num: '04', icon: Calculator,  title: 'حاسبات ذكية',     desc: 'احسب احتياجك من الأكل، وزنك المثالي، أقصى قوتك، وتوزيع أكلك — كل حاجة في مكان واحد بدون تعقيد.', href: '/tools'     },
-    { num: '05', icon: ShieldCheck, title: 'مجاني 100%',       desc: 'مفيش اشتراكات ومفيش رسوم مخفية. انشئ حسابك في دقيقة وابدأ رحلتك فوراً.',                   href: '/register'  },
-  ] : [
-    { num: '01', icon: Dumbbell,    title: 'Training Plans',    desc: 'Programs built for your exact goal and level — fat loss, muscle, or strength.', href: '/programs'  },
-    { num: '02', icon: Apple,       title: 'Nutrition',         desc: 'Egyptian meal plans with real ingredients. Pick your goal and swap freely.',     href: '/nutrition' },
-    { num: '03', icon: Activity,    title: 'Progress Tracking', desc: 'Log weight and measurements. Watch your body change with real weekly data.',     href: '/dashboard' },
-    { num: '04', icon: Calculator,  title: 'Smart Calculators', desc: 'TDEE, BMI, 1RM, and Macros — every tool you need in one sharp interface.',       href: '/tools'     },
-    { num: '05', icon: ShieldCheck, title: '100% Free',         desc: 'No subscriptions, no hidden fees. One minute to sign up. Start immediately.',    href: '/register'  },
-  ];
+  const filteredFoods = communityFoods.filter(f =>
+    !foodSearch.trim() ||
+    f.barcode?.includes(foodSearch.trim()) ||
+    f.name?.toLowerCase().includes(foodSearch.trim().toLowerCase())
+  );
 
-  const steps = ar ? [
-    { num: '01', title: 'أنشئ حسابك',   desc: 'إيميل وباسورد بس — دقيقة واحدة.' },
-    { num: '02', title: 'حدد هدفك',     desc: 'أسئلة بسيطة عن مستواك وجدولك الأسبوعي.' },
-    { num: '03', title: 'ابدأ برنامجك', desc: 'برنامج تدريبي وغذائي كامل مصمم ليك على طول.' },
-  ] : [
-    { num: '01', title: 'Create Account', desc: 'Email and password. One minute.' },
-    { num: '02', title: 'Set Your Goal',  desc: 'Tell us your level and weekly schedule.' },
-    { num: '03', title: 'Start Today',    desc: 'Full custom training and nutrition plan immediately.' },
-  ];
+  // ── loading / guard states ────────────────────────────────
+  if (loading || !user) return null;
+  if (user.role !== 'admin') return null;
 
   return (
     <>
-      <Head>
-        <title>GYMZ — {ar ? 'ابنِ جسمك بخطة مخصصة' : 'Build Your Body. No Excuses.'}</title>
-        <meta name="description" content={ar ? 'برامج تدريب وغذاء مخصصة لك — مجاناً.' : 'Custom training and nutrition plans — free.'} />
-        <meta name="keywords" content="GYMZ, Gymez, جيمز, جيمس, جيم, gym app, تمارين, نظام غذائي, برامج تدريب, جيم مصر, fitness app Egypt" />
-        <link rel="canonical" href="https://gymez.vercel.app/" />
+      <Head><title>Admin — GYMZ</title></Head>
 
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="GYMZ" />
-        <meta property="og:title" content="GYMZ — ابنِ جسمك بخطة مخصصة" />
-        <meta property="og:description" content="برامج تدريب وغذاء مخصصة لك — مجاناً." />
-        <meta property="og:url" content="https://gymez.vercel.app/" />
-        <meta property="og:locale" content="ar_EG" />
+      {/* ambient bg */}
+      <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse 50% 60% at 20% 30%, rgba(255,77,46,0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 70%, rgba(255,77,46,0.08) 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />
 
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebSite',
-              name: 'GYMZ',
-              alternateName: ['Gymez', 'Gymz', 'جيمز', 'جيمس', 'جيم زد'],
-              url: 'https://gymez.vercel.app/',
-              description: 'برامج تدريب وغذاء مخصصة — مجاناً',
-              inLanguage: 'ar',
-            }),
-          }}
-        />
-      </Head>
+      <div style={{ minHeight: '100vh', padding: '80px 24px 60px', maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
-      {/* ══════════════════════════════════════
-          HERO
-      ══════════════════════════════════════ */}
-      <section
-        ref={heroRef}
-        style={{
-          position: 'relative',
-          minHeight: '100vh',
-          background: 'var(--bg)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <div className="bg-grid" />
-        <div
-          className="bg-glow-blur"
-          style={{
-            width: 420,
-            height: 420,
-            top: -120,
-            right: ar ? 'auto' : '10%',
-            left: ar ? '10%' : 'auto',
-          }}
-        />
-        <div className="hero-scanlines" />
-        <div className="hero-noise" />
-
-        <div
-          style={{
-            position: 'absolute',
-            right: ar ? 'auto' : 0,
-            left: ar ? 0 : 'auto',
-            top: 0,
-            bottom: 0,
-            width: '52%',
-            background: 'radial-gradient(ellipse at center, rgba(255,90,31,0.07) 0%, rgba(255,90,31,0.015) 50%, transparent 75%)',
-            clipPath: ar
-              ? 'polygon(0 0, 85% 0, 100% 100%, 0% 100%)'
-              : 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            right: ar ? 'auto' : '48%',
-            left: ar ? '48%' : 'auto',
-            top: 0,
-            bottom: 0,
-            width: 2,
-            background: 'linear-gradient(180deg, transparent 0%, var(--volt) 30%, var(--volt) 70%, transparent 100%)',
-            opacity: 0.16,
-            transform: 'skewX(-2deg)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* CONTENT */}
-        <motion.div
-          style={{
-            y: heroY,
-            opacity: heroOpacity,
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            position: 'relative',
-            zIndex: 2,
-            padding: '84px 32px 36px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 44,
-              width: '100%',
-              maxWidth: 1200,
-              margin: '0 auto',
-              direction: ar ? 'rtl' : 'ltr',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-            }}
-          >
-            {/* TEXT SIDE */}
-            <div style={{ flex: '1 1 380px', minWidth: 280 }}>
-              <motion.div
-                initial={{ opacity: 0, x: ar ? 20 : -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}
-              >
-                <div className="rule-anim" style={{ width: 0, height: 2, background: 'var(--volt)' }} />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    letterSpacing: ar ? 0 : '0.18em',
-                    color: 'var(--volt)',
-                    textTransform: ar ? 'none' : 'uppercase',
-                  }}
-                >
-                  {user
-                    ? (ar ? `أهلاً / ${userName}` : `WELCOME BACK / ${userName}`)
-                    : (ar ? 'GYMZ / 2026 / مجاناً' : 'GYMZ / 2026 / FREE')}
-                </span>
-                <span
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: '50%',
-                    background: 'var(--volt)',
-                    animation: 'dotBlink 1.4s ease-in-out infinite',
-                  }}
-                />
-              </motion.div>
-
-              {/* HERO HEADLINE */}
-              {(() => {
-                const lines = user
-                  ? (ar ? ['أهلاً', `يا ${userName}`] : ['BACK,', userName.toUpperCase()])
-                  : (ar ? ['اتدرّب بذكاء.', 'سجّل كل عدة.', 'اسبق صحابك.'] : ['TRAIN SMARTER.', 'TRACK EVERY REP.', 'BEAT YOUR FRIENDS.']);
-
-                return (
-                  <h1 style={{ overflow: 'hidden', margin: 0, padding: 0 }}>
-                    {lines.filter(Boolean).map((line, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ y: '110%' }}
-                        animate={{ y: 0 }}
-                        transition={{ delay: 0.2 + i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ overflow: 'hidden', lineHeight: 1 }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'var(--font-display)',
-                            fontWeight: 800,
-                            fontSize: user ? 'clamp(2.6rem, 6vw, 4.6rem)' : 'clamp(3.5rem, 8.8vw, 7.2rem)',
-                            lineHeight: 1.08,
-                            color: i === 2 ? 'transparent' : i === 1 ? 'var(--volt)' : 'var(--chalk)',
-                            WebkitTextStroke: i === 2 ? '2px var(--volt)' : '0',
-                            letterSpacing: ar ? 0 : '-0.015em',
-                            textTransform: ar ? 'none' : 'uppercase',
-                            userSelect: 'none',
-                          }}
-                        >
-                          {line}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </h1>
-                );
-              })()}
-
-              {/* SUBTITLE */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                style={{
-                  color: 'var(--ash-light)',
-                  fontSize: '0.88rem',
-                  lineHeight: 1.75,
-                  maxWidth: 390,
-                  margin: '20px 0 28px',
-                  fontFamily: 'var(--font-body)',
-                }}
-              >
-                {user
-                  ? (ar ? 'كمّل رحلتك من حيث وقفت — صفحتك فيها كل حاجة محتاجها.' : 'Continue your journey — your dashboard has everything you need.')
-                  : (ar ? 'برنامج تدريب وتغذية ذكي، بيتابع كل تقدمك، وبيخليك ملتزم خطوة بخطوة.' : 'Smart programs, real-time rep tracking, and structured progress to keep you consistent.')}
-              </motion.p>
-
-              {/* CTAs */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.58 }}
-                style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}
-              >
-                {user ? (
-                  <>
-                    <Link href="/workout">
-                      <div className="btn btn-primary">
-                        <Zap size={14} /> {ar ? 'ابدأ تمريني' : 'START WORKOUT'}
-                        <ArrowRight size={14} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
-                      </div>
-                    </Link>
-                    <Link href="/dashboard">
-                      <div className="btn btn-outline">
-                        <BarChart3 size={14} /> {ar ? 'صفحتي' : 'DASHBOARD'}
-                      </div>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/register">
-                      <div className="btn btn-primary">
-                        <Zap size={14} /> {ar ? 'ابدأ مجاناً' : 'START FREE'}
-                      </div>
-                    </Link>
-                    <Link href="/programs">
-                      <div className="btn btn-outline">
-                        {ar ? 'استكشف البرامج' : 'EXPLORE'}
-                        <ArrowRight size={14} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
-                      </div>
-                    </Link>
-                  </>
-                )}
-              </motion.div>
-
-              {/* REAL STATS */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.68 }}
-                style={{ display: 'flex', gap: 0, paddingTop: 20, borderTop: '1px solid var(--glass-border)' }}
-              >
-                {[
-                  { val: stats.members,          suf: '',  label: ar ? 'متدرب مسجل' : 'MEMBERS'   },
-                  { val: EXERCISES.length,       suf: '+', label: ar ? 'تمرين'      : 'EXERCISES' },
-                  { val: PROGRAMS.length,        suf: '',  label: ar ? 'برامج'      : 'PROGRAMS'  },
-                ].filter(({ val }) => val > 0).map(({ val, suf, label }, i) => (
-                  <div
-                    key={label}
-                    style={{
-                      flex: 1,
-                      paddingInlineStart: i > 0 ? 20 : 0,
-                      borderInlineStart: i > 0 ? '1px solid var(--glass-border)' : 'none',
-                      marginInlineStart: i > 0 ? 20 : 0,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontWeight: 800,
-                        fontSize: 'clamp(1.6rem,3.5vw,2.8rem)',
-                        color: 'var(--chalk)',
-                        lineHeight: 1,
-                        fontVariantNumeric: 'tabular-nums',
-                      }}
-                    >
-                      <AnimatedCounter target={val} suffix={suf} />
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.62rem',
-                        letterSpacing: ar ? 0 : '0.14em',
-                        color: 'var(--ash)',
-                        marginTop: 4,
-                        textTransform: ar ? 'none' : 'uppercase',
-                      }}
-                    >
-                      {label}
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* TRAINING PREVIEW — liquid glass editorial panel */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.65 }}
-              style={{ flexShrink: 0, width: '100%', maxWidth: 320, margin: '24px auto 0' }}
-            >
-              <div
-                className="glass-card"
-                style={{
-                  padding: '22px 22px 18px',
-                  direction: ar ? 'rtl' : 'ltr',
-                }}
-              >
-                <span className="label-tag" style={{ color: 'var(--volt)' }}>
-                  {ar ? 'ابدأ من هنا' : 'YOUR TRAINING'}
-                </span>
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
-                    fontSize: '1.15rem',
-                    letterSpacing: ar ? 0 : '0.03em',
-                    color: 'var(--chalk)',
-                    textTransform: ar ? 'none' : 'uppercase',
-                    margin: '8px 0 16px',
-                  }}
-                >
-                  {ar ? 'البرامج المتاحة' : 'AVAILABLE PROGRAMS'}
-                </h3>
-
-                {(() => {
-                  const demo = programs.length > 0 ? programs : [
-                    { title_ar: 'كامل الجسم', title_en: 'Full Body',   days_per_week: 3, level: 'beginner'     },
-                    { title_ar: 'حرق الدهون', title_en: 'Fat Loss',    days_per_week: 4, level: 'intermediate' },
-                    { title_ar: 'بناء العضل', title_en: 'Muscle Gain', days_per_week: 5, level: 'advanced'     },
-                  ];
-                  const levelLabel = ar
-                    ? { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' }
-                    : { beginner: 'BEGINNER', intermediate: 'INTERMEDIATE', advanced: 'ADVANCED' };
-
-                  return demo.slice(0, 3).map((p, i) => {
-                    const name = ar
-                      ? (p.title_ar || p.program_title_ar || p.program_title)
-                      : (p.title_en || p.program_title || p.title_ar);
-                    const days = p.days_per_week || p.days || 3;
-                    const level = p.level || 'beginner';
-
-                    return (
-                      <Link key={i} href="/programs">
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 10,
-                            padding: '12px 6px',
-                            borderTop: i > 0 ? '1px solid var(--glass-border)' : 'none',
-                            borderRadius: 6,
-                            transition: 'background var(--transition-fast)',
-                            cursor: 'pointer',
-                          }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                        >
-                          <div>
-                            <div
-                              style={{
-                                fontFamily: 'var(--font-display)',
-                                fontWeight: 600,
-                                fontSize: '0.92rem',
-                                color: 'var(--chalk)',
-                              }}
-                            >
-                              {name}
-                            </div>
-                            <div
-                              style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.62rem',
-                                color: 'var(--ash)',
-                                marginTop: 3,
-                                textTransform: ar ? 'none' : 'uppercase',
-                                letterSpacing: ar ? 0 : '0.08em',
-                              }}
-                            >
-                              {days}× {ar ? 'أسبوعياً' : 'WEEK'} · {levelLabel[level] || level}
-                            </div>
-                          </div>
-                          <ChevronRight
-                            size={14}
-                            color="var(--ash)"
-                            style={{ flexShrink: 0, transform: ar ? 'rotate(180deg)' : 'none' }}
-                          />
-                        </div>
-                      </Link>
-                    );
-                  });
-                })()}
-
-                <Link href="/programs">
-                  <div
-                    style={{
-                      marginTop: 12,
-                      paddingTop: 14,
-                      borderTop: '1px solid var(--glass-border)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      color: 'var(--volt)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        letterSpacing: ar ? 0 : '0.12em',
-                        textTransform: ar ? 'none' : 'uppercase',
-                      }}
-                    >
-                      {ar ? 'شوف كل البرامج' : 'VIEW ALL PROGRAMS'}
-                    </span>
-                    <ArrowRight size={13} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
-                  </div>
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* BOTTOM STRIP */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            borderTop: '1px solid var(--glass-border)',
-            background: 'rgba(8, 8, 8, 0.80)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '14px 24px',
-              gap: 'clamp(20px,5vw,56px)',
-              flexWrap: 'wrap',
-              direction: ar ? 'rtl' : 'ltr',
-            }}
-          >
-            {[
-              { icon: BarChart3,  label: ar ? 'تتبع التقدم' : 'PROGRESS',    href: '/dashboard' },
-              { icon: Trophy,     label: ar ? 'البرامج'    : 'PROGRAMS',    href: '/programs'  },
-              { icon: Apple,      label: ar ? 'التغذية'    : 'NUTRITION',   href: '/nutrition' },
-              { icon: Calculator, label: ar ? 'الحاسبات'  : 'CALCULATORS', href: '/tools'     },
-              { icon: Dumbbell,   label: ar ? 'التمارين'   : 'EXERCISES',   href: '/exercises' },
-            ].map(({ icon: Icon, label, href }) => (
-              <Link key={href} href={href}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 7,
-                    color: 'var(--ash)',
-                    transition: 'color 0.15s',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--volt)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--ash)'; }}
-                >
-                  <Icon size={14} />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.72rem',
-                      letterSpacing: ar ? 0 : '0.14em',
-                      textTransform: ar ? 'none' : 'uppercase',
-                    }}
-                  >
-                    {label}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          SERVICES — editorial rows
-      ══════════════════════════════════════ */}
-      <section style={{ padding: 'clamp(64px,10vw,120px) 32px', background: 'var(--bg)', direction: ar ? 'rtl' : 'ltr' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 48, flexWrap: 'wrap', gap: 16 }}>
+        {/* ── Header ── */}
+        <Reveal>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <div className="rule-orange" />
-                <span className="label-tag">{ar ? 'الخدمات' : 'FEATURES'}</span>
-              </div>
-              <h2 className="display-lg" style={{ color: 'var(--chalk)', whiteSpace: 'pre-line' }}>
-                {ar ? 'كل اللي\nمحتاجه' : 'EVERYTHING\nYOU NEED'}
-              </h2>
-            </div>
-            <p style={{ color: 'var(--ash-light)', fontSize: '0.88rem', maxWidth: 340, lineHeight: 1.75 }}>
-              {ar
-                ? 'من التدريب للتغذية للحاسبات — GYMZ عنده كل أدواتك في مكان واحد.'
-                : 'From training to nutrition to calculators — GYMZ has every tool you need.'}
-            </p>
-          </div>
-
-          <div>
-            {services.map((s, i) => (
-              <ServiceRow key={s.num} s={s} i={i} ar={ar} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          LOGGED-IN QUICK ACTIONS
-      ══════════════════════════════════════ */}
-      {user && (
-        <section style={{ padding: 'clamp(48px,8vw,80px) 32px', background: 'var(--carbon)', direction: ar ? 'rtl' : 'ltr' }}>
-          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-              <div className="rule-orange" />
-              <span className="label-tag">{ar ? `أهلاً يا ${userName}` : `HEY, ${userName.toUpperCase()}`}</span>
-            </div>
-
-            <div
-              className="quick-actions-grid"
-              style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(0,1fr)', gap: 12, alignItems: 'stretch' }}
-            >
-              <Link href="/workout">
-                <div
-                  className="glass-card card-hover"
-                  style={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                    height: '100%',
-                    minHeight: 220,
-                    padding: '28px 26px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: 800,
-                      fontSize: 'clamp(90px,10vw,140px)',
-                      lineHeight: 1,
-                      color: 'rgba(255, 255, 255, 0.04)',
-                      position: 'absolute',
-                      top: -10,
-                      [ar ? 'left' : 'right']: 10,
-                      userSelect: 'none',
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    01
-                  </div>
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    <span className="label-tag" style={{ color: 'var(--volt)' }}>
-                      {ar ? 'الجلسة القادمة' : 'NEXT UP'}
-                    </span>
-                    <h3
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontWeight: 800,
-                        fontSize: 'clamp(1.8rem,3vw,2.6rem)',
-                        letterSpacing: ar ? 0 : '0.02em',
-                        color: 'var(--chalk)',
-                        textTransform: ar ? 'none' : 'uppercase',
-                        margin: '10px 0 8px',
-                      }}
-                    >
-                      {ar ? 'ابدأ جلستي' : 'START WORKOUT'}
-                    </h3>
-                    <p style={{ color: 'var(--ash-light)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: 320 }}>
-                      {ar ? 'سجّل تمرين جديد وتابع كل عدة دلوقتي.' : 'Log a new session and track every rep now.'}
-                    </p>
-                  </div>
-                  <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--volt)' }}>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        letterSpacing: ar ? 0 : '0.14em',
-                        textTransform: ar ? 'none' : 'uppercase',
-                      }}
-                    >
-                      {ar ? 'ابدأ الآن' : 'BEGIN NOW'}
-                    </span>
-                    <ArrowRight size={16} style={{ transform: ar ? 'rotate(180deg)' : 'none' }} />
-                  </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,77,46,0.15)', border: '1px solid rgba(255,77,46,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldAlert size={18} color="var(--accent)" />
                 </div>
-              </Link>
-
-              <div
-                className="glass-card"
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden',
-                }}
-              >
-                {[
-                  { href: '/dashboard', icon: BarChart3, title: ar ? 'تقدمي'         : 'MY PROGRESS',    desc: ar ? 'أرقامك ومؤشراتك الأسبوعية' : 'Weekly stats and numbers'    },
-                  { href: '/programs',  icon: Dumbbell,  title: ar ? 'برامجي'         : 'MY PROGRAMS',    desc: ar ? 'استكشف وغيّر برنامجك'       : 'Explore and switch programs' },
-                  { href: '/nutrition', icon: Apple,     title: ar ? 'خطتي الغذائية' : 'NUTRITION PLAN', desc: ar ? 'وجباتك وسعراتك اليومية'     : 'Meals and daily calories'    },
-                ].map(({ href, icon: Icon, title, desc }, i) => (
-                  <Link key={href} href={href}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 14,
-                        padding: '16px 18px',
-                        borderTop: i > 0 ? '1px solid var(--glass-border)' : 'none',
-                        background: 'transparent',
-                        cursor: 'pointer',
-                        transition: 'background var(--transition-base)',
-                        direction: ar ? 'rtl' : 'ltr',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      <Icon size={17} color="var(--volt)" style={{ flexShrink: 0 }} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.92rem', color: 'var(--chalk)' }}>
-                          {title}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--ash)', marginTop: 2 }}>{desc}</div>
-                      </div>
-                      <ChevronRight
-                        size={14}
-                        color="var(--ash)"
-                        style={{ flexShrink: 0, transform: ar ? 'rotate(180deg)' : 'none' }}
-                      />
-                    </div>
-                  </Link>
-                ))}
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--accent)', letterSpacing: '0.02em' }}>ADMIN PANEL</span>
               </div>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,3rem)', letterSpacing: '0.04em', color: 'var(--chalk)', lineHeight: 1 }}>
+                لوحة التحكم
+              </h1>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash-light)', marginTop: 6 }}>
+                مرحباً {user.name} — كل البيانات من Supabase مباشرةً
+              </p>
             </div>
 
-            <style>{`
-              @media (max-width: 720px) {
-                .quick-actions-grid { grid-template-columns: 1fr !important; }
-              }
-            `}</style>
+            <motion.button
+              onClick={fetchData}
+              whileTap={{ scale: 0.95 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 10, color: 'var(--chalk)', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer', }}
+            >
+              <RefreshCw size={13} />
+              تحديث
+            </motion.button>
           </div>
-        </section>
-      )}
+        </Reveal>
 
-      {/* HOW IT WORKS — for new visitors only */}
-      {!user && (
-        <section
-          style={{
-            padding: 'clamp(64px,10vw,120px) 32px',
-            background: 'var(--carbon)',
-            direction: ar ? 'rtl' : 'ltr',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%,-50%)',
-              fontFamily: 'var(--font-display)',
-              fontWeight: 800,
-              fontSize: 'clamp(200px,30vw,300px)',
-              color: 'rgba(255,90,31,0.03)',
-              lineHeight: 1,
-              userSelect: 'none',
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            GYMZ
-          </div>
+        {/* ── Stats ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 36 }}>
+          <StatBox icon={Users}       label="إجمالي المستخدمين"   value={loadingData ? '—' : stats.totalUsers}    accent="#3D7FFF" delay={0} />
+          <StatBox icon={Activity}    label="مشتركو البرامج"       value={loadingData ? '—' : stats.totalPrograms}  accent="var(--accent)" delay={0.05} />
+          <StatBox icon={Dumbbell}    label="جلسات التدريب"        value={loadingData ? '—' : stats.totalSessions}  accent="#4ade80" delay={0.1} />
+          <StatBox icon={TrendingUp}  label="مسجلين اليوم"         value={loadingData ? '—' : stats.newToday}       accent="#facc15" delay={0.15} />
+        </div>
 
-          <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div className="rule-orange" />
-              <span className="label-tag">{ar ? 'كيف تبدأ' : 'HOW IT WORKS'}</span>
+        {/* ── Nutrition Premium ── */}
+        <Reveal delay={0.15}>
+          <GlassCard accent="var(--accent)" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <Send size={16} color="var(--accent)" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                بث إشعار لكل العملاء ({users.length})
+              </span>
             </div>
-            <h2 className="display-lg" style={{ color: 'var(--chalk)', marginBottom: 64, whiteSpace: 'pre-line' }}>
-              {ar ? '٣ خطوات\nبس وانت جاهز' : 'THREE STEPS.\nTHATS IT.'}
-            </h2>
-            <div style={{ position: 'relative' }}>
-              <div
+
+            <input
+              type="text"
+              placeholder="عنوان الإشعار (مثال: عرض جديد 🔥)"
+              value={broadcastTitle}
+              onChange={e => setBroadcastTitle(e.target.value)}
+              style={{ ...foodInputStyle, width: '100%', marginBottom: 10, direction: 'rtl' }}
+            />
+            <textarea
+              placeholder="اكتب الرسالة اللي هتوصل لكل مستخدم..."
+              value={broadcastBody}
+              onChange={e => setBroadcastBody(e.target.value)}
+              rows={3}
+              style={{ ...foodInputStyle, width: '100%', marginBottom: 12, direction: 'rtl', resize: 'vertical', fontFamily: 'var(--font-body)' }}
+            />
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              disabled={sendingBroadcast || !broadcastTitle.trim() || users.length === 0}
+              onClick={async () => {
+                if (!broadcastTitle.trim()) return;
+                setSendingBroadcast(true);
+                const rows = users.map(u => ({
+                  user_id: u.id,
+                  title: broadcastTitle.trim(),
+                  body: broadcastBody.trim() || null,
+                }));
+                const { error } = await supabase.from('notifications').insert(rows);
+                setSendingBroadcast(false);
+                if (error) {
+                  toast.error('فشل الإرسال — تأكد إن policy الأدمن مضافة في Supabase');
+                } else {
+                  toast.success(`اتبعت لـ ${rows.length} مستخدم ✅`);
+                  setBroadcastTitle('');
+                  setBroadcastBody('');
+                }
+              }}
+              className="btn btn-primary"
+              style={{ padding: '10px 22px', fontSize: '0.82rem', opacity: sendingBroadcast || !broadcastTitle.trim() ? 0.5 : 1 }}
+            >
+              {sendingBroadcast ? 'جاري الإرسال...' : `إرسال للكل (${users.length})`}
+            </motion.button>
+          </GlassCard>
+        </Reveal>
+
+        {/* ── Nutrition Premium ── */}
+        <Reveal delay={0.15}>
+          <GlassCard accent="#FFFFFF" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <Apple size={16} color="#FFFFFF" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                اشتراكات التغذية ({premiumEmails.length})
+              </span>
+            </div>
+
+            {/* add email */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+              <input
+                type="email"
+                placeholder="example@gmail.com"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !addingEmail && addPremiumEmail()}
                 style={{
-                  position: 'absolute',
-                  top: 34,
-                  left: 0,
-                  right: 0,
-                  height: 1,
-                  background: 'var(--glass-border)',
-                  zIndex: 0,
+                  flex: 1, minWidth: 220, padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                  borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                  fontSize: '0.78rem', outline: 'none', direction: 'ltr', textAlign: 'right',
                 }}
               />
-              <div
+              <motion.button
+                onClick={addPremiumEmail}
+                disabled={addingEmail}
+                whileTap={{ scale: 0.96 }}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                  gap: 40,
-                  position: 'relative',
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px',
+                  background: 'rgba(255,159,10,0.12)', border: '1px solid rgba(255,159,10,0.35)',
+                  borderRadius: 8, color: '#FFFFFF', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                  cursor: addingEmail ? 'not-allowed' : 'pointer', opacity: addingEmail ? 0.5 : 1,
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {steps.map((s, i) => (
-                  <StepItem key={s.num} s={s} i={i} ar={ar} />
+                {addingEmail ? <RefreshCw size={13} /> : <Plus size={13} />}
+                تفعيل اشتراك
+              </motion.button>
+            </div>
+
+            {/* list */}
+            {premiumEmails.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                مفيش مشتركين لسه
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {premiumEmails.map(p => (
+                  <div key={p.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', background: 'rgba(255,159,10,0.06)',
+                    border: '1px solid rgba(255,159,10,0.15)', borderRadius: 8,
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--chalk)', direction: 'ltr', textAlign: 'right' }}>{p.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', marginTop: 2 }}>
+                        {new Date(p.added_at).toLocaleDateString('ar-EG')}
+                      </div>
+                    </div>
+                    <motion.button
+                      onClick={() => removePremiumEmail(p.id)}
+                      whileTap={{ scale: 0.9 }}
+                      disabled={removingEmail === p.id}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28, background: 'rgba(248,113,113,0.08)',
+                        border: '1px solid rgba(248,113,113,0.25)', borderRadius: 6,
+                        cursor: 'pointer', color: '#f87171',
+                      }}
+                    >
+                      {removingEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
+                    </motion.button>
+                  </div>
                 ))}
               </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── Exercise Videos Premium ── */}
+        <Reveal delay={0.18}>
+          <GlassCard accent="#facc15" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <Play size={16} color="#facc15" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                اشتراكات مكتبة التمارين المتحركة ({exercisePremiumEmails.length})
+              </span>
             </div>
-          </div>
-        </section>
-      )}
 
-      {/* ══════════════════════════════════════
-          CTA — inverted (#FF5A1F bg)
-      ══════════════════════════════════════ */}
-      {!user && (
-        <section
-          style={{
-            background: 'var(--volt)',
-            padding: 'clamp(64px,10vw,100px) 32px',
-            position: 'relative',
-            overflow: 'hidden',
-            direction: ar ? 'rtl' : 'ltr',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: 'repeating-linear-gradient(45deg, rgba(8,8,8,0.05) 0, rgba(8,8,8,0.05) 1px, transparent 1px, transparent 12px)',
-              pointerEvents: 'none',
-            }}
-          />
+            {/* add email */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+              <input
+                type="email"
+                placeholder="example@gmail.com"
+                value={newExerciseEmail}
+                onChange={e => setNewExerciseEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !addingExerciseEmail && addExercisePremiumEmail()}
+                style={{
+                  flex: 1, minWidth: 220, padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                  borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                  fontSize: '0.78rem', outline: 'none', direction: 'ltr', textAlign: 'right',
+                }}
+              />
+              <motion.button
+                onClick={addExercisePremiumEmail}
+                disabled={addingExerciseEmail}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px',
+                  background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.35)',
+                  borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                  cursor: addingExerciseEmail ? 'not-allowed' : 'pointer', opacity: addingExerciseEmail ? 0.5 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {addingExerciseEmail ? <RefreshCw size={13} /> : <Plus size={13} />}
+                تفعيل اشتراك
+              </motion.button>
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32 }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <div style={{ width: 32, height: 3, background: '#fff', borderRadius: 2 }} />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      letterSpacing: ar ? 0 : '0.16em',
-                      textTransform: ar ? 'none' : 'uppercase',
-                      color: '#080808',
-                    }}
-                  >
-                    {ar ? 'مجاناً تماماً • بدون أعذار' : 'COMPLETELY FREE • NO EXCUSES'}
-                  </span>
-                </div>
-                <h2
+            {/* list */}
+            {exercisePremiumEmails.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                مفيش مشتركين لسه
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {exercisePremiumEmails.map(p => (
+                  <div key={p.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', background: 'rgba(250,204,21,0.06)',
+                    border: '1px solid rgba(250,204,21,0.15)', borderRadius: 8,
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--chalk)', direction: 'ltr', textAlign: 'right' }}>{p.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', marginTop: 2 }}>
+                        {new Date(p.added_at).toLocaleDateString('ar-EG')}
+                      </div>
+                    </div>
+                    <motion.button
+                      onClick={() => removeExercisePremiumEmail(p.id)}
+                      whileTap={{ scale: 0.9 }}
+                      disabled={removingExerciseEmail === p.id}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28, background: 'rgba(248,113,113,0.08)',
+                        border: '1px solid rgba(248,113,113,0.25)', borderRadius: 6,
+                        cursor: 'pointer', color: '#f87171',
+                      }}
+                    >
+                      {removingExerciseEmail === p.id ? <RefreshCw size={12} /> : <Trash2 size={12} />}
+                    </motion.button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── طلبات الاشتراك ── */}
+        <Reveal delay={0.2}>
+          <GlassCard accent="var(--volt)" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Send size={16} color="var(--volt)" />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                  طلبات الاشتراك ({requests.length})
+                </span>
+              </div>
+              <motion.button
+                onClick={fetchPaymentRequests}
+                whileTap={{ scale: 0.94 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                  borderRadius: 6, color: 'var(--ash-light)', fontFamily: 'var(--font-mono)',
+                  fontSize: '0.62rem', cursor: 'pointer',
+                }}
+              >
+                <RefreshCw size={11} /> تحديث
+              </motion.button>
+            </div>
+
+            {requests.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '18px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                مفيش طلبات جديدة
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {requests.map(r => (
+                  <div key={r.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                    flexWrap: 'wrap', padding: '10px 14px', background: 'rgba(255,90,31,0.06)',
+                    border: '1px solid rgba(255,90,31,0.2)', borderRadius: 8,
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--chalk)', direction: 'ltr', textAlign: 'right', wordBreak: 'break-all' }}>{r.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash-light)', marginTop: 2 }}>
+                        {new Date(r.created_at).toLocaleString('ar-EG')}
+                        {r.phone ? ` · ${r.phone}` : ''}
+                        {r.amount ? ` · ${r.amount} جنيه` : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <motion.button
+                        onClick={() => activateRequest(r)}
+                        disabled={actingRequest === r.id}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px',
+                          background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.35)',
+                          borderRadius: 6, color: '#4ade80', fontFamily: 'var(--font-mono)',
+                          fontSize: '0.68rem', cursor: actingRequest === r.id ? 'not-allowed' : 'pointer',
+                          opacity: actingRequest === r.id ? 0.5 : 1,
+                        }}
+                      >
+                        {actingRequest === r.id ? <RefreshCw size={11} /> : <Check size={11} />}
+                        <span>تفعيل</span>
+                      </motion.button>
+                      <motion.button
+                        onClick={() => rejectRequest(r)}
+                        disabled={actingRequest === r.id}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          width: 28, height: 28, background: 'rgba(248,113,113,0.08)',
+                          border: '1px solid rgba(248,113,113,0.25)', borderRadius: 6,
+                          cursor: 'pointer', color: '#f87171',
+                        }}
+                      >
+                        <X size={12} />
+                      </motion.button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── منتجات الباركود المحلية ── */}
+        <Reveal delay={0.19}>
+          <GlassCard accent="#22d3ee" style={{ padding: '24px', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Barcode size={16} color="#22d3ee" />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                  منتجات الباركود المحلية ({communityFoods.length})
+                </span>
+              </div>
+              <motion.button
+                onClick={() => { if (showFoodForm) resetFoodForm(); setShowFoodForm(v => !v); }}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+                  background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)',
+                  borderRadius: 8, color: '#22d3ee', fontFamily: 'var(--font-mono)', fontSize: '0.72rem',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                }}
+              >
+                <Plus size={13} /> منتج جديد
+              </motion.button>
+            </div>
+
+            {/* فورم إضافة/تعديل */}
+            {showFoodForm && (
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px,1fr))', gap: 8,
+                marginBottom: 18, padding: 14, background: 'rgba(34,211,238,0.05)',
+                border: '1px solid rgba(34,211,238,0.15)', borderRadius: 10,
+              }}>
+                <input
+                  placeholder="الباركود" value={foodForm.barcode} disabled={!!editingBarcode}
+                  onChange={e => setFoodForm(f => ({ ...f, barcode: e.target.value }))}
+                  style={{ ...foodInputStyle, direction: 'ltr', textAlign: 'right', opacity: editingBarcode ? 0.6 : 1 }}
+                />
+                <input
+                  placeholder="اسم المنتج" value={foodForm.name}
+                  onChange={e => setFoodForm(f => ({ ...f, name: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="السعرات" type="number" value={foodForm.cal}
+                  onChange={e => setFoodForm(f => ({ ...f, cal: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="بروتين (جم)" type="number" value={foodForm.protein}
+                  onChange={e => setFoodForm(f => ({ ...f, protein: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="كارب (جم)" type="number" value={foodForm.carbs}
+                  onChange={e => setFoodForm(f => ({ ...f, carbs: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="دهون (جم)" type="number" value={foodForm.fat}
+                  onChange={e => setFoodForm(f => ({ ...f, fat: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <input
+                  placeholder="الكمية (مثلاً 100 جرام)" value={foodForm.serving}
+                  onChange={e => setFoodForm(f => ({ ...f, serving: e.target.value }))}
+                  style={foodInputStyle}
+                />
+                <motion.button
+                  onClick={saveFoodEntry} disabled={savingFood} whileTap={{ scale: 0.96 }}
                   style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 800,
-                    fontSize: 'clamp(3rem,8vw,6.8rem)',
-                    lineHeight: 0.96,
-                    color: '#fff',
-                    textTransform: ar ? 'none' : 'uppercase',
-                    marginBottom: 16,
-                    whiteSpace: 'pre-line',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px',
+                    background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.4)',
+                    borderRadius: 8, color: '#22d3ee', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                    cursor: savingFood ? 'not-allowed' : 'pointer', opacity: savingFood ? 0.5 : 1,
                   }}
                 >
-                  {ar ? 'ابدأ\nرحلتك\nدلوقتي' : 'START\nYOUR\nJOURNEY'}
-                </h2>
-                <p style={{ color: '#080808', fontWeight: 500, fontSize: '0.92rem', lineHeight: 1.7, maxWidth: 390 }}>
-                  {ar
-                    ? 'انضم لآلاف المتدربين اللي بيحققوا نتائج حقيقية مع GYMZ.'
-                    : 'Join thousands of athletes achieving real results with GYMZ.'}
-                </p>
+                  {savingFood ? <RefreshCw size={13} /> : <Plus size={13} />}
+                  {editingBarcode ? 'حفظ التعديل' : 'إضافة'}
+                </motion.button>
+              </div>
+            )}
+
+            {/* بحث */}
+            <input
+              placeholder="دوّر بالباركود أو الاسم..."
+              value={foodSearch}
+              onChange={e => setFoodSearch(e.target.value)}
+              style={{
+                width: '100%', padding: '9px 14px', marginBottom: 14, boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem', outline: 'none',
+              }}
+            />
+
+            {/* لستة المنتجات */}
+            {filteredFoods.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px 0', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash)' }}>
+                {communityFoods.length === 0 ? 'مفيش منتجات لسه — ضيف أول منتج محلي' : 'مفيش نتايج للبحث ده'}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 420, overflowY: 'auto' }}>
+                {filteredFoods.map(f => (
+                  <div key={f.barcode} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+                    padding: '10px 14px', background: 'rgba(34,211,238,0.05)',
+                    border: '1px solid rgba(34,211,238,0.12)', borderRadius: 8,
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--chalk)' }}>{f.name}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash-light)', marginTop: 2, direction: 'ltr', textAlign: 'right' }}>
+                        {f.barcode} · {f.cal} سعرة · {f.serving}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <motion.button
+                        onClick={() => startEditFood(f)} whileTap={{ scale: 0.9 }}
+                        style={{
+                          width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)',
+                          borderRadius: 6, color: 'var(--ash-light)', cursor: 'pointer',
+                        }}
+                      >
+                        <Pencil size={12} />
+                      </motion.button>
+                      <motion.button
+                        onClick={() => deleteFoodEntry(f.barcode)} disabled={deletingFoodBarcode === f.barcode} whileTap={{ scale: 0.9 }}
+                        style={{
+                          width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+                          borderRadius: 6, color: '#f87171', cursor: 'pointer',
+                        }}
+                      >
+                        {deletingFoodBarcode === f.barcode ? <RefreshCw size={12} /> : <Trash2 size={12} />}
+                      </motion.button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── Users Table ── */}
+        <Reveal delay={0.2}>
+          <GlassCard style={{ padding: '24px' }}>
+            {/* table header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Users size={16} color="var(--accent)" />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
+                  المستخدمون ({filtered.length})
+                </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <Link href="/register">
-                  <motion.div
-                    whileTap={{ scale: 0.97 }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      background: '#080808',
-                      color: '#fff',
-                      padding: '16px 32px',
-                      borderRadius: 'var(--radius-sm)',
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: 700,
-                      fontSize: '1.05rem',
-                      letterSpacing: ar ? 0 : '0.06em',
-                      cursor: 'pointer',
-                      boxShadow: '4px 4px 0 rgba(8, 8, 8, 0.28)',
-                      textTransform: ar ? 'none' : 'uppercase',
-                    }}
-                  >
-                    <Zap size={16} /> {ar ? 'أنشئ حسابك' : 'CREATE ACCOUNT'}
-                  </motion.div>
-                </Link>
-                <div
+              {/* search */}
+              <div style={{ position: 'relative' }}>
+                <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--ash)' }} />
+                <input
+                  type="text"
+                  placeholder="ابحث بالاسم أو الإيميل..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
                   style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    letterSpacing: ar ? 0 : '0.1em',
-                    color: '#080808',
-                    textTransform: ar ? 'none' : 'uppercase',
+                    paddingLeft: 30, paddingRight: 12, paddingTop: 8, paddingBottom: 8,
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)',
+                    borderRadius: 8, color: 'var(--chalk)', fontFamily: 'var(--font-mono)',
+                    fontSize: '0.72rem', outline: 'none', width: 220,
                   }}
-                >
-                  {ar ? '✓ مجاناً  ✓ بدون بطاقة  ✓ دقيقة واحدة' : '✓ FREE  ✓ NO CARD  ✓ ONE MINUTE'}
-                </div>
+                />
               </div>
             </div>
-          </motion.div>
-        </section>
-      )}
 
-      <style>{`
-        .rule-anim { animation: slideInRule 0.6s 0.3s ease-out forwards; }
-        @keyframes slideInRule { from { width: 0; } to { width: 32px; } }
-      `}</style>
+            {/* table */}
+            {loadingData ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ash)' }}>
+                جاري التحميل...
+              </div>
+            ) : filtered.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ash)' }}>
+                مفيش نتائج
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      {['الاسم', 'الإيميل', 'الدور', 'تاريخ التسجيل', 'إجراءات'].map(h => (
+                        <th key={h} style={{ textAlign: 'right', padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', letterSpacing: '0.02em', borderBottom: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((u, i) => (
+                      <motion.tr
+                        key={u.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.03 }}
+                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                      >
+                        <td style={{ padding: '12px 12px', fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--chalk)', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: u.role === 'admin' ? 'rgba(255,77,46,0.2)' : 'rgba(255,77,46,0.15)', border: `1px solid ${u.role === 'admin' ? 'rgba(255,77,46,0.4)' : 'rgba(255,77,46,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: u.role === 'admin' ? 'var(--accent)' : 'var(--accent)', fontFamily: 'var(--font-display)' }}>
+                              {(u.name || u.email)?.[0]?.toUpperCase()}
+                            </div>
+                            {u.name || '—'}
+                            {u.id === user.id && <span style={{ fontSize: '0.55rem', fontFamily: 'var(--font-mono)', color: 'var(--ash)', padding: '1px 5px', border: '1px solid var(--glass-border)', borderRadius: 3 }}>أنت</span>}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ash-light)', whiteSpace: 'nowrap' }}>{u.email}</td>
+                        <td style={{ padding: '12px 12px' }}><RoleBadge role={u.role} /></td>
+                        <td style={{ padding: '12px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--ash)', whiteSpace: 'nowrap' }}>
+                          {u.created_at ? new Date(u.created_at).toLocaleDateString('ar-EG') : '—'}
+                        </td>
+                        <td style={{ padding: '12px 12px' }}>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            {/* toggle role */}
+                            <motion.button
+                              onClick={() => toggleRole(u.id, u.role)}
+                              disabled={togglingId === u.id || u.id === user.id}
+                              whileTap={{ scale: 0.93 }}
+                              title={u.role === 'admin' ? 'خفّض لـ user' : 'ارفع لـ admin'}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 4,
+                                padding: '5px 10px',
+                                background: u.role === 'admin' ? 'rgba(255,77,46,0.1)' : 'rgba(255,77,46,0.1)',
+                                border: `1px solid ${u.role === 'admin' ? 'rgba(255,77,46,0.3)' : 'rgba(255,77,46,0.3)'}`,
+                                borderRadius: 6, cursor: u.id === user.id ? 'not-allowed' : 'pointer',
+                                color: u.role === 'admin' ? 'var(--accent)' : 'var(--accent)',
+                                fontFamily: 'var(--font-mono)', fontSize: '0.6rem',
+                                opacity: u.id === user.id ? 0.4 : 1,
+                              }}
+                            >
+                              {togglingId === u.id ? <RefreshCw size={10} /> : u.role === 'admin' ? <UserX size={10} /> : <UserCheck size={10} />}
+                              {u.role === 'admin' ? 'user' : 'admin'}
+                            </motion.button>
+
+                            {/* delete */}
+                            <motion.button
+                              onClick={() => deleteUser(u.id)}
+                              disabled={deletingId === u.id || u.id === user.id}
+                              whileTap={{ scale: 0.93 }}
+                              title="حذف المستخدم"
+                              style={{
+                                display: 'flex', alignItems: 'center',
+                                padding: '5px 8px',
+                                background: 'rgba(248,113,113,0.08)',
+                                border: '1px solid rgba(248,113,113,0.25)',
+                                borderRadius: 6, cursor: u.id === user.id ? 'not-allowed' : 'pointer',
+                                color: '#f87171', opacity: u.id === user.id ? 0.3 : 1,
+                              }}
+                            >
+                              {deletingId === u.id ? <RefreshCw size={10} /> : <Trash2 size={10} />}
+                            </motion.button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassCard>
+        </Reveal>
+
+        {/* ── Footer note ── */}
+        <Reveal delay={0.3}>
+          <p style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--ash)', marginTop: 28, letterSpacing: '0.07em' }}>
+            ⚠️ صفحة Admin — الوصول محدود على المستخدمين اللي عندهم role = admin في Supabase
+          </p>
+        </Reveal>
+
+      </div>
     </>
   );
 }
