@@ -831,14 +831,16 @@ export default function ProfilePage() {
     if (!user?.id || !prog) return;
     const title = prog.program_title || prog.program_title_ar || 'البرنامج';
     if (!confirm(`هتمسح ${title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
-    await supabase.from('user_programs').delete().eq('user_id', user.id);
-    const { data: left } = await supabase.from('user_programs').select('id').eq('user_id', user.id);
+    await supabase.from('user_programs').delete().eq('id', prog.id).eq('user_id', user.id);
+    const { data: left } = await supabase.from('user_programs').select('id').eq('id', prog.id);
     if (left && left.length > 0) {
       toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
       return;
     }
-    setEnrolledPrograms([]);
-    setRealStats((s) => ({ ...s, programs: 0 }));
+    const { data: rest } = await supabase.from('user_programs').select('*').eq('user_id', user.id);
+    const rows = rest || [];
+    setEnrolledPrograms(rows);
+    setRealStats((s) => ({ ...s, programs: rows.length }));
     toast.success('تمسح البرنامج');
   };
 
