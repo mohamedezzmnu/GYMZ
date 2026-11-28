@@ -10,7 +10,7 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   CheckCircle2, Circle, Dumbbell, Scale, Flame,
   ChevronDown, ChevronUp, Plus, Save,
-  Calendar, ArrowRight, Clock,
+  Calendar, ArrowRight, Clock, Trash2,
 } from 'lucide-react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -501,14 +501,15 @@ export default function WorkoutPage() {
   const [openDay, setOpenDay]             = useState(null);
   const [savingDay, setSavingDay]         = useState(null);
   const [loggingWeight, setLoggingWeight] = useState(false);
-  const [activeProgram, setActiveProgram] = useState(0);
+  const [activeProgram] = useState(0);
   const [loading, setLoading]             = useState(true);
+  const [deletingProgram, setDeletingProgram] = useState(false);
 
   const fetchAll = useCallback(async (isMounted = () => true) => {
     if (!user?.id) return;
     setLoading(true);
     const [{ data: progs }, { data: sess }, { data: wlog }] = await Promise.all([
-      supabase.from('user_programs').select('*').eq('user_id', user.id),
+      supabase.from('user_programs').select('*').eq('user_id', user.id).eq('is_active', true).order('started_at', { ascending: false }).limit(1),
       supabase.from('workout_sessions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30),
       supabase.from('weight_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(14),
     ]);
@@ -579,6 +580,24 @@ export default function WorkoutPage() {
       await fetchAll();
     }
     setLoggingWeight(false);
+  };
+
+  // برنامج واحد بس — المسح بيرجعك لحالة "مفيش برنامج"
+  const deleteProgram = async () => {
+    const prog = userPrograms[0];
+    if (!user?.id || !prog) return;
+    if (!confirm(`هتمسح ${prog.program_title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
+    setDeletingProgram(true);
+    await supabase.from('user_programs').delete().eq('user_id', user.id);
+    const { data: left } = await supabase.from('user_programs').select('id').eq('user_id', user.id);
+    setDeletingProgram(false);
+    if (left && left.length > 0) {
+      toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
+      return;
+    }
+    toast.success('تمسح البرنامج');
+    setOpenDay(null);
+    await fetchAll();
   };
 
   const now = new Date();
@@ -911,42 +930,64 @@ export default function WorkoutPage() {
                 </GlassCard>
               </Reveal>
 
-              {/* اختيار البرنامج */}
+              {/* برنامجك — برنامج واحد بس */}
               {userPrograms.length > 0 && (
                 <Reveal delay={0.12}>
                   <div className="section-tight" style={{ direction: 'rtl' }}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', marginBottom: 10 }}>
                       برنامجك
                     </div>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      {userPrograms.map((p, i) => {
-                        const selected = activeProgram === i;
-                        return (
-                          <motion.button
-                            type="button"
-                            key={p.id}
-                            whileTap={{ scale: 0.96 }}
-                            onClick={() => {
-                              setActiveProgram(i);
-                              setOpenDay(null);
-                            }}
-                            style={{
-                              padding: '7px 14px',
-                              borderRadius: 8,
-                              cursor: 'pointer',
-                              background: selected ? 'var(--volt-dim)' : 'var(--glass-bg)',
-                              border: `1px solid ${selected ? 'var(--glass-border-hover)' : 'var(--glass-border)'}`,
-                              color: selected ? 'var(--volt)' : 'var(--ash-light)',
-                              fontFamily: 'var(--font-display)',
-                              fontWeight: 700,
-                              fontSize: '0.82rem',
-                              transition: 'all 0.2s',
-                            }}
-                          >
-                            {p.program_title}
-                          </motion.button>
-                        );
-                      })}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          padding: '7px 14px',
+                          borderRadius: 8,
+                          background: 'var(--volt-dim)',
+                          border: '1px solid var(--glass-border-hover)',
+                          color: 'var(--volt)',
+                          fontFamily: 'var(--font-display)',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                        }}
+                      >
+                        {userPrograms[0].program_title}
+                      </span>
+                      <Link
+                        href="/programs"
+                        style={{
+                          padding: '7px 12px',
+                          borderRadius: 8,
+                          background: 'var(--glass-bg)',
+                          border: '1px solid var(--glass-border)',
+                          color: 'var(--ash-light)',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.7rem',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        غيّر البرنامج
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={deleteProgram}
+                        disabled={deletingProgram}
+                        aria-label={`امسح برنامج ${userPrograms[0].program_title}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          padding: '7px 12px',
+                          borderRadius: 8,
+                          background: 'rgba(248, 113, 113, 0.07)',
+                          border: '1px solid rgba(248, 113, 113, 0.3)',
+                          color: '#f87171',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.7rem',
+                          cursor: deletingProgram ? 'default' : 'pointer',
+                        }}
+                      >
+                        <Trash2 size={12} /> امسح
+                      </button>
                     </div>
                   </div>
                 </Reveal>
