@@ -9,6 +9,8 @@ import {
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import { EXERCISES } from '../data/exercises';
+import PROGRAMS from '../data/programs';
 
 /* ─────────────────────────────────────────────
    ANIMATED COUNTER
@@ -186,12 +188,6 @@ export default function HomePage() {
     let active = true;
     supabase.from('users').select('id', { count: 'exact', head: true }).then(({ count }) => {
       if (active) setStats(s => ({ ...s, members: count || 0 }));
-    });
-    supabase.from('exercises').select('id', { count: 'exact', head: true }).then(({ count }) => {
-      if (active) setStats(s => ({ ...s, exercises: count || 0 }));
-    });
-    supabase.from('programs').select('id', { count: 'exact', head: true }).then(({ count }) => {
-      if (active) setStats(s => ({ ...s, programs: count || 0 }));
     });
     supabase.from('programs').select('title_ar,title_en,days_per_week,level').limit(3).then(({ data }) => {
       if (active && data?.length) setPrograms(data);
@@ -393,7 +389,7 @@ export default function HomePage() {
                   : (ar ? ['اتدرّب بذكاء.', 'سجّل كل عدة.', 'اسبق صحابك.'] : ['TRAIN SMARTER.', 'TRACK EVERY REP.', 'BEAT YOUR FRIENDS.']);
 
                 return (
-                  <div style={{ overflow: 'hidden' }}>
+                  <h1 style={{ overflow: 'hidden', margin: 0, padding: 0 }}>
                     {lines.filter(Boolean).map((line, i) => (
                       <motion.div
                         key={i}
@@ -419,7 +415,7 @@ export default function HomePage() {
                         </div>
                       </motion.div>
                     ))}
-                  </div>
+                  </h1>
                 );
               })()}
 
@@ -488,10 +484,10 @@ export default function HomePage() {
                 style={{ display: 'flex', gap: 0, paddingTop: 20, borderTop: '1px solid var(--glass-border)' }}
               >
                 {[
-                  { val: stats.members   || 5200, suf: '+', label: ar ? 'متدرب نشط' : 'MEMBERS'   },
-                  { val: stats.exercises || 120,  suf: '+', label: ar ? 'تمرين'      : 'EXERCISES' },
-                  { val: stats.programs  || 15,   suf: '+', label: ar ? 'برنامج'     : 'PROGRAMS'  },
-                ].map(({ val, suf, label }, i) => (
+                  { val: stats.members,          suf: '',  label: ar ? 'متدرب مسجل' : 'MEMBERS'   },
+                  { val: EXERCISES.length,       suf: '+', label: ar ? 'تمرين'      : 'EXERCISES' },
+                  { val: PROGRAMS.length,        suf: '',  label: ar ? 'برامج'      : 'PROGRAMS'  },
+                ].filter(({ val }) => val > 0).map(({ val, suf, label }, i) => (
                   <div
                     key={label}
                     style={{
