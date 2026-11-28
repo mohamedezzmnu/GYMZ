@@ -1,26 +1,22 @@
 // src/pages/exercises/videos.jsx
 // ── مكتبة التمارين — صفحة مستقلة، بريميوم ──────────────────
 //
-// المصدر: yuhonas/free-exercise-db (public domain / Unlicense — حر تمامًا
-// حتى للاستخدام التجاري، من غير attribution ولا API key).
-// https://github.com/yuhonas/free-exercise-db
-// 873 تمرين بصور. المصدر القديم (zenithfits exercise-database) اتقفل وكل
-// روابط الفيديو بتاعته بترجع 401، فاتبدل بالكامل.
-// مفيش فيديو في المصدر ده؛ كل تمرين ليه صورتين (بداية ونهاية الحركة)
-// بنبدل بينهم في لوب جوه المودال فتبان كأنها حركة متحركة (زي GIF).
+// المصدر: namnq/workout-free-videos (CC0 1.0 public domain — مجاني بالكامل
+// حتى للاستخدام التجاري، من غير attribution ولا API key ولا rate limit).
+// https://github.com/namnq/workout-free-videos
+// 57 تمرين بفيديو حقيقي 720p بيلف في لوب (من غير صوت).
 //
-// الداتا بتتجاب عن طريق jsDelivr (مرآة CDN لأي مشروع مفتوح المصدر على
-// GitHub، ومضمون إنها بتشتغل مع طلبات المتصفح CORS) — مفيش API key
-// ولا سيرفر مطلوب.
+// الفيديوهات والداتا self-hosted جوه المشروع نفسه
+// (public/exercises/videos/*.mp4 + src/data/videoLibrary.js)، فمفيش
+// أي سيرفر خارجي ممكن يقفل أو يرجع 401 زي ما حصل مع المكتبة القديمة.
 //
-// خطوات الأداء بتتبني محليًا بالعامية المصرية (buildStepsAr تحت) من غير
-// أي API أو اتصال إنترنت زيادة — مبنية على اسم العضلة والمعدة الحقيقيين
-// لكل تمرين، فبتشتغل فورًا ومحدش ممكن يفشل.
+// خطوات الأداء بالعامية المصرية مترجمة يدويًا من الـcues الأصلية لكل
+// تمرين (موجودة جاهزة في videoLibrary.js كـ stepsAr).
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff,
+  Search, X, Crown, Loader, ChevronRight,
   SlidersHorizontal, ChevronDown, ChevronUp, Check,
   HeartPulse, CircleDot, PersonStanding, Target,
   Cable, Dumbbell, Weight, Link2, Settings, Settings2, Truck, Circle, Waves,
@@ -30,79 +26,35 @@ import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
+import VIDEO_EXERCISES from '../../data/videoLibrary';
 
-// ── مصدر الداتا: jsDelivr (مرآة CDN رسمية لأي مشروع GitHub، بتدعم
-// CORS بشكل مضمون من المتصفح) — ومصدر احتياطي مباشر من GitHub لو
-// jsDelivr كان بطيء أو واقع لحظتها ──────────────────────────────
-const DATA_URL = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/dist/exercises.json';
-const DATA_URL_FALLBACK = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
-const MEDIA_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/';
+// ── الداتا كلها محلية (57 تمرين + فيديوهات self-hosted) — مفيش fetch
+// ولا مصدر خارجي، فمفيش تحميل ولا فشل اتصال أصلًا ─────────────
 const PAGE_LIMIT = 24;
-
-// ── تحويل تمرين المصدر الجديد (yuhonas) لنفس الشكل اللي الصفحة
-// متعودة عليه، عشان باقي الكود (فلاتر، كروت، مودال) ميتغيرش ────
-const MUSCLE_TO_BODYPART = {
-  chest: 'chest',
-  lats: 'back', 'middle back': 'back', 'lower back': 'back', traps: 'back', neck: 'back',
-  shoulders: 'shoulders',
-  biceps: 'upper arms', triceps: 'upper arms',
-  forearms: 'lower arms',
-  quadriceps: 'upper legs', hamstrings: 'upper legs',
-  calves: 'lower legs',
-  glutes: 'hips', abductors: 'hips', adductors: 'hips',
-  abdominals: 'waist',
-};
-const EQUIP_MAP = {
-  'body only': 'body weight', none: 'body weight',
-  bands: 'band', kettlebells: 'kettlebell',
-  machine: 'leverage machine', 'e-z curl bar': 'ez barbell',
-  'exercise ball': 'stability ball',
-};
-
-function adaptExercise(raw) {
-  const primary = (raw.primaryMuscles && raw.primaryMuscles[0]) || '';
-  const frames = (raw.images || []).map(p => MEDIA_BASE + p);
-  const instructions = Array.isArray(raw.instructions) ? raw.instructions.filter(Boolean) : [];
-  const bodyPart = raw.category === 'cardio' ? 'cardio' : (MUSCLE_TO_BODYPART[primary] || 'waist');
-  const equipment = EQUIP_MAP[raw.equipment] || raw.equipment || 'body weight';
-  const level = raw.level === 'expert' ? 'advanced' : (raw.level || 'beginner');
-  return {
-    id: raw.id || raw.name,
-    name: raw.name,
-    aliases: [],
-    bodyPart,
-    target: primary,
-    secondaryMuscles: raw.secondaryMuscles || [],
-    equipment,
-    difficulty: level,
-    frames,
-    thumbnails: { male: frames[0] || '', female: '' },
-    videos: { male: '', female: '' },
-    steps: instructions,
-    instructions,
-  };
-}
 
 // ── ترجمة أقسام الجسم ──────────────────────────────────────
 const BODYPART_AR = {
   back: 'الظهر', cardio: 'كارديو', chest: 'الصدر', hips: 'الحوض والجلوتس',
   'lower arms': 'أسفل الذراع', 'lower legs': 'أسفل الرجل', shoulders: 'الأكتاف',
   'upper arms': 'أعلى الذراع', 'upper legs': 'أعلى الرجل', waist: 'البطن',
+  recovery: 'إطالات واستشفاء',
 };
 
 // ✅ فلتر أقسام الجسم: أعلى وأسفل الذراع/الرجل بقوا فلتر واحد بدل ما يبقوا منفصلين
 const BODYPART_FILTER_GROUPS = {
   back: ['back'], cardio: ['cardio'], chest: ['chest'], hips: ['hips'],
   arms: ['upper arms', 'lower arms'], legs: ['upper legs', 'lower legs'],
-  shoulders: ['shoulders'], waist: ['waist'],
+  shoulders: ['shoulders'], waist: ['waist'], recovery: ['recovery'],
 };
 const BODYPART_FILTER_AR = {
   back: 'الظهر', cardio: 'كارديو', chest: 'الصدر', hips: 'الحوض والجلوتس',
   arms: 'الذراع', legs: 'الرجل', shoulders: 'الأكتاف', waist: 'البطن',
+  recovery: 'إطالات واستشفاء',
 };
 const BODYPART_FILTER_ICON = {
   back: BackIcon, cardio: HeartPulse, chest: ChestIcon, hips: HipIcon,
   arms: ArmIcon, legs: LegsIcon, shoulders: ShoulderIcon, waist: CoreIcon,
+  recovery: HeartPulse,
 };
 const BODYPARTS = Object.keys(BODYPART_FILTER_AR);
 
@@ -113,13 +65,16 @@ const EQUIPMENT_AR = {
   'leverage machine': 'ماشين رافعة', rope: 'حبل', 'sled machine': 'ماشين زلاجة',
   'smith machine': 'سميث ماشين', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
   'medicine ball': 'كورة طبية', 'foam roll': 'فوم رول', other: 'معدات تانية',
+  machine: 'ماشين', pullupBar: 'بار عقلة', dipBars: 'متوازي (ديبس)',
+  roller: 'فوم رولر', lacrosse: 'كورة مساج', ball: 'كورة اتزان', plate: 'بلاطة',
+  bench: 'بنش',
 };
 
 // ✅ فلتر المعدات: بار + بار EZ بقوا فلتر واحد، وكل أنواع الماشينات بقت فلتر واحد
 const EQUIPMENT_FILTER_GROUPS = {
   band: ['band'], barbell: ['barbell', 'ez barbell'], 'body weight': ['body weight', 'foam roll'],
   cable: ['cable'], dumbbell: ['dumbbell'], kettlebell: ['kettlebell'],
-  machine: ['leverage machine', 'smith machine', 'sled machine'],
+  machine: ['leverage machine', 'smith machine', 'sled machine', 'machine'],
   rope: ['rope'], 'stability ball': ['stability ball'], weighted: ['weighted', 'medicine ball', 'other'],
 };
 const EQUIPMENT_FILTER_AR = {
@@ -280,6 +235,10 @@ const MUSCLE_AR = {
   'transverse abdominis': 'عضلة البطن العرضية',
   trapezius: 'الترابس', traps: 'الترابس', 'upper trapezius': 'أعلى الترابس',
   triceps: 'التراي', 'triceps brachii': 'التراي',
+  // مفاتيح مكتبة الفيديو (namnq) — camelCase
+  forearm: 'الساعد', upperBack: 'أعلى الظهر', lowerBack: 'أسفل الظهر',
+  hipFlexors: 'ثنايا الورك', itBand: 'رباط الفخد الجانبي',
+  plantar: 'باطن القدم', palmar: 'كف اليد', quads: 'الفخد الأمامي',
   'upper arms': 'أعلى الذراع', 'upper back': 'أعلى الظهر',
   'varies by machine': 'بيختلف حسب الجهاز', 'varies by machine (legs, glutes, arms)': 'بيختلف حسب الجهاز',
   'varies by movement': 'بيختلف حسب الحركة', 'vastus medialis': 'عضلة داخل الفخذ',
@@ -334,69 +293,34 @@ function PremiumGate({ user }) {
   );
 }
 
-// ── شاشة لو الاتصال فشل (مؤقتًا، مش إعداد ناقص) ─────────────
-function LoadFailed({ onRetry }) {
-  return (
-    <div style={{ minHeight: '40vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', direction: 'rtl' }}>
-      <div style={{ maxWidth: 420, textAlign: 'center' }}>
-        <WifiOff size={36} color="var(--ash-light)" style={{ marginBottom: 14 }} />
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--chalk)', marginBottom: 8 }}>
-          مقدرناش نجيب بيانات التمارين دلوقتي
-        </h3>
-        <p style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 18 }}>
-          ممكن يكون النت وقع لحظة أو GitHub مش رادّ. جرب تاني.
-        </p>
-        <button
-          onClick={onRetry}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 18px', background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', cursor: 'pointer' }}
-        >
-          <RefreshCw size={13} /> إعادة المحاولة
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── صورة متحركة: بنبدل بين صورتي البداية والنهاية في لوب (زي GIF) ──
-// الصورتين بيترسموا فوق بعض والشفافية هي اللي بتتبدل، عشان التبديل
-// يبقى سلس من غير فلاش أبيض بين فريم والتاني.
-function FrameAnimator({ frames, alt }) {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    setIdx(0);
-    if (!frames || frames.length < 2) return;
-    const t = setInterval(() => setIdx(p => (p + 1) % frames.length), 700);
-    return () => clearInterval(t);
-  }, [frames]);
-  if (!frames || frames.length === 0) {
+// ── فيديو التمرين: بيلف في لوب من غير صوت (زي GIF بس فيديو حقيقي) ──
+function VideoPlayer({ src, name }) {
+  if (!src) {
     return (
       <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ash-light)', fontSize: '0.8rem' }}>
-        مفيش صورة متاحة للتمرين ده
+        مفيش فيديو متاح للتمرين ده
       </div>
     );
   }
   return (
-    <div style={{ position: 'relative', width: '100%', maxHeight: 320, overflow: 'hidden', background: '#000' }}>
-      {frames.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt={alt}
-          style={{
-            width: '100%', maxHeight: 320, objectFit: 'contain', display: 'block',
-            position: i === 0 ? 'relative' : 'absolute', inset: i === 0 ? undefined : 0,
-            opacity: idx === i ? 1 : 0, transition: 'opacity 120ms linear',
-          }}
-        />
-      ))}
+    <div style={{ position: 'relative', width: '100%', maxHeight: 340, overflow: 'hidden', background: '#000' }}>
+      <video
+        key={src}
+        src={src}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        aria-label={name}
+        style={{ width: '100%', maxHeight: 340, objectFit: 'contain', display: 'block' }}
+      />
     </div>
   );
 }
 
 // ── كارت التمرين ──────────────────────────────────────────
 function ExerciseCard({ exercise, onOpen, index = 0 }) {
-  const poster = exercise.frames?.[0] || exercise.thumbnails?.male || exercise.thumbnails?.female || '';
-  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -406,12 +330,15 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
       onClick={() => onOpen(exercise)}
       style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, overflow: 'hidden', transition: 'border-color 250ms' }}
     >
-      <div style={{ position: 'relative', height: 170, background: 'rgba(255,255,255,0.03)' }}>
-        {poster && (
-          <img src={poster} alt={exercise.name} loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: imgLoaded ? 1 : 0, transition: 'opacity 300ms ease' }}
-            onLoad={() => setImgLoaded(true)}
-            onError={e => { e.currentTarget.style.opacity = 0.15; }}
+      <div style={{ position: 'relative', height: 170, background: '#000' }}>
+        {exercise.video && (
+          <video
+            src={exercise.video}
+            muted
+            playsInline
+            preload="metadata"
+            aria-label={exercise.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         )}
         <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 10, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -440,7 +367,8 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
 function ExerciseModal({ exercise, onClose }) {
   if (!exercise) return null;
 
-  const steps = buildStepsAr(exercise);
+  // خطوات مترجمة يدويًا لكل تمرين في المكتبة؛ buildStepsAr احتياطي بس
+  const steps = (exercise.stepsAr && exercise.stepsAr.length) ? exercise.stepsAr : buildStepsAr(exercise);
 
   return (
     <AnimatePresence>
@@ -455,7 +383,7 @@ function ExerciseModal({ exercise, onClose }) {
           style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, direction: 'rtl' }}
         >
           <div style={{ position: 'relative', background: '#000' }}>
-            <FrameAnimator frames={exercise.frames} alt={exercise.name} />
+            <VideoPlayer src={exercise.video} name={exercise.name} />
             <button onClick={onClose} style={{ position: 'absolute', top: 12, left: 12, width: 32, height: 32, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} />
             </button>
@@ -673,9 +601,8 @@ export default function ExerciseVideosPage() {
   const [bodyPart, setBodyPart] = useState('');
   const [equipment, setEquipment] = useState('');
   const [difficulty, setDifficulty] = useState('');
-  const [allExercises, setAllExercises] = useState([]);
-  const [loadingList, setLoadingList] = useState(false);
-  const [loadError, setLoadError] = useState(false);
+  // الداتا محلية بالكامل (مفيش fetch) — جاهزة من أول فريم
+  const [allExercises] = useState(VIDEO_EXERCISES);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -696,45 +623,6 @@ export default function ExerciseVideosPage() {
     const t = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 400);
     return () => clearTimeout(t);
   }, [search]);
-
-  // جلب الداتا كلها مرة واحدة (JSON واحد، مفيش صفحات في المصدر نفسه)
-  // بمحاولات تلقائية + مصدر احتياطي، عشان طلب واحد فاشل (نت بطيء لحظة،
-  // أو الـCDN واقع) ميوقفش الصفحة على طول زي ما كان بيحصل قبل كده
-  const fetchWithTimeout = async (url, ms = 8000) => {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), ms);
-    try {
-      const res = await fetch(url, { signal: controller.signal });
-      if (!res.ok) throw new Error('bad response');
-      return await res.json();
-    } finally {
-      clearTimeout(t);
-    }
-  };
-
-  const fetchExercises = useCallback(async () => {
-    setLoadingList(true);
-    setLoadError(false);
-
-    const attempts = [DATA_URL, DATA_URL, DATA_URL_FALLBACK]; // محاولتين على jsDelivr وبعدين fallback
-    for (let i = 0; i < attempts.length; i++) {
-      try {
-        const json = await fetchWithTimeout(attempts[i]);
-        setAllExercises(Array.isArray(json) ? json.map(adaptExercise) : []);
-        setLoadingList(false);
-        return;
-      } catch {
-        if (i < attempts.length - 1) await new Promise(r => setTimeout(r, 700)); // استنى شوية وحاول تاني
-      }
-    }
-    setLoadError(true);
-    setAllExercises([]);
-    setLoadingList(false);
-  }, []);
-
-  useEffect(() => {
-    if (isPremium && allExercises.length === 0) fetchExercises();
-  }, [isPremium, fetchExercises, allExercises.length]);
 
   // فلترة وترقيم على الجهاز نفسه (مفيش API نرجعله فلتر)
   const filtered = useMemo(() => {
@@ -787,7 +675,7 @@ export default function ExerciseVideosPage() {
               مكتبة<br /><span style={{ color: '#facc15' }}>التمارين</span>
             </h1>
             <p style={{ color: 'var(--ash-light)', marginTop: 12, fontSize: '0.875rem', lineHeight: 1.7 }}>
-              صورة متحركة لكل تمرين بتوريك الحركة، مع خطوات الأداء وملاحظات الفورم.
+              فيديو حقيقي بيلف لكل تمرين بيوريك الحركة صح، مع خطوات الأداء بالعامية المصرية.
             </p>
           </motion.div>
 
@@ -817,13 +705,6 @@ export default function ExerciseVideosPage() {
                 </motion.span>
               )}
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.85, rotate: 180 }} transition={{ duration: 0.12 }}
-              onClick={fetchExercises}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 8, color: '#facc15', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', cursor: 'pointer' }}
-            >
-              <RefreshCw size={13} /> تحديث
-            </motion.button>
           </div>
 
           <FiltersDrawer
@@ -837,29 +718,7 @@ export default function ExerciseVideosPage() {
           />
 
           {/* المحتوى */}
-          {loadingList ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)' }}>
-                  <div className="skeleton-shimmer" style={{ height: 170 }} />
-                  <div style={{ padding: '14px 16px 16px' }}>
-                    <div className="skeleton-shimmer" style={{ height: 10, width: '50%', borderRadius: 4, marginBottom: 8 }} />
-                    <div className="skeleton-shimmer" style={{ height: 14, width: '80%', borderRadius: 4 }} />
-                  </div>
-                </div>
-              ))}
-              <style>{`
-                .skeleton-shimmer {
-                  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 37%, rgba(255,255,255,0.04) 63%);
-                  background-size: 400% 100%;
-                  animation: shimmer 1.4s ease infinite;
-                }
-                @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
-              `}</style>
-            </div>
-          ) : loadError ? (
-            <LoadFailed onRetry={fetchExercises} />
-          ) : pageItems.length === 0 ? (
+          {pageItems.length === 0 ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '60px 0' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--chalk)', marginBottom: 6 }}>مفيش نتايج</div>
               <div style={{ fontSize: '0.82rem', color: 'var(--ash-light)' }}>جرّب كلمة تانية أو غيّر الفلتر</div>
