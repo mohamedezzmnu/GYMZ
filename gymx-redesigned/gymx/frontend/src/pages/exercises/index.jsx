@@ -8,6 +8,7 @@ import {
   Settings, Gauge, TrendingUp, Rocket,
 } from 'lucide-react';
 import Head from 'next/head';
+import { useAuth } from '../../context/AuthContext';
 import { EXERCISES } from '../../data/exercises';
 import { normalizeArabic } from '../../utils/arabic';
 
@@ -632,6 +633,7 @@ function FiltersDrawer({ open, onClose, muscleGroup, equipment, difficulty, onAp
 // ── Page ──────────────────────────────────────────────────
 export default function ExercisesPage() {
   const router = useRouter();
+  const { premium } = useAuth();
   const [search, setSearch] = useState('');
   const [muscleGroup, setMuscleGroup] = useState('');
   const [difficulty, setDifficulty] = useState('');
@@ -718,22 +720,24 @@ export default function ExercisesPage() {
                     <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--chalk)', letterSpacing: '0.02em' }}>
                       مكتبة التمارين المتحركة
                     </span>
-                    <span
-                      style={{
-                        fontSize: '0.58rem',
-                        fontFamily: 'var(--font-mono)',
-                        padding: '2px 8px',
-                        borderRadius: 10,
-                        background: 'var(--volt-dim)',
-                        border: '1px solid rgba(255, 90, 31, 0.35)',
-                        color: 'var(--volt-bright)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
-                    >
-                      <Crown size={9} /> مميز
-                    </span>
+                    {!premium && (
+                      <span
+                        style={{
+                          fontSize: '0.58rem',
+                          fontFamily: 'var(--font-mono)',
+                          padding: '2px 8px',
+                          borderRadius: 10,
+                          background: 'var(--volt-dim)',
+                          border: '1px solid rgba(255, 90, 31, 0.35)',
+                          color: 'var(--volt-bright)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
+                      >
+                        <Crown size={9} /> مميز
+                      </span>
+                    )}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--ash-light)' }}>شوف كل تمرين بشكل متحرك قبل ما تأديه</div>
                 </div>
