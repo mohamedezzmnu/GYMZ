@@ -1981,7 +1981,7 @@ function NutritionForUser() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push('/login');
+      router.push('/login?from=/nutrition');
       return;
     }
 

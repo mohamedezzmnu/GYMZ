@@ -34,7 +34,8 @@ export default function LoginPage() {
     try {
       const user = await login(form.email, form.password);
       toast.success(ar ? `أهلاً بيك تاني، ${user.name}! 💪` : `Welcome back, ${user.name}! 💪`);
-      router.push(router.query.from || '/');
+      const dest = typeof router.query.from === 'string' && router.query.from.startsWith('/') && !router.query.from.startsWith('//') ? router.query.from : '/';
+      router.push(dest);
     } catch (err) {
       toast.error(err.message || (ar ? 'فشل تسجيل الدخول' : 'Login failed'));
     } finally {
@@ -50,6 +51,18 @@ export default function LoginPage() {
       subtitle={ar ? 'سجّل دخولك عشان تكمل رحلتك التدريبية.' : 'Sign in to continue your training journey.'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {typeof router.query.from === 'string' && router.query.from.startsWith('/') && (
+          <div role="status" style={{
+            background: 'var(--volt-dim)', border: '1px solid var(--volt)',
+            borderRadius: 'var(--radius-sm)', padding: '10px 14px',
+            color: 'var(--chalk)', fontSize: '0.82rem', lineHeight: 1.7,
+            fontFamily: 'var(--font-body)',
+          }}>
+            {ar
+              ? 'الصفحة اللي كنت رايحها محتاجة تسجيل دخول — سجّل وهنرجّعك ليها على طول.'
+              : 'The page you were heading to needs sign-in — sign in and we will take you right back.'}
+          </div>
+        )}
         <div>
           <label className="label">{ar ? 'الإيميل' : 'EMAIL'}</label>
           <input
@@ -74,7 +87,7 @@ export default function LoginPage() {
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               style={{ paddingRight: 48 }}
             />
-            <button type="button" onClick={() => setShowPass(!showPass)} style={eyeBtnStyle}>
+            <button type="button" aria-label={showPass ? (ar ? 'إخفاء الباسورد' : 'Hide password') : (ar ? 'إظهار الباسورد' : 'Show password')} onClick={() => setShowPass(!showPass)} style={eyeBtnStyle}>
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>

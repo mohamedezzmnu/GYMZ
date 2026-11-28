@@ -120,7 +120,7 @@ export default function AdminPage() {
   // ── guard ────────────────────────────────────────────────
   useEffect(() => {
     if (!loading) {
-      if (!user) { router.push('/login'); return; }
+      if (!user) { router.push('/login?from=/admin'); return; }
       if (user.role !== 'admin') { router.push('/dashboard'); return; }
     }
   }, [user, loading]);

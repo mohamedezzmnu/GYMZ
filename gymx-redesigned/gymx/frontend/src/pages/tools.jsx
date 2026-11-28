@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calculator, Zap, Target, Scale, Activity } from 'lucide-react';
+import { Calculator, Zap, Target, Scale, Activity, Flame, Dumbbell } from 'lucide-react';
 import Head from 'next/head';
 import { calculateCalorieEstimate, CALORIE_SCOPE, SCOPE_CONFIRMATION } from '../utils/calories';
 
@@ -46,7 +46,7 @@ function TDEECalc() {
       <div style={{ marginBottom:10 }}>
         <label style={labelStyle}>الجنس</label>
         <div style={{ display:'flex', gap:8 }}>
-          {[{ v:'male', l:'ذكر 👨' },{ v:'female', l:'أنثى 👩' }].map(({ v, l }) => (
+          {[{ v:'male', l:'ذكر' },{ v:'female', l:'أنثى' }].map(({ v, l }) => (
             <motion.button key={v} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.12 }} onClick={() => updateForm({ ...form, gender: v })}
               style={{ ...toggleStyle, ...(form.gender === v ? toggleActive : {}) }}>{l}</motion.button>
           ))}
@@ -74,12 +74,12 @@ function TDEECalc() {
         {result && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} style={{ marginTop:16, display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(115px,1fr))', gap:10 }}>
             {[
-              { label:'عشان تفضل زي ما انت', value: result.goals.maintain, color:'var(--accent)', icon:'⚖️' },
-              { label:'عشان تنزل وزن', value: result.goals.cut_strong,          color:'#f87171',       icon:'🔥' },
-              { label:'عشان تزود عضل', value: result.goals.bulk_lean,         color:'#4ade80',       icon:'💪' },
-            ].map(({ label, value, color, icon }) => (
+              { label:'عشان تفضل زي ما انت', value: result.goals.maintain, color:'var(--accent)', icon: Scale },
+              { label:'عشان تنزل وزن', value: result.goals.cut_strong,          color:'#f87171',       icon: Flame },
+              { label:'عشان تزود عضل', value: result.goals.bulk_lean,         color:'#4ade80',       icon: Dumbbell },
+            ].map(({ label, value, color, icon: GoalIcon }) => (
               <div key={label} style={{ padding:'14px', background:`${color}0f`, border:`1px solid ${color}25`, borderRadius:'var(--radius-sm)', textAlign:'center' }}>
-                <div style={{ fontSize:'1.2rem', marginBottom:4 }}>{icon}</div>
+                <div style={{ marginBottom:4, color }}><GoalIcon size={20} aria-hidden="true" /></div>
                 <div style={{ fontFamily:'var(--font-display)', fontSize:'1.5rem', color }}>{value.available ? value.targetCal : 'راجع مختص'}</div>
                 <div style={{ fontSize:'0.65rem', fontFamily:'var(--font-mono)', color:'var(--ash-light)', marginTop:2 }}>سعرة/يوم</div>
                 <div style={{ fontSize:'0.7rem', color:'var(--ash-light)', marginTop:4 }}>{label}</div>{!value.available && <p style={{ fontSize: '0.7rem', lineHeight: 1.7 }}>{value.reason}</p>}
@@ -167,9 +167,9 @@ function MacroCalc() {
   const [result, setResult] = useState(null);
 
   const goals = [
-    { v:'cut',      l:'عايز أنزل وزن 🔥', protein:0.40, carbs:0.30, fat:0.30 },
-    { v:'maintain', l:'عايز أفضل زي ما أنا ⚖️', protein:0.30, carbs:0.40, fat:0.30 },
-    { v:'bulk',     l:'عايز أزود عضل 💪',  protein:0.30, carbs:0.45, fat:0.25 },
+    { v:'cut',      l:'عايز أنزل وزن', protein:0.40, carbs:0.30, fat:0.30 },
+    { v:'maintain', l:'عايز أفضل زي ما أنا', protein:0.30, carbs:0.40, fat:0.30 },
+    { v:'bulk',     l:'عايز أزود عضل',  protein:0.30, carbs:0.45, fat:0.25 },
   ];
 
   const calculate = () => {
@@ -378,4 +378,4 @@ export default function ToolsPage() {
       </div>
     </>
   );
-        }
+                              }
