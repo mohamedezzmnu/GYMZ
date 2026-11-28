@@ -7,6 +7,29 @@ import Navbar from '../components/layout/Navbar';
 import ErrorBoundary from '../components/layout/ErrorBoundary';
 import '../styles/globals.css';
 
+function ThemedToaster() {
+  const { isRTL } = useLang();
+  return (
+    <Toaster
+      position="bottom-center"
+      containerStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}
+      toastOptions={{
+        duration: 5000,
+        style: {
+          background: 'var(--carbon)',
+          color: 'var(--chalk)',
+          border: '1px solid var(--iron-light)',
+          fontFamily: 'var(--font-body)',
+          fontSize: '0.9rem',
+          maxWidth: 420,
+        },
+        success: { duration: 5000, iconTheme: { primary: 'var(--accent)', secondary: '#fff' } },
+        error: { duration: 7000 },
+      }}
+    />
+  );
+}
+
 function SkipLink() {
   const { lang } = useLang();
   return (
@@ -62,19 +85,7 @@ export default function App({ Component, pageProps }) {
         </footer>
 
         </MotionConfig>
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: 'var(--carbon)',
-              color: 'var(--chalk)',
-              border: '1px solid var(--iron-light)',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-            },
-            success: { iconTheme: { primary: 'var(--accent)', secondary: '#fff' } },
-          }}
-        />
+        <ThemedToaster />
       </AuthProvider>
     </LangProvider>
   );
