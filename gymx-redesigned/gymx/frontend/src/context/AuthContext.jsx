@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { clearNutritionCache, removeLegacyNutritionCache } from '../utils/nutritionCache';
@@ -8,6 +8,9 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // بريميوم = الإيميل موجود في exercise_premium أو nutrition_premium.
+  // بيتقرأ مرة عند الدخول، وبيتحدث من غير refresh عن طريق refreshPremium.
+  const [premium, setPremium] = useState(false);
 
   const previousNutritionOwner = useRef(null);
   useEffect(() => {
@@ -46,11 +49,31 @@ export function AuthProvider({ children }) {
     };
   }
 
+  const checkPremium = useCallback(async (email) => {
+    if (!email) { setPremium(false); return false; }
+    const mail = String(email).toLowerCase();
+    try {
+      const [videos, nutrition] = await Promise.all([
+        supabase.from('exercise_premium').select('id').eq('email', mail).limit(1),
+        supabase.from('nutrition_premium').select('id').eq('email', mail).limit(1),
+      ]);
+      const isPremium = !!((videos.data && videos.data.length) || (nutrition.data && nutrition.data.length));
+      setPremium(isPremium);
+      return isPremium;
+    } catch (e) {
+      return false;
+    }
+  }, []);
+
+  const refreshPremium = useCallback(() => checkPremium(user?.email), [checkPremium, user?.email]);
+
   useEffect(() => {
     removeLegacyNutritionCache();
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser(await buildUser(session.user));
+        const built = await buildUser(session.user);
+        setUser(built);
+        await checkPremium(built?.email);
       }
       setLoading(false);
     });
@@ -59,17 +82,20 @@ export function AuthProvider({ children }) {
       if (event === 'SIGNED_OUT') {
         removeLegacyNutritionCache();
         setUser(null);
+        setPremium(false);
         setLoading(false);
         return;
       }
       if (session?.user) {
-        setUser(await buildUser(session.user));
+        const built = await buildUser(session.user);
+        setUser(built);
+        await checkPremium(built?.email);
       }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [checkPremium]);
 
   const register = async (name, email, password) => {
     const { data, error } = await supabase.auth.signUp({
@@ -93,6 +119,7 @@ export function AuthProvider({ children }) {
 
     const built = await buildUser(data.user);
     setUser(built);
+    await checkPremium(built?.email);
     return { ...built, needsEmailConfirmation: false };
   };
 
@@ -101,6 +128,7 @@ export function AuthProvider({ children }) {
     if (error) throw new Error(error.message);
     const built = await buildUser(data.user);
     setUser(built);
+    await checkPremium(built?.email);
     return built;
   };
 
@@ -108,6 +136,7 @@ export function AuthProvider({ children }) {
     clearNutritionCache(user?.id);
     await supabase.auth.signOut();
     setUser(null);
+    setPremium(false);
     toast.success('تم تسجيل الخروج');
   };
 
@@ -117,7 +146,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, api }}>
+    <AuthContext.Provider value={{ user, loading, premium, refreshPremium, login, register, logout, api }}>
       {children}
     </AuthContext.Provider>
   );
