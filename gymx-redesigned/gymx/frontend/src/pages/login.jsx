@@ -8,12 +8,15 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import AuthLayout from '../components/layout/AuthLayout';
 
+/* 44px hit area, positioned with logical properties so it lands
+   on the correct side in both RTL and LTR */
 const eyeBtnStyle = {
-  position: 'absolute', right: 14, top: '50%',
+  position: 'absolute', insetInlineEnd: 2, top: '50%',
   transform: 'translateY(-50%)',
   background: 'none', border: 'none', padding: 0,
+  width: 44, height: 44,
   color: 'var(--ash)', cursor: 'pointer',
-  display: 'flex', alignItems: 'center',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 
 export default function LoginPage() {
@@ -24,12 +27,15 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!form.email || !form.password) {
-      toast.error(ar ? 'من فضلك اكتب الإيميل والباسورد' : 'Please enter your email and password');
+      setError(ar ? 'من فضلك اكتب الإيميل والباسورد' : 'Please enter your email and password');
       return;
     }
+    setError('');
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
@@ -37,11 +43,20 @@ export default function LoginPage() {
       const dest = typeof router.query.from === 'string' && router.query.from.startsWith('/') && !router.query.from.startsWith('//') ? router.query.from : '/';
       router.push(dest);
     } catch (err) {
-      toast.error(err.message || (ar ? 'فشل تسجيل الدخول' : 'Login failed'));
+      setError(err.message || (ar ? 'فشل تسجيل الدخول — تأكد من الإيميل والباسورد وحاول تاني' : 'Login failed — check your email and password and try again'));
     } finally {
       setLoading(false);
     }
   };
+
+  const field =
+    (key) => ({
+      value: form[key],
+      onChange: (e) => {
+        setForm({ ...form, [key]: e.target.value });
+        if (error) setError('');
+      },
+    });
 
   return (
     <AuthLayout
@@ -50,7 +65,7 @@ export default function LoginPage() {
       title={ar ? 'أهلاً بيك تاني' : 'WELCOME BACK'}
       subtitle={ar ? 'سجّل دخولك عشان تكمل رحلتك التدريبية.' : 'Sign in to continue your training journey.'}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {typeof router.query.from === 'string' && router.query.from.startsWith('/') && (
           <div role="status" style={{
             background: 'var(--volt-dim)', border: '1px solid var(--volt)',
@@ -64,28 +79,31 @@ export default function LoginPage() {
           </div>
         )}
         <div>
-          <label className="label">{ar ? 'الإيميل' : 'EMAIL'}</label>
+          <label className="label" htmlFor="login-email">{ar ? 'الإيميل' : 'EMAIL'}</label>
           <input
             className="input"
+            id="login-email"
+            name="email"
             type="email"
+            autoComplete="email"
+            inputMode="email"
             placeholder="your@email.com"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+            {...field('email')}
           />
         </div>
 
         <div>
-          <label className="label">{ar ? 'الباسورد' : 'PASSWORD'}</label>
+          <label className="label" htmlFor="login-password">{ar ? 'الباسورد' : 'PASSWORD'}</label>
           <div style={{ position: 'relative' }}>
             <input
               className="input"
+              id="login-password"
+              name="password"
               type={showPass ? 'text' : 'password'}
+              autoComplete="current-password"
               placeholder="••••••••"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              style={{ paddingRight: 48 }}
+              {...field('password')}
+              style={{ paddingInlineEnd: 48 }}
             />
             <button type="button" aria-label={showPass ? (ar ? 'إخفاء الباسورد' : 'Hide password') : (ar ? 'إظهار الباسورد' : 'Show password')} onClick={() => setShowPass(!showPass)} style={eyeBtnStyle}>
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -93,10 +111,19 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {error && (
+          <p role="alert" style={{
+            margin: 0, color: '#f87171', fontSize: '0.85rem',
+            lineHeight: 1.6, fontFamily: 'var(--font-body)',
+          }}>
+            {error}
+          </p>
+        )}
+
         <motion.button
+          type="submit"
           className="btn btn-primary"
           style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
-          onClick={handleSubmit}
           disabled={loading}
           whileTap={{ scale: 0.98 }}
         >
@@ -111,7 +138,7 @@ export default function LoginPage() {
             {ar ? 'انضم لـ GYMZ' : 'Join GYMZ'}
           </Link>
         </p>
-      </div>
+      </form>
     </AuthLayout>
   );
 }
