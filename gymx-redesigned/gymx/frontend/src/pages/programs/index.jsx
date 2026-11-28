@@ -817,14 +817,6 @@ export default function ProgramsPage() {
 
   const myProgramTitle = myProgram?.program_title || null;
 
-  // مسح أي صف برنامج للمستخدم — بترجع false لو Supabase رفض المسح (RLS)
-  const clearPrograms = async () => {
-    if (!user?.id) return false;
-    await supabase.from('user_programs').delete().eq('user_id', user.id);
-    const { data: left } = await supabase.from('user_programs').select('id').eq('user_id', user.id);
-    return !left || left.length === 0;
-  };
-
   const chooseProgram = async (program) => {
     if (!user) return;
     const title = program.subtitle || program.title;
@@ -833,9 +825,15 @@ export default function ProgramsPage() {
     }
     setProgramBusy(true);
     try {
+      // برنامج واحد بس: نشيل أي برنامج تاني قبل ما نضيف الجديد
       if (myProgram) {
-        const cleared = await clearPrograms();
-        if (!cleared) {
+        await supabase.from('user_programs').delete().eq('user_id', user.id).neq('program_title', title);
+        const { data: others } = await supabase
+          .from('user_programs')
+          .select('id')
+          .eq('user_id', user.id)
+          .neq('program_title', title);
+        if (others && others.length > 0) {
           toast.error('مش قادرين نمسح البرنامج القديم — صلاحية الحذف ناقصة في Supabase');
           return;
         }
@@ -871,8 +869,9 @@ export default function ProgramsPage() {
     if (!confirm(`هتمسح ${myProgram.program_title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
     setProgramBusy(true);
     try {
-      const cleared = await clearPrograms();
-      if (!cleared) {
+      await supabase.from('user_programs').delete().eq('id', myProgram.id).eq('user_id', user.id);
+      const { data: left } = await supabase.from('user_programs').select('id').eq('id', myProgram.id);
+      if (left && left.length > 0) {
         toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
         return;
       }
