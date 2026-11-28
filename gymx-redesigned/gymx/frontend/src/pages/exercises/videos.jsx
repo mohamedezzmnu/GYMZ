@@ -1,9 +1,13 @@
 // src/pages/exercises/videos.jsx
 // ── مكتبة التمارين — صفحة مستقلة، بريميوم ──────────────────
 //
-// المصدر: harshvishu/free-exercise-db-with-videos (رخصة MIT — حر تمامًا)
-// https://github.com/harshvishu/free-exercise-db-with-videos
-// 317 تمرين، 593 فيديو حقيقي (راجل وست) بجودة Full HD.
+// المصدر: yuhonas/free-exercise-db (public domain / Unlicense — حر تمامًا
+// حتى للاستخدام التجاري، من غير attribution ولا API key).
+// https://github.com/yuhonas/free-exercise-db
+// 873 تمرين بصور. المصدر القديم (zenithfits exercise-database) اتقفل وكل
+// روابط الفيديو بتاعته بترجع 401، فاتبدل بالكامل.
+// مفيش فيديو في المصدر ده؛ كل تمرين ليه صورتين (بداية ونهاية الحركة)
+// بنبدل بينهم في لوب جوه المودال فتبان كأنها حركة متحركة (زي GIF).
 //
 // الداتا بتتجاب عن طريق jsDelivr (مرآة CDN لأي مشروع مفتوح المصدر على
 // GitHub، ومضمون إنها بتشتغل مع طلبات المتصفح CORS) — مفيش API key
@@ -13,10 +17,10 @@
 // أي API أو اتصال إنترنت زيادة — مبنية على اسم العضلة والمعدة الحقيقيين
 // لكل تمرين، فبتشتغل فورًا ومحدش ممكن يفشل.
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff, Play, User, UserRound,
+  Search, X, Crown, Loader, ChevronRight, RefreshCw, WifiOff,
   SlidersHorizontal, ChevronDown, ChevronUp, Check,
   HeartPulse, CircleDot, PersonStanding, Target,
   Cable, Dumbbell, Weight, Link2, Settings, Settings2, Truck, Circle, Waves,
@@ -30,9 +34,54 @@ import { supabase } from '../../lib/supabaseClient';
 // ── مصدر الداتا: jsDelivr (مرآة CDN رسمية لأي مشروع GitHub، بتدعم
 // CORS بشكل مضمون من المتصفح) — ومصدر احتياطي مباشر من GitHub لو
 // jsDelivr كان بطيء أو واقع لحظتها ──────────────────────────────
-const DATA_URL = 'https://cdn.jsdelivr.net/gh/harshvishu/free-exercise-db-with-videos@main/data/exercises.json';
-const DATA_URL_FALLBACK = 'https://raw.githubusercontent.com/harshvishu/free-exercise-db-with-videos/main/data/exercises.json';
+const DATA_URL = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/dist/exercises.json';
+const DATA_URL_FALLBACK = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
+const MEDIA_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/';
 const PAGE_LIMIT = 24;
+
+// ── تحويل تمرين المصدر الجديد (yuhonas) لنفس الشكل اللي الصفحة
+// متعودة عليه، عشان باقي الكود (فلاتر، كروت، مودال) ميتغيرش ────
+const MUSCLE_TO_BODYPART = {
+  chest: 'chest',
+  lats: 'back', 'middle back': 'back', 'lower back': 'back', traps: 'back', neck: 'back',
+  shoulders: 'shoulders',
+  biceps: 'upper arms', triceps: 'upper arms',
+  forearms: 'lower arms',
+  quadriceps: 'upper legs', hamstrings: 'upper legs',
+  calves: 'lower legs',
+  glutes: 'hips', abductors: 'hips', adductors: 'hips',
+  abdominals: 'waist',
+};
+const EQUIP_MAP = {
+  'body only': 'body weight', none: 'body weight',
+  bands: 'band', kettlebells: 'kettlebell',
+  machine: 'leverage machine', 'e-z curl bar': 'ez barbell',
+  'exercise ball': 'stability ball',
+};
+
+function adaptExercise(raw) {
+  const primary = (raw.primaryMuscles && raw.primaryMuscles[0]) || '';
+  const frames = (raw.images || []).map(p => MEDIA_BASE + p);
+  const instructions = Array.isArray(raw.instructions) ? raw.instructions.filter(Boolean) : [];
+  const bodyPart = raw.category === 'cardio' ? 'cardio' : (MUSCLE_TO_BODYPART[primary] || 'waist');
+  const equipment = EQUIP_MAP[raw.equipment] || raw.equipment || 'body weight';
+  const level = raw.level === 'expert' ? 'advanced' : (raw.level || 'beginner');
+  return {
+    id: raw.id || raw.name,
+    name: raw.name,
+    aliases: [],
+    bodyPart,
+    target: primary,
+    secondaryMuscles: raw.secondaryMuscles || [],
+    equipment,
+    difficulty: level,
+    frames,
+    thumbnails: { male: frames[0] || '', female: '' },
+    videos: { male: '', female: '' },
+    steps: instructions,
+    instructions,
+  };
+}
 
 // ── ترجمة أقسام الجسم ──────────────────────────────────────
 const BODYPART_AR = {
@@ -63,14 +112,15 @@ const EQUIPMENT_AR = {
   dumbbell: 'دمبل', 'ez barbell': 'بار EZ', kettlebell: 'كيتلبل',
   'leverage machine': 'ماشين رافعة', rope: 'حبل', 'sled machine': 'ماشين زلاجة',
   'smith machine': 'سميث ماشين', 'stability ball': 'كورة اتزان', weighted: 'بوزن إضافي',
+  'medicine ball': 'كورة طبية', 'foam roll': 'فوم رول', other: 'معدات تانية',
 };
 
 // ✅ فلتر المعدات: بار + بار EZ بقوا فلتر واحد، وكل أنواع الماشينات بقت فلتر واحد
 const EQUIPMENT_FILTER_GROUPS = {
-  band: ['band'], barbell: ['barbell', 'ez barbell'], 'body weight': ['body weight'],
+  band: ['band'], barbell: ['barbell', 'ez barbell'], 'body weight': ['body weight', 'foam roll'],
   cable: ['cable'], dumbbell: ['dumbbell'], kettlebell: ['kettlebell'],
   machine: ['leverage machine', 'smith machine', 'sled machine'],
-  rope: ['rope'], 'stability ball': ['stability ball'], weighted: ['weighted'],
+  rope: ['rope'], 'stability ball': ['stability ball'], weighted: ['weighted', 'medicine ball', 'other'],
 };
 const EQUIPMENT_FILTER_AR = {
   band: 'رباط مقاومة', barbell: 'بار', 'body weight': 'وزن الجسم', cable: 'كابل',
@@ -212,7 +262,7 @@ const MUSCLE_AR = {
   infraspinatus: 'الكتف الدوارة', intercostals: 'عضلات ما بين الأضلاع',
   'latissimus dorsi': 'اللاتس', lats: 'اللاتس',
   'lower back': 'أسفل الظهر', 'lower trapezius': 'أسفل الترابس', 'middle back': 'وسط الظهر', 'middle trapezius': 'وسط الترابس',
-  'neck flexors': 'عضلات ثني الرقبة',
+  'neck flexors': 'عضلات ثني الرقبة', neck: 'الرقبة',
   'pectoralis major': 'الصدر', 'pectoralis major, clavicular head': 'أعلى الصدر', pectorals: 'الصدر',
   'upper pectorals': 'أعلى الصدر', 'upper chest': 'أعلى الصدر',
   peroneals: 'عضلات الساق الجانبية', 'peroneus longus and brevis': 'عضلات الساق الجانبية',
@@ -307,9 +357,45 @@ function LoadFailed({ onRetry }) {
   );
 }
 
+// ── صورة متحركة: بنبدل بين صورتي البداية والنهاية في لوب (زي GIF) ──
+// الصورتين بيترسموا فوق بعض والشفافية هي اللي بتتبدل، عشان التبديل
+// يبقى سلس من غير فلاش أبيض بين فريم والتاني.
+function FrameAnimator({ frames, alt }) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    setIdx(0);
+    if (!frames || frames.length < 2) return;
+    const t = setInterval(() => setIdx(p => (p + 1) % frames.length), 700);
+    return () => clearInterval(t);
+  }, [frames]);
+  if (!frames || frames.length === 0) {
+    return (
+      <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ash-light)', fontSize: '0.8rem' }}>
+        مفيش صورة متاحة للتمرين ده
+      </div>
+    );
+  }
+  return (
+    <div style={{ position: 'relative', width: '100%', maxHeight: 320, overflow: 'hidden', background: '#000' }}>
+      {frames.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt={alt}
+          style={{
+            width: '100%', maxHeight: 320, objectFit: 'contain', display: 'block',
+            position: i === 0 ? 'relative' : 'absolute', inset: i === 0 ? undefined : 0,
+            opacity: idx === i ? 1 : 0, transition: 'opacity 120ms linear',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── كارت التمرين ──────────────────────────────────────────
 function ExerciseCard({ exercise, onOpen, index = 0 }) {
-  const poster = exercise.thumbnails?.male || exercise.thumbnails?.female || '';
+  const poster = exercise.frames?.[0] || exercise.thumbnails?.male || exercise.thumbnails?.female || '';
   const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <motion.div
@@ -330,9 +416,6 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
         )}
         <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 10, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Crown size={9} /> مميز
-        </span>
-        <span style={{ position: 'absolute', bottom: 10, left: 10, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Play size={13} color="#fff" fill="#fff" />
         </span>
       </div>
       <div style={{ padding: '14px 16px 16px' }}>
@@ -355,18 +438,8 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
 
 // ── مودال تفاصيل التمرين ──────────────────────────────────
 function ExerciseModal({ exercise, onClose }) {
-  const [gender, setGender] = useState('male');
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    setGender('male');
-  }, [exercise?.id]);
-
   if (!exercise) return null;
 
-  const videoSrc = exercise.videos?.[gender] || exercise.videos?.male || exercise.videos?.female;
-  const poster = exercise.thumbnails?.[gender] || exercise.thumbnails?.male;
-  const hasBothGenders = exercise.videos?.male && exercise.videos?.female;
   const steps = buildStepsAr(exercise);
 
   return (
@@ -382,41 +455,10 @@ function ExerciseModal({ exercise, onClose }) {
           style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, direction: 'rtl' }}
         >
           <div style={{ position: 'relative', background: '#000' }}>
-            {videoSrc ? (
-              <video
-                ref={videoRef}
-                key={videoSrc}
-                src={videoSrc}
-                poster={poster}
-                controls
-                loop
-                playsInline
-                style={{ width: '100%', maxHeight: 320, display: 'block', background: '#000' }}
-              />
-            ) : (
-              <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ash-light)', fontSize: '0.8rem' }}>
-                مفيش فيديو متاح للتمرين ده
-              </div>
-            )}
+            <FrameAnimator frames={exercise.frames} alt={exercise.name} />
             <button onClick={onClose} style={{ position: 'absolute', top: 12, left: 12, width: 32, height: 32, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} />
             </button>
-            {hasBothGenders && (
-              <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.6)', borderRadius: 10, padding: 3 }}>
-                <button
-                  onClick={() => setGender('male')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', background: gender === 'male' ? '#facc15' : 'transparent', color: gender === 'male' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
-                >
-                  <User size={12} /> راجل
-                </button>
-                <button
-                  onClick={() => setGender('female')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', background: gender === 'female' ? '#facc15' : 'transparent', color: gender === 'female' ? '#000' : '#fff', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}
-                >
-                  <UserRound size={12} /> ست
-                </button>
-              </div>
-            )}
           </div>
 
           <div style={{ padding: '20px 22px 26px' }}>
@@ -678,7 +720,7 @@ export default function ExerciseVideosPage() {
     for (let i = 0; i < attempts.length; i++) {
       try {
         const json = await fetchWithTimeout(attempts[i]);
-        setAllExercises(Array.isArray(json) ? json : []);
+        setAllExercises(Array.isArray(json) ? json.map(adaptExercise) : []);
         setLoadingList(false);
         return;
       } catch {
@@ -745,7 +787,7 @@ export default function ExerciseVideosPage() {
               مكتبة<br /><span style={{ color: '#facc15' }}>التمارين</span>
             </h1>
             <p style={{ color: 'var(--ash-light)', marginTop: 12, fontSize: '0.875rem', lineHeight: 1.7 }}>
-              فيديو حقيقي راجل وست لكل تمرين، مع خطوات الأداء وملاحظات الفورم.
+              صورة متحركة لكل تمرين بتوريك الحركة، مع خطوات الأداء وملاحظات الفورم.
             </p>
           </motion.div>
 
