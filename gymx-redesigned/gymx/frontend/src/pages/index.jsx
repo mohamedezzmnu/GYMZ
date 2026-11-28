@@ -244,10 +244,6 @@ export default function HomePage() {
     { num: '03', title: 'Start Today',    desc: 'Full custom training and nutrition plan immediately.' },
   ];
 
-  const valueProps = ar
-    ? ['بدون اشتراكات نهائي', 'بدون إعلانات', 'مبني في مصر', 'تتبع حقيقي أسبوعي', 'خطط أكل مصرية']
-    : ['NO SUBSCRIPTIONS', 'NO ADS', 'BUILT IN EGYPT', 'REAL WEEKLY TRACKING', 'EGYPTIAN MEAL PLANS'];
-
   return (
     <>
       <Head>
@@ -733,30 +729,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════
-          VALUE STRIP
-      ══════════════════════════════════════ */}
-      <MarqueeStrip
-        items={valueProps}
-        style={{
-          background: 'var(--glass-bg)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderTop: '1px solid var(--glass-border)',
-          borderBottom: '1px solid var(--glass-border)',
-          padding: '16px 0',
-        }}
-        itemStyle={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.72rem',
-          letterSpacing: ar ? 0 : '0.16em',
-          textTransform: ar ? 'none' : 'uppercase',
-          color: 'var(--ash-light)',
-          padding: '0 8px',
-        }}
-        duration="30s"
-      />
 
       {/* ══════════════════════════════════════
           SERVICES — editorial rows
