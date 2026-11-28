@@ -588,8 +588,8 @@ export default function WorkoutPage() {
     if (!user?.id || !prog) return;
     if (!confirm(`هتمسح ${prog.program_title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
     setDeletingProgram(true);
-    await supabase.from('user_programs').delete().eq('user_id', user.id);
-    const { data: left } = await supabase.from('user_programs').select('id').eq('user_id', user.id);
+    await supabase.from('user_programs').delete().eq('id', prog.id).eq('user_id', user.id);
+    const { data: left } = await supabase.from('user_programs').select('id').eq('id', prog.id);
     setDeletingProgram(false);
     if (left && left.length > 0) {
       toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
