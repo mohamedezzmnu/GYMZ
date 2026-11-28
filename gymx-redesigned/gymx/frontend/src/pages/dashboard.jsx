@@ -209,7 +209,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user?.id) {
-      router.push('/login');
+      router.push('/login?from=/dashboard');
       return;
     }
 
