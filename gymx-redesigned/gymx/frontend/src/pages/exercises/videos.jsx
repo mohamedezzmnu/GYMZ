@@ -25,7 +25,7 @@ import {
 import Head from 'next/head';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabaseClient';
+import PremiumGate from '../../components/PremiumGate';
 import VIDEO_EXERCISES from '../../data/videoLibrary';
 
 // ── الداتا كلها محلية (57 تمرين + فيديوهات self-hosted) — مفيش fetch
@@ -249,50 +249,6 @@ function muscleAr(term) {
   return MUSCLE_AR[term.toLowerCase()] || term;
 }
 
-// ── شاشة غير مشترك (بريميوم — بعلامة التاج) ────────────────
-function PremiumGate({ user }) {
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px', direction: 'rtl' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{ width: '100%', maxWidth: 420, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: '36px 28px', boxShadow: 'var(--glass-shadow)', position: 'relative', overflow: 'hidden' }}
-      >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,#facc15,transparent)' }} />
-        <div style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Crown size={26} color="#facc15" />
-        </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.04em', color: 'var(--chalk)', marginBottom: 8 }}>للمشتركين فقط</h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 24 }}>
-          مكتبة التمارين متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش واتفتحلك فوراً.
-        </p>
-        <div style={{ padding: '16px', background: 'rgba(250,204,21,0.07)', border: '1px solid rgba(250,204,21,0.2)', borderRadius: 'var(--radius-sm)', marginBottom: 16 }}>
-          <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', letterSpacing: '0.02em', marginBottom: 8 }}>ابعت على فودافون كاش</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--chalk)', letterSpacing: '0.06em', direction: 'ltr' }}>01097931713</div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#facc15', lineHeight: 1 }}>99</div>
-              <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>جنيه</div>
-            </div>
-          </div>
-        </div>
-        <a
-          href={`https://wa.me/201097931713?text=عايز اشتراك مكتبة التمارين — إيميلي: ${user?.email || ''}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: 'var(--radius-sm)', marginBottom: 12, textDecoration: 'none', color: '#25D166', fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.04em' }}
-        >
-          📲 ابعت السكرين شوت على واتساب
-        </a>
-        <p style={{ fontSize: '0.72rem', color: 'var(--ash)', textAlign: 'center', lineHeight: 1.6 }}>
-          بعد التأكيد هيتفتحلك الاشتراك على إيميلك<br />
-          <span style={{ color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>{user?.email}</span>
-        </p>
-      </motion.div>
-    </div>
-  );
-}
-
 // ── فيديو التمرين: بيلف في لوب من غير صوت (زي GIF بس فيديو حقيقي) ──
 function VideoPlayer({ src, name }) {
   if (!src) {
@@ -320,7 +276,7 @@ function VideoPlayer({ src, name }) {
 }
 
 // ── كارت التمرين ──────────────────────────────────────────
-function ExerciseCard({ exercise, onOpen, index = 0 }) {
+function ExerciseCard({ exercise, onOpen, index = 0, showBadge = true }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -341,9 +297,11 @@ function ExerciseCard({ exercise, onOpen, index = 0 }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         )}
-        <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 10, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Crown size={9} /> مميز
-        </span>
+        {showBadge && (
+          <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.58rem', fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 10, background: 'rgba(250,204,21,0.12)', border: '1px solid rgba(250,204,21,0.3)', color: '#facc15', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Crown size={9} /> مميز
+          </span>
+        )}
       </div>
       <div style={{ padding: '14px 16px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -591,10 +549,8 @@ function FiltersDrawer({ open, onClose, bodyPart, equipment, difficulty, onApply
 
 // ── Main Page ──────────────────────────────────────────────
 export default function ExerciseVideosPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, premium } = useAuth();
   const router = useRouter();
-  const [isPremium, setIsPremium] = useState(false);
-  const [checking, setChecking] = useState(true);
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -611,12 +567,6 @@ export default function ExerciseVideosPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { router.push('/login?from=/exercises/videos'); return; }
-    const checkPremium = async () => {
-      const { data } = await supabase.from('exercise_premium').select('id').eq('email', user.email).single();
-      setIsPremium(!!data);
-      setChecking(false);
-    };
-    checkPremium();
   }, [user, authLoading]);
 
   useEffect(() => {
@@ -645,7 +595,7 @@ export default function ExerciseVideosPage() {
 
   useEffect(() => { setPage(1); }, [debouncedSearch, bodyPart, equipment, difficulty]);
 
-  if (authLoading || checking) {
+  if (authLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Loader size={28} color="#facc15" style={{ animation: 'spin 1s linear infinite' }} />
@@ -654,7 +604,19 @@ export default function ExerciseVideosPage() {
     );
   }
 
-  if (!isPremium) return <><Head><title>مكتبة التمارين — GYMZ</title></Head><PremiumGate user={user} /></>;
+  if (!premium) {
+    return (
+      <>
+        <Head><title>مكتبة التمارين — GYMZ</title></Head>
+        <PremiumGate
+          user={user}
+          accent="#facc15"
+          product="videos"
+          description="مكتبة التمارين متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش واتفتحلك فوراً."
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -666,11 +628,13 @@ export default function ExerciseVideosPage() {
 
           {/* header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#facc15', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Crown size={12} /> مميز
-              </span>
-            </div>
+            {!premium && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#facc15', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <Crown size={12} /> مميز
+                </span>
+              </div>
+            )}
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem,5vw,3.5rem)', letterSpacing: '0.04em', lineHeight: 1 }}>
               مكتبة<br /><span style={{ color: '#facc15' }}>التمارين</span>
             </h1>
@@ -727,7 +691,7 @@ export default function ExerciseVideosPage() {
             <>
               <div key={`${currentPage}-${bodyPart}-${equipment}-${difficulty}-${debouncedSearch}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 24 }}>
                 {pageItems.map((ex, i) => (
-                  <ExerciseCard key={ex.id} exercise={ex} onOpen={setSelected} index={i} />
+                  <ExerciseCard key={ex.id} exercise={ex} onOpen={setSelected} index={i} showBadge={!premium} />
                 ))}
               </div>
 
