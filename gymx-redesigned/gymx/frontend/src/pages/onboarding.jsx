@@ -142,7 +142,7 @@ export default function OnboardingPage() {
     if (authLoading) return false; // متستدعى أبداً بدري عن اللازم — بس حماية إضافية
     if (!user) {
       toast.error('لازم تسجل دخول الأول عشان نحفظ بياناتك');
-      router.push('/login');
+      router.push('/login?from=/onboarding');
       return false;
     }
     setSaving(true);
