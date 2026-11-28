@@ -30,9 +30,6 @@ const EQUIP_AR = {
   Barbell: 'بار', Dumbbells: 'دمبل', 'Cable Machine': 'كيبل', Bodyweight: 'بدون معدات', Machine: 'ماشين',
 };
 
-const EQUIP_ICON = {
-  Barbell: '🏋️', Dumbbells: '💪', 'Cable Machine': '🔗', Bodyweight: '🤸', Machine: '⚙️',
-};
 
 // ── أيقونات كروت الفلتر — رسمة عضلة مبسّطة لكل مجموعة (سيلويت خط واحد) ─
 function MuscleIconBase({ children, size = 22, color = 'currentColor' }) {
@@ -138,6 +135,12 @@ const EQUIP_ICON_SVG = {
 };
 const DIFFICULTY_ICON = { beginner: Gauge, intermediate: TrendingUp, advanced: Rocket };
 
+// أيقونة معدة التمرين — SVG من lucide بدل الإيموجي
+function EquipIcon({ equipment, size = 12 }) {
+  const Icon = EQUIP_ICON_SVG[equipment] || Dumbbell;
+  return <Icon size={size} aria-hidden="true" style={{ display: 'inline-block', verticalAlign: '-0.15em' }} />;
+}
+
 // ── Modal ─────────────────────────────────────────────────
 function ExerciseModal({ exercise, onClose }) {
   const diff = DIFF_META[exercise.difficulty] || DIFF_META.beginner;
@@ -240,7 +243,7 @@ function ExerciseModal({ exercise, onClose }) {
           {/* محتوى */}
           <div style={{ padding: '24px 28px 32px' }}>
             <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--volt)', letterSpacing: '0.02em', marginBottom: 8 }}>
-              {MUSCLE_AR[exercise.muscle_group]} — {EQUIP_ICON[exercise.equipment]} {EQUIP_AR[exercise.equipment]}
+              {MUSCLE_AR[exercise.muscle_group]} — <EquipIcon equipment={exercise.equipment} size={11} /> {EQUIP_AR[exercise.equipment]}
             </div>
 
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '0.02em', color: 'var(--chalk)', lineHeight: 1.15, marginBottom: 6 }}>
@@ -342,7 +345,7 @@ function ExerciseCard({ exercise, index, onOpen }) {
               gap: 5,
             }}
           >
-            {EQUIP_ICON[exercise.equipment]} {EQUIP_AR[exercise.equipment] || exercise.equipment}
+            <EquipIcon equipment={exercise.equipment} /> {EQUIP_AR[exercise.equipment] || exercise.equipment}
           </span>
         </div>
 
