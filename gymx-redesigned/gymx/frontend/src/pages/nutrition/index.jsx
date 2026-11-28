@@ -14,126 +14,8 @@ import { PROTEIN_OPTIONS, CARB_OPTIONS, FAT_OPTIONS } from '../../data/foods';
 import { normalizeArabic } from '../../utils/arabic';
 import { mealBaseCalories, scaleFoodItem, sumDay } from '../../utils/portions';
 import { calculateCalorieEstimate, validateCalorieInput, CALORIE_SCOPE, SCOPE_CONFIRMATION } from '../../utils/calories';
-import { readNutritionCache, writeNutritionCache, clearNutritionCache } from '../../utils/nutritionCache';
-
-// ── شاشة غير مشترك ────────────────────────────────────────
-function PremiumGate({ user }) {
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'var(--bg)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0 20px',
-        direction: 'rtl',
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card"
-        style={{
-          width: '100%',
-          maxWidth: 420,
-          borderRadius: 'var(--radius-lg)',
-          padding: '36px 28px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 2,
-            background: 'linear-gradient(90deg, var(--volt), transparent)',
-          }}
-        />
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 12,
-            background: 'var(--volt-dim)',
-            border: '1px solid var(--glass-border-hover)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 20,
-          }}
-        >
-          <Lock size={24} color="var(--volt)" />
-        </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.75rem', color: 'var(--chalk)', marginBottom: 8 }}>
-          للمشتركين فقط
-        </h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--ash-light)', lineHeight: 1.7, marginBottom: 24 }}>
-          الأنظمة الغذائية متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش ويتفعّلك الاشتراك.
-        </p>
-        <div
-          style={{
-            padding: '16px',
-            background: 'var(--volt-dim)',
-            border: '1px solid var(--glass-border-hover)',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: 16,
-          }}
-        >
-          <div style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)', marginBottom: 8 }}>
-            ابعت على فودافون كاش
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.4rem', color: 'var(--chalk)', direction: 'ltr' }}>
-              01097931713
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.8rem', color: 'var(--volt)', lineHeight: 1 }}>
-                99
-              </div>
-              <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--ash-light)' }}>
-                جنيه
-              </div>
-            </div>
-          </div>
-        </div>
-        <a
-          href={`https://wa.me/201097931713?text=${encodeURIComponent(`عايز اشتراك الأنظمة الغذائية — إيميلي: ${user?.email || ''}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            padding: '13px',
-            background: 'rgba(37,211,102,0.12)',
-            border: '1px solid rgba(37,211,102,0.35)',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: 12,
-            textDecoration: 'none',
-            color: '#25D166',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            fontSize: '0.98rem',
-          }}
-        >
-          <MessageCircle size={16} /> ابعت السكرين شوت على واتساب
-        </a>
-        <p style={{ fontSize: '0.72rem', color: 'var(--ash)', textAlign: 'center', lineHeight: 1.6 }}>
-          بعد التأكيد هيتفعّلك الاشتراك على إيميلك
-          <br />
-          <span style={{ color: 'var(--ash-light)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>
-            {user?.email}
-          </span>
-        </p>
-      </motion.div>
-    </div>
-  );
-}
+import { readNutritionCache, writeNutritionCache, clearNutritionCache, readScopeAck, writeScopeAck } from '../../utils/nutritionCache';
+import PremiumGate from '../../components/PremiumGate';
 
 // ── كل الأكلات مجمّعة (للبحث السريع) ──────────────────────
 const ALL_FOODS = [
@@ -1662,14 +1544,14 @@ function BarcodeSearch({ userId }) {
 }
 
 // ── فورم البيانات ─────────────────────────────────────────
-function UserDataForm({ onCalculate, initialData, onClear }) {
+function UserDataForm({ onCalculate, initialData, onClear, scopeAcceptedDefault = false, onScopeAccepted }) {
   const [weight, setWeight]     = useState('');
   const [height, setHeight]     = useState('');
   const [age, setAge]           = useState('');
   const [gender, setGender]     = useState('male');
   const [activity, setActivity] = useState('moderate');
   const [error, setError]       = useState('');
-  const [scopeAccepted, setScopeAccepted] = useState(false);
+  const [scopeAccepted, setScopeAccepted] = useState(scopeAcceptedDefault);
   const [expanded, setExpanded] = useState(!initialData);
   const autoCollapsedRef = useRef(false);
 
@@ -1686,6 +1568,11 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
       }
     }
   }, [initialData]);
+
+  // الموافقة المحفوظة بتوصل بعد أول render (قراءة من التخزين)
+  useEffect(() => {
+    if (scopeAcceptedDefault) setScopeAccepted(true);
+  }, [scopeAcceptedDefault]);
 
   const inputStyle = {
     width: '100%',
@@ -1892,7 +1779,14 @@ function UserDataForm({ onCalculate, initialData, onClear }) {
 
       <p style={{ fontSize: '0.78rem', lineHeight: 1.8, color: 'var(--ash-light)' }}>{CALORIE_SCOPE}</p>
       <label style={{ display: 'flex', gap: 8, fontSize: '0.78rem', lineHeight: 1.8, margin: '12px 0' }}>
-        <input type="checkbox" checked={scopeAccepted} onChange={e => setScopeAccepted(e.target.checked)} />{SCOPE_CONFIRMATION}
+        <input
+          type="checkbox"
+          checked={scopeAccepted}
+          onChange={e => {
+            setScopeAccepted(e.target.checked);
+            if (e.target.checked) onScopeAccepted?.(true);
+          }}
+        />{SCOPE_CONFIRMATION}
       </label>
       {error && (
         <div
@@ -1964,10 +1858,12 @@ export default function NutritionPage() {
 }
 
 function NutritionForUser() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, premium } = useAuth();
   const router = useRouter();
-  const [isPremium, setIsPremium] = useState(false);
-  const [checking, setChecking]   = useState(true);
+  // البريميوم بقى مصدر واحد في AuthContext، فالتغذية ومكتبة التمارين بيفتحوا مع بعض.
+  const isPremium = premium;
+  const checking  = authLoading;
+  const [scopeAck, setScopeAck] = useState(false);
   const [tdee, setTdee]           = useState(null);
   const [plans, setPlans]         = useState(null);
   const [activePlan, setActivePlan] = useState(null);
@@ -1982,26 +1878,14 @@ function NutritionForUser() {
     if (authLoading) return;
     if (!user) {
       router.push('/login?from=/nutrition');
-      return;
     }
-
-    let active = true;
-    const checkPremium = async () => {
-      const { data } = await supabase
-        .from('nutrition_premium')
-        .select('id')
-        .eq('email', user.email)
-        .single();
-      if (!active) return;
-      setIsPremium(!!data);
-      setChecking(false);
-    };
-    checkPremium();
-
-    return () => {
-      active = false;
-    };
   }, [user, authLoading, router]);
+
+  // موافقة شروط الاستخدام التقديري بتتحفظ، فمش بنسأل كل مرة.
+  useEffect(() => {
+    if (!user?.id) return;
+    setScopeAck(readScopeAck(user.id));
+  }, [user?.id]);
 
   const handleCalculate = useCallback(({ weight, height, age, gender, activity }) => {
     if (!user?.id || !isPremium) return;
@@ -2027,6 +1911,7 @@ function NutritionForUser() {
     if (!isPremium || !user?.id || autoLoaded) return;
     let cancelled = false;
     (async () => {
+      const acked = readScopeAck(user.id);
       const remote = await loadUserDataFromSupabase(user.id);
       if (cancelled) return;
       const checked = remote ? validateCalorieInput(remote) : null;
@@ -2034,6 +1919,23 @@ function NutritionForUser() {
       if (data) {
         setSavedData(data);
         writeNutritionCache(user.id, data);
+        // الخطة بتتحسب تاني من نفس البيانات المحفوظة (دالة صافية، مفيش نت)،
+        // فاللي فتح الصفحة بيلاقي خطته زي ما هي بدل ما يوافق ويحسب من الأول.
+        if (acked) {
+          try {
+            const estimate = calculateCalorieEstimate(data);
+            const nextPlans = generatePlans(estimate);
+            const firstPlan = nextPlans.maintain?.available
+              ? 'maintain'
+              : Object.keys(nextPlans).find((k) => nextPlans[k]?.available) || null;
+            setTdee(estimate.tdee);
+            setUserData(data);
+            setPlans(nextPlans);
+            setActivePlan(firstPlan);
+          } catch (e) {
+            // بيانات قديمة مش صالحة - نسيب الفورم يظهر عادي
+          }
+        }
       }
       setAutoLoaded(true);
     })();
@@ -2055,7 +1957,12 @@ function NutritionForUser() {
         <Head>
           <title>الأنظمة الغذائية — GYMZ</title>
         </Head>
-        <PremiumGate user={user} />
+        <PremiumGate
+          user={user}
+          accent="var(--volt)"
+          product="nutrition"
+          description="الأنظمة الغذائية متاحة للمشتركين. اشترك دلوقتي عن طريق فودافون كاش ويتفعّلك الاشتراك."
+        />
       </>
     );
   }
@@ -2117,6 +2024,8 @@ function NutritionForUser() {
           <UserDataForm
             onCalculate={handleCalculate}
             initialData={savedData}
+            scopeAcceptedDefault={scopeAck}
+            onScopeAccepted={(v) => { setScopeAck(v); if (v && user?.id) writeScopeAck(user.id); }}
             onClear={() => {
               setSavedData(null);
               setPlans(null); setTdee(null); setActivePlan(null); setUserData(null); setSelections({});
