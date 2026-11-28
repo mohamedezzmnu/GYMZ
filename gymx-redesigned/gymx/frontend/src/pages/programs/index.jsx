@@ -1,9 +1,9 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown, Calendar, Users, Target, Zap, CheckCircle2,
-  ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell,
+  ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell, Trash2,
 } from 'lucide-react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
@@ -161,33 +161,19 @@ const DAY_STRUCTURE = [
 // ══════════════════════════════════════════
 // Components
 // ══════════════════════════════════════════
-function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEnrolledTitle }) {
+function ProgramCard({ program, index, highlighted = false, myProgramTitle = null, onChoose, onDelete, busy = false }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
   const [open, setOpen] = useState(highlighted);
   const [activeDay, setActiveDay] = useState(0);
-  const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
   const [sessionDone, setSessionDone] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
   const [previewExercise, setPreviewExercise] = useState(null);
   const { user } = useAuth();
 
-  const isMyProgram = enrolledTitle === (program.subtitle || program.title);
-  const hasOtherProgram = enrolledTitle && !isMyProgram;
-
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from('user_programs')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('program_title', program.subtitle || program.title)
-      .single()
-      .then(({ data }) => {
-        if (data) setJoined(true);
-      });
-  }, [user, program]);
+  const isMyProgram = myProgramTitle === (program.subtitle || program.title);
+  const hasOtherProgram = Boolean(myProgramTitle) && !isMyProgram;
 
   useEffect(() => {
     if (!user) return;
@@ -204,36 +190,18 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
       });
   }, [user, program]);
 
-  const handleJoin = async (e) => {
+  const handleChoose = async (e) => {
     e.stopPropagation();
     if (!user) {
       toast.error('سجّل دخول الأول');
       return;
     }
     setJoining(true);
-    const daysNum = parseInt(program.days, 10) || 3;
-    const levelMap = { مبتدئ: 'beginner', متوسط: 'intermediate', متقدم: 'advanced' };
-    const levelEn = levelMap[program.level] || program.level;
-    const { error } = await supabase.from('user_programs').upsert(
-      {
-        user_id: user.id,
-        program_title: program.subtitle || program.title,
-        program_title_ar: program.title,
-        days_per_week: daysNum,
-        level: levelEn,
-        progress: 0,
-        is_active: true,
-      },
-      { onConflict: 'user_id,program_title' }
-    );
-    setJoining(false);
-    if (error) {
-      toast.error('حصل خطأ: ' + error.message);
-      return;
+    try {
+      await onChoose(program);
+    } finally {
+      setJoining(false);
     }
-    setJoined(true);
-    setEnrolledTitle(program.subtitle || program.title);
-    toast.success(`انضممت لبرنامج ${program.title}`);
   };
 
   const handleLogSession = async (e) => {
@@ -577,45 +545,72 @@ function ProgramCard({ program, index, highlighted = false, enrolledTitle, setEn
                   <AlertTriangle size={16} color="var(--volt)" style={{ flexShrink: 0 }} />
                   <div>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--chalk)', margin: 0 }}>
-                      إنت مسجل حالياً في برنامج <strong style={{ color: 'var(--volt-bright)' }}>{enrolledTitle}</strong>
+                      برنامجك الحالي <strong style={{ color: 'var(--volt-bright)' }}>{myProgramTitle}</strong>
                     </p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', margin: '3px 0 0' }}>
-                      لو انضممت لده هيتغير برنامجك الأساسي
+                      مسموح ببرنامج واحد بس — لو بدّلت، القديم هيتشال
                     </p>
                   </div>
                 </motion.div>
               )}
 
-              {/* زرار الانضمام */}
+              {/* زرار الانضمام / التبديل */}
               <motion.button
-                onClick={handleJoin}
-                disabled={joining || joined}
+                onClick={handleChoose}
+                disabled={joining || busy || isMyProgram}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.12 }}
-                className={joined ? 'btn btn-outline' : 'btn btn-primary'}
+                className={isMyProgram ? 'btn btn-outline' : 'btn btn-primary'}
                 style={{
                   marginTop: 20,
                   width: '100%',
                   padding: '13px',
                   borderRadius: 10,
-                  cursor: joined ? 'default' : 'pointer',
-                  background: joined ? 'rgba(255, 90, 31, 0.1)' : undefined,
-                  borderColor: joined ? 'rgba(255, 90, 31, 0.4)' : undefined,
-                  color: joined ? 'var(--volt-bright)' : '#fff',
+                  cursor: isMyProgram || busy ? 'default' : 'pointer',
+                  background: isMyProgram ? 'rgba(255, 90, 31, 0.1)' : undefined,
+                  borderColor: isMyProgram ? 'rgba(255, 90, 31, 0.4)' : undefined,
+                  color: isMyProgram ? 'var(--volt-bright)' : '#fff',
                 }}
               >
-                {joined ? (
+                {isMyProgram ? (
                   <>
-                    <CheckCircle2 size={16} /> منضم للبرنامج
+                    <CheckCircle2 size={16} /> برنامجك الحالي
                   </>
                 ) : joining ? (
-                  'جاري الانضمام...'
+                  'جاري التبديل...'
                 ) : (
                   <>
-                    <Zap size={15} /> ابدأ البرنامج
+                    <Zap size={15} /> {myProgramTitle ? 'بدّل البرنامج' : 'ابدأ البرنامج'}
                   </>
                 )}
               </motion.button>
+
+              {isMyProgram && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  disabled={busy}
+                  aria-label={`امسح برنامج ${program.title}`}
+                  style={{
+                    marginTop: 10,
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '11px',
+                    borderRadius: 10,
+                    background: 'rgba(248, 113, 113, 0.07)',
+                    border: '1px solid rgba(248, 113, 113, 0.3)',
+                    color: '#f87171',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.78rem',
+                    cursor: busy ? 'default' : 'pointer',
+                  }}
+                >
+                  <Trash2 size={14} /> امسح البرنامج
+                </button>
+              )}
 
               {/* زرار تسجيل الجلسة */}
               <motion.button
@@ -797,21 +792,96 @@ export default function ProgramsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const filterProgram = router.query.program || null;
-  const [enrolledTitle, setEnrolledTitle] = useState(null);
+  // برنامج واحد بس في أي وقت — بنقرا الصف النشط
+  const [myProgram, setMyProgram] = useState(null);
+  const [programBusy, setProgramBusy] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
+  const loadMyProgram = useCallback(async () => {
+    if (!user?.id) {
+      setMyProgram(null);
+      return;
+    }
+    const { data } = await supabase
       .from('user_programs')
-      .select('program_title')
+      .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
-      .limit(1)
-      .single()
-      .then(({ data }) => {
-        if (data) setEnrolledTitle(data.program_title);
-      });
-  }, [user]);
+      .order('started_at', { ascending: false })
+      .limit(1);
+    setMyProgram((data && data[0]) || null);
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadMyProgram();
+  }, [loadMyProgram]);
+
+  const myProgramTitle = myProgram?.program_title || null;
+
+  // مسح أي صف برنامج للمستخدم — بترجع false لو Supabase رفض المسح (RLS)
+  const clearPrograms = async () => {
+    if (!user?.id) return false;
+    await supabase.from('user_programs').delete().eq('user_id', user.id);
+    const { data: left } = await supabase.from('user_programs').select('id').eq('user_id', user.id);
+    return !left || left.length === 0;
+  };
+
+  const chooseProgram = async (program) => {
+    if (!user) return;
+    const title = program.subtitle || program.title;
+    if (myProgram && myProgram.program_title !== title) {
+      if (!confirm(`هنسيب ${myProgram.program_title} ونشترك في ${program.title}. مسموح ببرنامج واحد بس في نفس الوقت. تمام؟`)) return;
+    }
+    setProgramBusy(true);
+    try {
+      if (myProgram) {
+        const cleared = await clearPrograms();
+        if (!cleared) {
+          toast.error('مش قادرين نمسح البرنامج القديم — صلاحية الحذف ناقصة في Supabase');
+          return;
+        }
+      }
+      const daysNum = parseInt(program.days, 10) || 3;
+      const levelMap = { مبتدئ: 'beginner', متوسط: 'intermediate', متقدم: 'advanced' };
+      const { error } = await supabase.from('user_programs').upsert(
+        {
+          user_id: user.id,
+          program_title: title,
+          program_title_ar: program.title,
+          days_per_week: daysNum,
+          level: levelMap[program.level] || program.level,
+          progress: 0,
+          is_active: true,
+        },
+        { onConflict: 'user_id,program_title' }
+      );
+      if (error) {
+        toast.error('حصل خطأ: ' + error.message);
+        return;
+      }
+      const wasSwitch = Boolean(myProgram);
+      await loadMyProgram();
+      toast.success(wasSwitch ? `بدّلت لبرنامج ${program.title}` : `انضممت لبرنامج ${program.title}`);
+    } finally {
+      setProgramBusy(false);
+    }
+  };
+
+  const deleteProgram = async () => {
+    if (!user || !myProgram) return;
+    if (!confirm(`هتمسح ${myProgram.program_title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
+    setProgramBusy(true);
+    try {
+      const cleared = await clearPrograms();
+      if (!cleared) {
+        toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
+        return;
+      }
+      await loadMyProgram();
+      toast.success('تمسح البرنامج');
+    } finally {
+      setProgramBusy(false);
+    }
+  };
 
   const visiblePrograms = filterProgram
     ? PROGRAMS.filter((p) => p.title === filterProgram || p.subtitle === filterProgram)
@@ -860,8 +930,10 @@ export default function ProgramsPage() {
               program={p}
               index={i}
               highlighted={Boolean(filterProgram)}
-              enrolledTitle={enrolledTitle}
-              setEnrolledTitle={setEnrolledTitle}
+              myProgramTitle={myProgramTitle}
+              onChoose={chooseProgram}
+              onDelete={deleteProgram}
+              busy={programBusy}
             />
           ))}
         </div>
