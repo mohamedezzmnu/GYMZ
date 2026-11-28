@@ -641,7 +641,7 @@ export default function ExerciseVideosPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push('/login?from=/exercises/videos'); return; }
     const checkPremium = async () => {
       const { data } = await supabase.from('exercise_premium').select('id').eq('email', user.email).single();
       setIsPremium(!!data);
