@@ -1,10 +1,20 @@
 import Head from 'next/head';
 import { Toaster } from 'react-hot-toast';
+import { MotionConfig } from 'framer-motion';
 import { AuthProvider } from '../context/AuthContext';
-import { LangProvider } from '../context/LangContext';
+import { LangProvider, useLang } from '../context/LangContext';
 import Navbar from '../components/layout/Navbar';
 import ErrorBoundary from '../components/layout/ErrorBoundary';
 import '../styles/globals.css';
+
+function SkipLink() {
+  const { lang } = useLang();
+  return (
+    <a href="#main-content" className="skip-link">
+      {lang === 'ar' ? 'تخطَّ إلى المحتوى' : 'Skip to content'}
+    </a>
+  );
+}
 
 export default function App({ Component, pageProps }) {
   return (
@@ -16,8 +26,10 @@ export default function App({ Component, pageProps }) {
         />
       </Head>
       <AuthProvider>
+        <MotionConfig reducedMotion="user">
+        <SkipLink />
         <Navbar />
-        <main className="animate-fade-in" style={{ paddingTop: 92, minHeight: '100vh' }}>
+        <main id="main-content" tabIndex={-1} className="animate-fade-in" style={{ paddingTop: 92, minHeight: '100vh' }}>
           <ErrorBoundary>
             <Component {...pageProps} />
           </ErrorBoundary>
@@ -49,6 +61,7 @@ export default function App({ Component, pageProps }) {
           </div>
         </footer>
 
+        </MotionConfig>
         <Toaster
           position="bottom-right"
           toastOptions={{
