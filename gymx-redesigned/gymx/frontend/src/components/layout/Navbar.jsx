@@ -204,26 +204,7 @@ export default function Navbar() {
 
         {/* RIGHT */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {/* language */}
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            transition={{ duration: 0.12 }}
-            onClick={toggleLang}
-            style={{
-              background: 'var(--glass-bg)',
-              border: '1px solid var(--glass-border)',
-              color: 'var(--chalk-dim)',
-              padding: '4px 10px',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.72rem',
-              fontFamily: 'var(--font-mono)',
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {lang === 'ar' ? 'EN' : 'ع'}
-          </motion.button>
+          {/* language toggle hidden until English covers every page (tools/exercises/programs are Arabic-only) */}
 
           {/* NOT LOGGED IN */}
           {!user && (
@@ -741,7 +722,7 @@ export default function Navbar() {
                 className="truncate-1"
                 style={{
                   maxWidth: '100%',
-                  fontSize: '0.58rem',
+                  fontSize: '0.75rem',
                   color: active ? 'var(--volt)' : 'var(--ash)',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: active ? 800 : 700,
