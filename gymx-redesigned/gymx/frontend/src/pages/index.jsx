@@ -4,7 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import {
   Dumbbell, Apple, Activity, Calculator, ShieldCheck,
-  ArrowRight, Zap, BarChart3, Trophy, ChevronRight,
+  ArrowRight, Zap, BarChart3, Trophy, ChevronRight, Pause, Play,
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
@@ -160,18 +160,34 @@ function StepItem({ s, i, ar }) {
    MARQUEE STRIP — editorial ticker texture
 ───────────────────────────────────────────── */
 function MarqueeStrip({ items, style, itemStyle, duration = '26s' }) {
+  const { lang } = useLang();
+  const ar = lang === 'ar';
+  const [paused, setPaused] = useState(false);
   const doubled = [...items, ...items];
 
   return (
-    <div className="marquee-strip" style={style}>
-      <div className="marquee-track" style={{ animationDuration: duration }}>
+    <div className="marquee-strip" style={style} data-paused={paused || undefined}>
+      {/* screen readers get the items once, statically; the moving track is decorative */}
+      <span className="sr-only">{items.join(' • ')}</span>
+      <div className="marquee-track" style={{ animationDuration: duration }} aria-hidden="true">
         {doubled.map((t, i) => (
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', ...itemStyle }}>
             {t}
-            <span aria-hidden="true" style={{ margin: '0 24px', opacity: 0.45 }}>•</span>
+            <span style={{ margin: '0 24px', opacity: 0.45 }}>•</span>
           </span>
         ))}
       </div>
+      <button
+        type="button"
+        className="marquee-pause-btn"
+        aria-pressed={paused}
+        aria-label={paused
+          ? (ar ? 'تشغيل الشريط المتحرك' : 'Play scrolling strip')
+          : (ar ? 'إيقاف الشريط المتحرك' : 'Pause scrolling strip')}
+        onClick={() => setPaused(p => !p)}
+      >
+        {paused ? <Play size={15} /> : <Pause size={15} />}
+      </button>
     </div>
   );
 }
@@ -704,7 +720,7 @@ export default function HomePage() {
                   <span
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize: '0.62rem',
+                      fontSize: '0.72rem',
                       letterSpacing: ar ? 0 : '0.14em',
                       textTransform: ar ? 'none' : 'uppercase',
                     }}

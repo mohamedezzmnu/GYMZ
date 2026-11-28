@@ -8,12 +8,14 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import AuthLayout from '../components/layout/AuthLayout';
 
+/* 44px hit area, logical properties so it works in RTL and LTR */
 const eyeBtnStyle = {
-  position: 'absolute', right: 14, top: '50%',
+  position: 'absolute', insetInlineEnd: 2, top: '50%',
   transform: 'translateY(-50%)',
   background: 'none', border: 'none', padding: 0,
+  width: 44, height: 44,
   color: 'var(--ash)', cursor: 'pointer',
-  display: 'flex', alignItems: 'center',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 
 // red → orange → yellow → green: a strength meter should read as
@@ -29,6 +31,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const passStrength = () => {
     const p = form.password;
@@ -48,12 +51,14 @@ export default function RegisterPage() {
   const strengthLabel = strengthLabels[strength];
   const strengthColor = STRENGTH_COLORS[strength];
 
-  const handleSubmit = async () => {
-    if (!form.name.trim()) { toast.error(ar ? 'اكتب اسمك' : 'Enter your name'); return; }
-    if (!form.email) { toast.error(ar ? 'اكتب الإيميل' : 'Enter your email'); return; }
-    if (form.password.length < 8) { toast.error(ar ? 'الباسورد لازم 8 حروف على الأقل' : 'Password must be at least 8 characters'); return; }
-    if (form.password !== form.confirm) { toast.error(ar ? 'الباسوردين مش متطابقين' : "Passwords don't match"); return; }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name.trim()) { setError(ar ? 'اكتب اسمك' : 'Enter your name'); return; }
+    if (!form.email) { setError(ar ? 'اكتب الإيميل' : 'Enter your email'); return; }
+    if (form.password.length < 8) { setError(ar ? 'الباسورد لازم 8 حروف على الأقل' : 'Password must be at least 8 characters'); return; }
+    if (form.password !== form.confirm) { setError(ar ? 'الباسوردين مش متطابقين' : "Passwords don't match"); return; }
 
+    setError('');
     setLoading(true);
     try {
       const user = await register(form.name.trim(), form.email.toLowerCase(), form.password);
@@ -65,11 +70,20 @@ export default function RegisterPage() {
       toast.success(ar ? `أهلاً بيك في GYMZ، ${user.name}! 💪` : `Welcome to GYMZ, ${user.name}! 💪`);
       router.push('/onboarding');
     } catch (err) {
-      toast.error(err.message || (ar ? 'مشكلة في التسجيل' : 'Registration failed'));
+      setError(err.message || (ar ? 'مشكلة في التسجيل — جرّب تاني' : 'Registration failed — please try again'));
     } finally {
       setLoading(false);
     }
   };
+
+  const field =
+    (key) => ({
+      value: form[key],
+      onChange: (e) => {
+        setForm({ ...form, [key]: e.target.value });
+        if (error) setError('');
+      },
+    });
 
   return (
     <AuthLayout
@@ -78,43 +92,50 @@ export default function RegisterPage() {
       title={ar ? 'انضم لـ GYMZ' : 'JOIN GYMZ'}
       subtitle={ar ? 'اعمل حسابك وابدأ رحلتك التدريبية النهارده.' : 'Create your account and start training today.'}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* Name */}
         <div>
-          <label className="label">{ar ? 'الاسم' : 'NAME'}</label>
+          <label className="label" htmlFor="register-name">{ar ? 'الاسم' : 'NAME'}</label>
           <input
             className="input"
+            id="register-name"
+            name="name"
             type="text"
+            autoComplete="name"
             placeholder={ar ? 'اسمك الكامل' : 'Your full name'}
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            {...field('name')}
           />
         </div>
 
         {/* Email */}
         <div>
-          <label className="label">{ar ? 'الإيميل' : 'EMAIL'}</label>
+          <label className="label" htmlFor="register-email">{ar ? 'الإيميل' : 'EMAIL'}</label>
           <input
             className="input"
+            id="register-email"
+            name="email"
             type="email"
+            autoComplete="email"
+            inputMode="email"
             placeholder="your@email.com"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            {...field('email')}
           />
         </div>
 
         {/* Password */}
         <div>
-          <label className="label">{ar ? 'الباسورد' : 'PASSWORD'}</label>
+          <label className="label" htmlFor="register-password">{ar ? 'الباسورد' : 'PASSWORD'}</label>
           <div style={{ position: 'relative' }}>
             <input
               className="input"
-              style={{ paddingRight: 48 }}
+              id="register-password"
+              name="password"
+              style={{ paddingInlineEnd: 48 }}
               type={showPass ? 'text' : 'password'}
+              autoComplete="new-password"
               placeholder={ar ? '8 حروف على الأقل' : 'At least 8 characters'}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              {...field('password')}
             />
             <button type="button" aria-label={showPass ? (ar ? 'إخفاء الباسورد' : 'Hide password') : (ar ? 'إظهار الباسورد' : 'Show password')} onClick={() => setShowPass(!showPass)} style={eyeBtnStyle}>
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -124,7 +145,7 @@ export default function RegisterPage() {
           {/* Password strength */}
           {form.password.length > 0 && (
             <div style={{ marginTop: 10 }}>
-              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }} aria-hidden="true">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} style={{
                     height: 3, flex: 1, borderRadius: 2,
@@ -136,11 +157,12 @@ export default function RegisterPage() {
               </div>
               <span style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.65rem',
+                fontSize: '0.72rem',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 color: strengthColor,
               }}>
+                <span className="sr-only">{ar ? 'قوة الباسورد: ' : 'Password strength: '}</span>
                 {strengthLabel}
               </span>
             </div>
@@ -149,12 +171,14 @@ export default function RegisterPage() {
 
         {/* Confirm Password */}
         <div>
-          <label className="label">{ar ? 'تأكيد الباسورد' : 'CONFIRM PASSWORD'}</label>
+          <label className="label" htmlFor="register-confirm">{ar ? 'تأكيد الباسورد' : 'CONFIRM PASSWORD'}</label>
           <div style={{ position: 'relative' }}>
             <input
               className="input"
+              id="register-confirm"
+              name="confirm"
               style={{
-                paddingRight: 48,
+                paddingInlineEnd: 48,
                 borderColor: form.confirm && form.password !== form.confirm
                   ? 'rgba(248,113,113,0.5)'
                   : form.confirm && form.password === form.confirm
@@ -162,23 +186,31 @@ export default function RegisterPage() {
                     : undefined,
               }}
               type={showPass ? 'text' : 'password'}
+              autoComplete="new-password"
               placeholder={ar ? 'اكتب الباسورد تاني' : 'Re-enter your password'}
-              value={form.confirm}
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              {...field('confirm')}
             />
             {form.confirm && form.password === form.confirm && (
-              <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#4ade80' }}>
+              <div style={{ position: 'absolute', insetInlineEnd: 14, top: '50%', transform: 'translateY(-50%)', color: '#4ade80' }} aria-hidden="true">
                 <Check size={16} />
               </div>
             )}
           </div>
         </div>
 
+        {error && (
+          <p role="alert" style={{
+            margin: 0, color: '#f87171', fontSize: '0.85rem',
+            lineHeight: 1.6, fontFamily: 'var(--font-body)',
+          }}>
+            {error}
+          </p>
+        )}
+
         {/* Submit */}
         <motion.button
+          type="submit"
           className="btn btn-primary"
-          onClick={handleSubmit}
           disabled={loading}
           whileTap={{ scale: 0.98 }}
           style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
@@ -194,7 +226,7 @@ export default function RegisterPage() {
             {ar ? 'سجل دخول' : 'Sign in'}
           </Link>
         </p>
-      </div>
+      </form>
     </AuthLayout>
   );
 }
