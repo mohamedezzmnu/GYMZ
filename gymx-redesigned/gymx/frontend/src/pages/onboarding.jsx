@@ -141,7 +141,7 @@ export default function OnboardingPage() {
   const saveOnboarding = async (finalAnswers, program) => {
     if (authLoading) return false; // متستدعى أبداً بدري عن اللازم — بس حماية إضافية
     if (!user) {
-      toast.error('لازم تسجل دخول الأول عشان نحفظ بياناتك');
+      toast.error(lang === 'ar' ? 'لازم تسجل دخول الأول عشان نحفظ بياناتك' : 'Sign in first so we can save your data');
       router.push('/login?from=/onboarding');
       return false;
     }
@@ -171,7 +171,7 @@ export default function OnboardingPage() {
     setSaving(false);
 
     if (onboardingError || programError) {
-      toast.error('حصلت مشكلة في حفظ بياناتك، جرب تاني');
+      toast.error(lang === 'ar' ? 'حصلت مشكلة في حفظ بياناتك، جرب تاني' : 'Could not save your data, try again');
       return false;
     }
     return true;
