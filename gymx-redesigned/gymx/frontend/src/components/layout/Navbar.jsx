@@ -97,6 +97,15 @@ export default function Navbar() {
     setUserMenuOpen(false);
   }, [router.pathname]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const fn = (e) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+    document.addEventListener('keydown', fn);
+    return () => document.removeEventListener('keydown', fn);
+  }, [mobileOpen]);
+
   const isActive = (href) => router.pathname === href || router.pathname.startsWith(href + '/');
 
   const publicLinks = [
@@ -178,6 +187,7 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? 'page' : undefined}
                 style={{
                   fontFamily: 'var(--font-display)',
                   fontSize: '0.88rem',
@@ -568,12 +578,15 @@ export default function Navbar() {
             transition={{ duration: 0.12 }}
             onClick={() => setMobileOpen(o => !o)}
             className="mobile-menu-btn"
+            aria-label={mobileOpen ? (ar ? 'إغلاق القايمة' : 'Close menu') : (ar ? 'فتح القايمة' : 'Open menu')}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
             style={{
               background: 'var(--glass-bg)',
               border: '1px solid var(--glass-border)',
               color: 'var(--chalk)',
-              width: 30,
-              height: 30,
+              width: 44,
+              height: 44,
               borderRadius: 'var(--radius-sm)',
               display: 'none',
               alignItems: 'center',
@@ -595,6 +608,7 @@ export default function Navbar() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
             className="gymz-glass-popover"
+            id="mobile-menu"
             style={{
               position: 'fixed',
               top: 56,
@@ -616,7 +630,7 @@ export default function Navbar() {
             {[...publicLinks, ...(user ? privateLinks : [])].map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
-                <Link key={href} href={href}>
+                <Link key={href} href={href} aria-current={active ? 'page' : undefined}>
                   <div
                     style={{
                       display: 'flex',
@@ -694,6 +708,7 @@ export default function Navbar() {
             <Link
               key={href}
               href={href}
+              aria-current={active ? 'page' : undefined}
               style={{
                 flex: 1,
                 minWidth: 0,
