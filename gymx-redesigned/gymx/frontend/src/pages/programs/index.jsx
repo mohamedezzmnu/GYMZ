@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown, Calendar, Users, Target, Zap, CheckCircle2,
-  ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell, Trash2,
+  ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell, Trash2, Play,
 } from 'lucide-react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { EXERCISES } from '../../data/exercises';
 import { PROGRAMS } from '../../data/programs';
+import { getExerciseVideo } from '../../data/exerciseVideos';
 
 // ══════════════════════════════════════════
 // ربط أسماء تمارين البرامج بصور التمارين (id من EXERCISES)
@@ -170,7 +171,9 @@ function ProgramCard({ program, index, highlighted = false, myProgramTitle = nul
   const [sessionDone, setSessionDone] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
   const [previewExercise, setPreviewExercise] = useState(null);
-  const { user } = useAuth();
+  const { user, premium } = useAuth();
+  // فيديو التمرين بيظهر للمشتركين بس، ولو التمرين ليه فيديو في المكتبة
+  const previewVideo = premium && previewExercise ? getExerciseVideo(previewExercise.id) : null;
 
   const isMyProgram = myProgramTitle === (program.subtitle || program.title);
   const hasOtherProgram = Boolean(myProgramTitle) && !isMyProgram;
@@ -678,7 +681,7 @@ function ProgramCard({ program, index, highlighted = false, myProgramTitle = nul
               className="glass-card"
               style={{
                 width: '100%',
-                maxWidth: 380,
+                maxWidth: previewVideo ? 720 : 380,
                 overflow: 'hidden',
                 position: 'relative',
               }}
@@ -704,12 +707,42 @@ function ProgramCard({ program, index, highlighted = false, myProgramTitle = nul
               >
                 <X size={15} />
               </button>
-              <img
-                src={previewExercise.img}
-                alt={previewExercise.enTitle || previewExercise.name_ar}
-                loading="lazy"
-                style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', background: 'var(--iron)' }}
-              />
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                <img
+                  src={previewExercise.img}
+                  alt={previewExercise.enTitle || previewExercise.name_ar}
+                  loading="lazy"
+                  style={{
+                    flex: '1 1 240px',
+                    width: previewVideo ? '50%' : '100%',
+                    height: 240,
+                    objectFit: 'cover',
+                    display: 'block',
+                    background: 'var(--iron)',
+                  }}
+                />
+                {previewVideo && (
+                  <video
+                    key={previewVideo.video}
+                    src={previewVideo.video}
+                    poster={previewExercise.img}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-label={previewVideo.name}
+                    style={{
+                      flex: '1 1 240px',
+                      width: '50%',
+                      height: 240,
+                      objectFit: 'contain',
+                      display: 'block',
+                      background: '#000',
+                    }}
+                  />
+                )}
+              </div>
               <div style={{ padding: '16px 18px', direction: 'rtl' }}>
                 <div
                   dir="ltr"
@@ -724,6 +757,12 @@ function ProgramCard({ program, index, highlighted = false, myProgramTitle = nul
                 >
                   {previewExercise.enTitle || previewExercise.name_ar}
                 </div>
+                {previewVideo?.note && (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: 'var(--ash)', lineHeight: 1.6, marginTop: 6 }}>
+                    <Play size={13} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span>{previewVideo.note}</span>
+                  </div>
+                )}
                 {previewExercise.tips && (
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
                     <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
