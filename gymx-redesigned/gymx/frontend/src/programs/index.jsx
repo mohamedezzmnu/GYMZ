@@ -1,0 +1,1007 @@
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import {
+  ChevronDown, Calendar, Users, Target, Zap, CheckCircle2,
+  ImageIcon, X, AlertTriangle, Lightbulb, Flame, Snowflake, Dumbbell, Trash2, Play,
+} from 'lucide-react';
+import Head from 'next/head';
+import toast from 'react-hot-toast';
+import { supabase } from '../../lib/supabaseClient';
+import { useAuth } from '../../context/AuthContext';
+import { EXERCISES } from '../../data/exercises';
+import { PROGRAMS } from '../../data/programs';
+import { getExerciseVideo } from '../../data/exerciseVideos';
+
+// ══════════════════════════════════════════
+// ربط أسماء تمارين البرامج بصور التمارين (id من EXERCISES)
+// ══════════════════════════════════════════
+const PROGRAM_EXERCISE_MAP = {
+  'أرنولد برس': 19,
+  'أوفر هيد برس': 14,
+  'أوفر هيد برس بار': 14,
+  'بريتشر كيرل': 24,
+  'بنش برس': 1,
+  'بنش برس بار': 1,
+  'تراسبس بوش داون': 31,
+  'ديد ليفت': 7,
+  'ديد ليفت رومانيان': 37,
+  'رفع أمامي': 17,
+  'رفع جانبي': 16,
+  'رفع سمانة': 56,
+  'رفع سمانة جالس': 57,
+  'رفع سمانة واقف': 56,
+  'رومانيان ديد ليفت': 37,
+  'رووينج بار': 9,
+  'سبليت سكوات بلغاري': 41,
+  'سكال كراشر': 30,
+  'سكوات': 35,
+  'سكوات بار': 35,
+  'سيتد رووينج': 11,
+  'ضغط بنش مائل': 2,
+  'ضغط بنش مائل دمبل': 2,
+  'ضغط كتف': 14,
+  'ضغط مائل دمبل': 2,
+  'عقلة': 8,
+  'عقلة أو كيبل': 8,
+  'فلاي دمبل': 5,
+  'فلاي كيبل': 4,
+  'فيس بولز': 13,
+  'كيبل كيك باك': 46,
+  'كيرل بار': 21,
+  'كيرل بايسبس': 22,
+  'لات بول داون': 10,
+  'ليج اكستنشن': 39,
+  'ليج برس': 36,
+  'ليج كيرل': 38,
+  'مط تراسبس فوق الرأس': 32,
+  'هامر كيرل': 23,
+  'هيب ثراست': 44,
+};
+
+// ══════════════════════════════════════════
+// الأسماء الإنجليزية المعتمدة لتمارين البرامج
+// ══════════════════════════════════════════
+const PROGRAM_EXERCISE_EN_MAP = {
+  'إحماء': 'Warm-up',
+  'تبريد وإطالات': 'Cool-down & Stretch',
+  'أرنولد برس': 'Arnold Press',
+  'أوفر هيد برس': 'Overhead Press',
+  'أوفر هيد برس بار': 'Barbell Overhead Press',
+  'بريتشر كيرل': 'Preacher Curl',
+  'بنش برس': 'Bench Press',
+  'بنش برس بار': 'Barbell Bench Press',
+  'تراسبس بوش داون': 'Tricep Pushdown',
+  'ديد ليفت': 'Deadlift',
+  'ديد ليفت رومانيان': 'Romanian Deadlift',
+  'رفع أمامي': 'Front Raise',
+  'رفع جانبي': 'Lateral Raise',
+  'رفع سمانة': 'Calf Raise',
+  'رفع سمانة جالس': 'Seated Calf Raise',
+  'رفع سمانة واقف': 'Standing Calf Raise',
+  'رومانيان ديد ليفت': 'Romanian Deadlift',
+  'رووينج بار': 'Barbell Row',
+  'سبليت سكوات بلغاري': 'Bulgarian Split Squat',
+  'سكال كراشر': 'Skull Crusher',
+  'سكوات': 'Squat',
+  'سكوات بار': 'Barbell Squat',
+  'سيتد رووينج': 'Seated Row',
+  'ضغط بنش مائل': 'Incline Bench Press',
+  'ضغط بنش مائل دمبل': 'Incline Dumbbell Press',
+  'ضغط كتف': 'Shoulder Press',
+  'ضغط مائل دمبل': 'Incline Dumbbell Press',
+  'عقلة': 'Pull-ups',
+  'عقلة أو كيبل': 'Pull-ups / Lat Pulldown',
+  'فلاي دمبل': 'Dumbbell Fly',
+  'فلاي كيبل': 'Cable Fly',
+  'فيس بولز': 'Face Pulls',
+  'كيبل كيك باك': 'Cable Kickback',
+  'كيرل بار': 'Barbell Curl',
+  'كيرل بايسبس': 'Bicep Curl',
+  'لات بول داون': 'Lat Pulldown',
+  'ليج اكستنشن': 'Leg Extension',
+  'ليج برس': 'Leg Press',
+  'ليج كيرل': 'Leg Curl',
+  'مط تراسبس فوق الرأس': 'Overhead Tricep Extension',
+  'هامر كيرل': 'Hammer Curl',
+  'هيب ثراست': 'Hip Thrust',
+};
+
+function getExerciseImage(name) {
+  const id = PROGRAM_EXERCISE_MAP[name];
+  if (!id) return null;
+  return EXERCISES.find((e) => e.id === id) || null;
+}
+
+function getEnglishExerciseName(arName, exObj) {
+  const fromData = exObj?.name_en || exObj?.englishName;
+  if (fromData) return fromData;
+  if (PROGRAM_EXERCISE_EN_MAP[arName]) return PROGRAM_EXERCISE_EN_MAP[arName];
+  if (exObj?.name && !/[\u0600-\u06FF]/.test(exObj.name)) return exObj.name;
+  return arName;
+}
+
+// ══════════════════════════════════════════
+// الهيكل الأساسي لأي يوم تمرين
+// ══════════════════════════════════════════
+const DAY_STRUCTURE = [
+  {
+    step: '01',
+    title: 'الإحماء',
+    subtitle: 'تسخين الجسم',
+    desc: '10 دقايق كارديو خفيف + تمدد للمفاصل عشان جسمك يكون جاهز وتتجنب الإصابات.',
+    color: 'var(--volt)',
+    Icon: Flame,
+  },
+  {
+    step: '02',
+    title: 'التمارين الأساسية',
+    subtitle: 'التمارين الكبيرة',
+    desc: 'رفع الأثقال في التمارين الكبيرة زي السكوات والبنش برس والديدليفت — دي أهم جزء في التمرين.',
+    color: 'var(--chalk)',
+    Icon: Dumbbell,
+  },
+  {
+    step: '03',
+    title: 'التمارين المساعدة',
+    subtitle: 'تمارين عضلة واحدة',
+    desc: 'تمارين بتستهدف العضلة بشكل مباشر زي تجميع الدمبل أو جهاز السحب — لإكمال الشغل.',
+    color: 'var(--volt-bright)',
+    Icon: Target,
+  },
+  {
+    step: '04',
+    title: 'التبريد والإطالات',
+    subtitle: 'تهدئة الجسم',
+    desc: 'في الآخر مش اختياري — بيقلل وجع العضلات وبيساعد على الاسترداد للتمرين الجاي.',
+    color: 'var(--ash-light)',
+    Icon: Snowflake,
+  },
+];
+
+// ══════════════════════════════════════════
+// Components
+// ══════════════════════════════════════════
+function ProgramCard({ program, index, highlighted = false, myProgramTitle = null, onChoose, onDelete, busy = false }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const [open, setOpen] = useState(highlighted);
+  const [activeDay, setActiveDay] = useState(0);
+  const [joining, setJoining] = useState(false);
+  const [sessionDone, setSessionDone] = useState(false);
+  const [savingSession, setSavingSession] = useState(false);
+  const [previewExercise, setPreviewExercise] = useState(null);
+  const { user, premium } = useAuth();
+  // فيديو التمرين بيظهر للمشتركين بس، ولو التمرين ليه فيديو في المكتبة
+  const previewVideo = premium && previewExercise ? getExerciseVideo(previewExercise.id) : null;
+
+  const isMyProgram = myProgramTitle === (program.subtitle || program.title);
+  const hasOtherProgram = Boolean(myProgramTitle) && !isMyProgram;
+
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    supabase
+      .from('workout_sessions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('program_title', program.subtitle || program.title)
+      .eq('session_day', today)
+      .single()
+      .then(({ data }) => {
+        if (data) setSessionDone(true);
+      });
+  }, [user, program]);
+
+  const handleChoose = async (e) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error('سجّل دخول الأول');
+      return;
+    }
+    setJoining(true);
+    try {
+      await onChoose(program);
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  const handleLogSession = async (e) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error('سجّل دخول الأول');
+      return;
+    }
+    setSavingSession(true);
+    const today = new Date().toISOString().split('T')[0];
+    const dayLabel = program.days_detail?.[activeDay]?.day || `يوم ${activeDay + 1}`;
+    const { error } = await supabase.from('workout_sessions').insert({
+      user_id: user.id,
+      program_title: program.subtitle || program.title,
+      day_label: dayLabel,
+      session_day: today,
+      done: true,
+    });
+    setSavingSession(false);
+    if (error) {
+      toast.error('حصل خطأ');
+      return;
+    }
+    setSessionDone(true);
+    toast.success('تم تسجيل جلسة النهارده');
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 28 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.45, delay: index * 0.08 }}
+      id={'program-' + program.subtitle}
+      style={{ marginBottom: 16 }}
+    >
+      {/* Card Header */}
+      <div
+        className="glass-card"
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderColor: highlighted || isMyProgram ? 'rgba(255, 90, 31, 0.42)' : undefined,
+          borderRadius: open ? '14px 14px 0 0' : 14,
+          cursor: 'pointer',
+          padding: '24px 28px',
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        {/* Editorial index number */}
+        <div
+          style={{
+            position: 'absolute',
+            top: -6,
+            insetInlineEnd: 18,
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 'clamp(64px,8vw,96px)',
+            lineHeight: 1,
+            color: 'rgba(255, 255, 255, 0.035)',
+            userSelect: 'none',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, position: 'relative', zIndex: 1 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontFamily: 'var(--font-mono)',
+                  padding: '3px 10px',
+                  borderRadius: 6,
+                  background: 'var(--volt-dim)',
+                  border: '1px solid rgba(255, 90, 31, 0.25)',
+                  color: 'var(--volt-bright)',
+                }}
+              >
+                {program.subtitle}
+              </span>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontFamily: 'var(--font-mono)',
+                  padding: '3px 10px',
+                  borderRadius: 6,
+                  background: program.levelColor?.bg || 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid ' + (program.levelColor?.border || 'var(--glass-border)'),
+                  color: program.levelColor?.text || 'var(--ash-light)',
+                }}
+              >
+                {program.level}
+              </span>
+              {isMyProgram && (
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '3px 10px',
+                    borderRadius: 6,
+                    background: 'rgba(255, 90, 31, 0.14)',
+                    border: '1px solid rgba(255, 90, 31, 0.45)',
+                    color: 'var(--volt-bright)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <CheckCircle2 size={11} /> برنامجك الحالي
+                </span>
+              )}
+            </div>
+
+            <h2
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: '1.4rem',
+                letterSpacing: '-0.02em',
+                color: 'var(--chalk)',
+                margin: '0 0 4px 0',
+                lineHeight: 1.2,
+              }}
+            >
+              {program.title}
+            </h2>
+            <div
+              style={{
+                fontSize: '0.8rem',
+                color: 'var(--volt-bright)',
+                fontFamily: 'var(--font-body)',
+                marginBottom: 12,
+                opacity: 0.9,
+                direction: 'rtl',
+              }}
+            >
+              {program.subtitleAr || program.subtitle}
+            </div>
+            <p
+              style={{
+                fontSize: '0.88rem',
+                color: 'var(--ash-light)',
+                lineHeight: 1.7,
+                margin: '0 0 14px 0',
+                direction: 'rtl',
+                fontFamily: 'var(--font-body)',
+                maxWidth: 600,
+              }}
+            >
+              {program.description}
+            </p>
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Calendar size={13} color="var(--ash)" />
+                <span style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-mono)' }}>{program.days}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Users size={13} color="var(--ash)" />
+                <span style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)', direction: 'rtl' }}>{program.suitable}</span>
+              </div>
+            </div>
+          </div>
+
+          <motion.div
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ color: 'var(--volt)', flexShrink: 0, marginTop: 4 }}
+          >
+            <ChevronDown size={22} />
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Expanded Content */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              className="glass-card"
+              style={{
+                borderTop: '1px solid var(--glass-border)',
+                borderRadius: '0 0 14px 14px',
+                padding: '24px 28px',
+                boxShadow: 'none',
+              }}
+            >
+              {/* Day tabs */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+                {program.days_detail.map((d, i) => (
+                  <motion.button
+                    key={i}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.12 }}
+                    onClick={() => setActiveDay(i)}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontFamily: 'var(--font-mono)',
+                      padding: '6px 14px',
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                      border: '1px solid',
+                      transition: 'all 180ms ease',
+                      background: activeDay === i ? 'var(--volt-dim)' : 'rgba(255, 255, 255, 0.02)',
+                      borderColor: activeDay === i ? 'rgba(255, 90, 31, 0.55)' : 'var(--glass-border)',
+                      color: activeDay === i ? 'var(--volt-bright)' : 'var(--ash)',
+                    }}
+                  >
+                    يوم {i + 1}
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Active day */}
+              <motion.div
+                key={activeDay}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.22 }}
+              >
+                <div
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '0.95rem',
+                    color: 'var(--volt-bright)',
+                    marginBottom: 16,
+                    direction: 'rtl',
+                    fontWeight: 700,
+                  }}
+                >
+                  {program.days_detail[activeDay].day}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {program.days_detail[activeDay].exercises.map((ex, i) => {
+                    const exImg = getExerciseImage(ex.name);
+                    const enTitle = getEnglishExerciseName(ex.name, exImg);
+
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 12,
+                          padding: '12px 14px',
+                          borderRadius: 10,
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--glass-border)',
+                          direction: 'rtl',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontFamily: 'var(--font-mono)',
+                            color: 'var(--volt)',
+                            minWidth: 22,
+                            paddingTop: 2,
+                          }}
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                          <div>
+                            <div
+                              dir="ltr"
+                              style={{
+                                fontSize: '0.92rem',
+                                color: 'var(--chalk)',
+                                fontFamily: 'var(--font-display)',
+                                fontWeight: 700,
+                                textAlign: 'left',
+                                marginBottom: 3,
+                              }}
+                            >
+                              {enTitle}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--ash-light)', fontFamily: 'var(--font-body)' }}>
+                              {ex.detail}
+                            </div>
+                          </div>
+                          {exImg && (
+                            <motion.button
+                              whileHover={{ scale: 1.04 }}
+                              whileTap={{ scale: 0.95 }}
+                              transition={{ duration: 0.12 }}
+                              onClick={() => setPreviewExercise({ ...exImg, enTitle })}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                padding: '5px 10px',
+                                flexShrink: 0,
+                                background: 'rgba(255, 255, 255, 0.04)',
+                                border: '1px solid var(--glass-border)',
+                                borderRadius: 7,
+                                color: 'var(--ash-light)',
+                                cursor: 'pointer',
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.62rem',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <ImageIcon size={12} /> صورة
+                            </motion.button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              {/* Banner لو مسجل في برنامج تاني */}
+              {hasOtherProgram && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    marginTop: 18,
+                    padding: '12px 14px',
+                    background: 'rgba(255, 90, 31, 0.07)',
+                    border: '1px solid rgba(255, 90, 31, 0.28)',
+                    borderRadius: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    direction: 'rtl',
+                  }}
+                >
+                  <AlertTriangle size={16} color="var(--volt)" style={{ flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--chalk)', margin: 0 }}>
+                      برنامجك الحالي <strong style={{ color: 'var(--volt-bright)' }}>{myProgramTitle}</strong>
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--ash)', margin: '3px 0 0' }}>
+                      مسموح ببرنامج واحد بس — لو بدّلت، القديم هيتشال
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* زرار الانضمام / التبديل */}
+              <motion.button
+                onClick={handleChoose}
+                disabled={joining || busy || isMyProgram}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.12 }}
+                className={isMyProgram ? 'btn btn-outline' : 'btn btn-primary'}
+                style={{
+                  marginTop: 20,
+                  width: '100%',
+                  padding: '13px',
+                  borderRadius: 10,
+                  cursor: isMyProgram || busy ? 'default' : 'pointer',
+                  background: isMyProgram ? 'rgba(255, 90, 31, 0.1)' : undefined,
+                  borderColor: isMyProgram ? 'rgba(255, 90, 31, 0.4)' : undefined,
+                  color: isMyProgram ? 'var(--volt-bright)' : '#fff',
+                }}
+              >
+                {isMyProgram ? (
+                  <>
+                    <CheckCircle2 size={16} /> برنامجك الحالي
+                  </>
+                ) : joining ? (
+                  'جاري التبديل...'
+                ) : (
+                  <>
+                    <Zap size={15} /> {myProgramTitle ? 'بدّل البرنامج' : 'ابدأ البرنامج'}
+                  </>
+                )}
+              </motion.button>
+
+              {isMyProgram && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  disabled={busy}
+                  aria-label={`امسح برنامج ${program.title}`}
+                  style={{
+                    marginTop: 10,
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '11px',
+                    borderRadius: 10,
+                    background: 'rgba(248, 113, 113, 0.07)',
+                    border: '1px solid rgba(248, 113, 113, 0.3)',
+                    color: '#f87171',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.78rem',
+                    cursor: busy ? 'default' : 'pointer',
+                  }}
+                >
+                  <Trash2 size={14} /> امسح البرنامج
+                </button>
+              )}
+
+              {/* زرار تسجيل الجلسة */}
+              <motion.button
+                onClick={handleLogSession}
+                disabled={savingSession || sessionDone}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.12 }}
+                className="btn btn-outline"
+                style={{
+                  marginTop: 10,
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: 10,
+                  cursor: sessionDone ? 'default' : 'pointer',
+                  background: sessionDone ? 'rgba(255, 90, 31, 0.06)' : 'rgba(255, 255, 255, 0.02)',
+                  borderColor: sessionDone ? 'rgba(255, 90, 31, 0.35)' : 'var(--glass-border)',
+                  color: sessionDone ? 'var(--volt-bright)' : 'var(--ash-light)',
+                  fontSize: '0.88rem',
+                }}
+              >
+                {sessionDone ? (
+                  <>
+                    <CheckCircle2 size={15} /> تمت جلسة النهارده
+                  </>
+                ) : savingSession ? (
+                  'جاري الحفظ...'
+                ) : (
+                  <>
+                    <CheckCircle2 size={15} /> سجّل جلسة النهارده
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal معاينة صورة التمرين ── */}
+      <AnimatePresence>
+        {previewExercise && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewExercise(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 200,
+              background: 'rgba(0, 0, 0, 0.78)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 20,
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.18 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass-card"
+              style={{
+                width: '100%',
+                maxWidth: previewVideo ? 720 : 380,
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              <button
+                onClick={() => setPreviewExercise(null)}
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  zIndex: 2,
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'rgba(8, 8, 8, 0.72)',
+                  border: '1px solid var(--glass-border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                <X size={15} />
+              </button>
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                <img
+                  src={previewExercise.img}
+                  alt={previewExercise.enTitle || previewExercise.name_ar}
+                  loading="lazy"
+                  style={{
+                    flex: '1 1 240px',
+                    width: previewVideo ? '50%' : '100%',
+                    height: 240,
+                    objectFit: 'cover',
+                    display: 'block',
+                    background: 'var(--iron)',
+                  }}
+                />
+                {previewVideo && (
+                  <video
+                    key={previewVideo.video}
+                    src={previewVideo.video}
+                    poster={previewExercise.img}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-label={previewVideo.name}
+                    style={{
+                      flex: '1 1 240px',
+                      width: '50%',
+                      height: 240,
+                      objectFit: 'contain',
+                      display: 'block',
+                      background: '#000',
+                    }}
+                  />
+                )}
+              </div>
+              <div style={{ padding: '16px 18px', direction: 'rtl' }}>
+                <div
+                  dir="ltr"
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: '1.05rem',
+                    color: 'var(--chalk)',
+                    textAlign: 'left',
+                    marginBottom: 6,
+                  }}
+                >
+                  {previewExercise.enTitle || previewExercise.name_ar}
+                </div>
+                {previewVideo?.note && (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: 'var(--ash)', lineHeight: 1.6, marginTop: 6 }}>
+                    <Play size={13} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span>{previewVideo.note}</span>
+                  </div>
+                )}
+                {previewExercise.tips && (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
+                    <Lightbulb size={14} color="var(--volt)" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span>{previewExercise.tips}</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function StructureStep({ step, index }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const { Icon } = step;
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.45, delay: index * 0.08 }}
+      className="glass-card"
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 16,
+        padding: '20px 24px',
+      }}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 10,
+          background: 'var(--volt-dim)',
+          border: '1px solid rgba(255, 90, 31, 0.28)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={18} color={step.color} strokeWidth={2} />
+      </div>
+      <div style={{ flex: 1, direction: 'rtl' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--volt)', fontWeight: 700 }}>{step.step}</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: 'var(--chalk)', fontWeight: 700 }}>{step.title}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--ash)' }}>— {step.subtitle}</span>
+        </div>
+        <p style={{ fontSize: '0.84rem', color: 'var(--ash-light)', lineHeight: 1.7, margin: 0, fontFamily: 'var(--font-body)' }}>{step.desc}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ══════════════════════════════════════════
+// Main Page
+// ══════════════════════════════════════════
+export default function ProgramsPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const filterProgram = router.query.program || null;
+  // برنامج واحد بس في أي وقت — بنقرا الصف النشط
+  const [myProgram, setMyProgram] = useState(null);
+  const [programBusy, setProgramBusy] = useState(false);
+
+  const loadMyProgram = useCallback(async () => {
+    if (!user?.id) {
+      setMyProgram(null);
+      return;
+    }
+    const { data } = await supabase
+      .from('user_programs')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .order('started_at', { ascending: false })
+      .limit(1);
+    setMyProgram((data && data[0]) || null);
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadMyProgram();
+  }, [loadMyProgram]);
+
+  const myProgramTitle = myProgram?.program_title || null;
+
+  const chooseProgram = async (program) => {
+    if (!user) return;
+    const title = program.subtitle || program.title;
+    if (myProgram && myProgram.program_title !== title) {
+      if (!confirm(`هنسيب ${myProgram.program_title} ونشترك في ${program.title}. مسموح ببرنامج واحد بس في نفس الوقت. تمام؟`)) return;
+    }
+    setProgramBusy(true);
+    try {
+      // برنامج واحد بس: نشيل أي برنامج تاني قبل ما نضيف الجديد
+      if (myProgram) {
+        await supabase.from('user_programs').delete().eq('user_id', user.id).neq('program_title', title);
+        const { data: others } = await supabase
+          .from('user_programs')
+          .select('id')
+          .eq('user_id', user.id)
+          .neq('program_title', title);
+        if (others && others.length > 0) {
+          toast.error('مش قادرين نمسح البرنامج القديم — صلاحية الحذف ناقصة في Supabase');
+          return;
+        }
+      }
+      const daysNum = parseInt(program.days, 10) || 3;
+      const levelMap = { مبتدئ: 'beginner', متوسط: 'intermediate', متقدم: 'advanced' };
+      const { error } = await supabase.from('user_programs').upsert(
+        {
+          user_id: user.id,
+          program_title: title,
+          program_title_ar: program.title,
+          days_per_week: daysNum,
+          level: levelMap[program.level] || program.level,
+          progress: 0,
+          is_active: true,
+        },
+        { onConflict: 'user_id,program_title' }
+      );
+      if (error) {
+        toast.error('حصل خطأ: ' + error.message);
+        return;
+      }
+      const wasSwitch = Boolean(myProgram);
+      await loadMyProgram();
+      toast.success(wasSwitch ? `بدّلت لبرنامج ${program.title}` : `انضممت لبرنامج ${program.title}`);
+    } finally {
+      setProgramBusy(false);
+    }
+  };
+
+  const deleteProgram = async () => {
+    if (!user || !myProgram) return;
+    if (!confirm(`هتمسح ${myProgram.program_title}. سجل تمارينك هيفضل زي ما هو. تمام؟`)) return;
+    setProgramBusy(true);
+    try {
+      await supabase.from('user_programs').delete().eq('id', myProgram.id).eq('user_id', user.id);
+      const { data: left } = await supabase.from('user_programs').select('id').eq('id', myProgram.id);
+      if (left && left.length > 0) {
+        toast.error('مقدرناش نمسح البرنامج — صلاحية الحذف ناقصة في Supabase');
+        return;
+      }
+      await loadMyProgram();
+      toast.success('تمسح البرنامج');
+    } finally {
+      setProgramBusy(false);
+    }
+  };
+
+  const visiblePrograms = filterProgram
+    ? PROGRAMS.filter((p) => p.title === filterProgram || p.subtitle === filterProgram)
+    : PROGRAMS;
+
+  return (
+    <>
+      <Head>
+        <title>Programs - GYMZ</title>
+      </Head>
+
+      {/* Hero */}
+      <section style={{ padding: '64px 0 40px', borderBottom: '1px solid var(--glass-border)', position: 'relative' }}>
+        <div className="bg-grid" />
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div className="rule-orange" />
+              <span className="label-tag">Training programs</span>
+            </div>
+            <h1 className="display-lg" style={{ marginBottom: 16 }}>
+              اختار <span style={{ color: 'var(--volt)' }}>برنامجك</span>
+            </h1>
+            <p style={{ fontSize: '1rem', color: 'var(--ash-light)', maxWidth: 560, lineHeight: 1.8, direction: 'rtl', fontFamily: 'var(--font-body)' }}>
+              4 برامج تمرين جاهزة — كل واحد ليه أسلوبه وناسه. اختار اللي يناسب مستواك ووقتك وابدأ.
+            </p>
+            {filterProgram && (
+              <button
+                onClick={() => router.replace('/programs', undefined, { shallow: true })}
+                className="btn btn-outline"
+                style={{ marginTop: 18, padding: '8px 16px', fontSize: '0.78rem' }}
+              >
+                عرض كل البرامج
+              </button>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Programs */}
+      <section style={{ padding: '40px 0' }}>
+        <div className="container">
+          {visiblePrograms.map((p, i) => (
+            <ProgramCard
+              key={p.id}
+              program={p}
+              index={i}
+              highlighted={Boolean(filterProgram)}
+              myProgramTitle={myProgramTitle}
+              onChoose={chooseProgram}
+              onDelete={deleteProgram}
+              busy={programBusy}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Day Structure */}
+      <section style={{ padding: '0 0 80px' }}>
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3 }}
+            style={{ marginBottom: 32 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <div className="rule-orange" />
+              <span className="label-tag">هيكل أي يوم تمرين</span>
+            </div>
+            <h2 className="display-md" style={{ margin: 0 }}>
+              الترتيب <span style={{ color: 'var(--volt)' }}>الصح</span>
+            </h2>
+          </motion.div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {DAY_STRUCTURE.map((s, i) => (
+              <StructureStep key={i} step={s} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
