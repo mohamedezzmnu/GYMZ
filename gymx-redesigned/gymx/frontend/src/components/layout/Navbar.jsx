@@ -5,11 +5,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutGrid, Dumbbell, Calculator, Apple,
   LayoutDashboard, User, LogOut,
-  Menu, X, Home, Zap, ChevronDown, Bell,
+  Menu, X, Home, Zap, ChevronDown, Bell, Trash2, CheckCheck,
 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabaseClient';
+import toast from 'react-hot-toast';
+
+const notifActionStyle = {
+  background: 'none',
+  border: '1px solid var(--glass-border)',
+  borderRadius: 'var(--radius-sm)',
+  color: 'var(--chalk)',
+  cursor: 'pointer',
+  fontFamily: 'var(--font-body)',
+  fontSize: '0.75rem',
+  minHeight: 32,
+  padding: '4px 8px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 4,
+};
 
 export default function Navbar() {
   const { lang, toggleLang, isRTL } = useLang();
@@ -24,6 +40,8 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen]         = useState(false);
   const notifRef = useRef(null);
+  const bellRef = useRef(null);
+  const wasNotifOpen = useRef(false);
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   useEffect(() => {
@@ -58,28 +76,71 @@ export default function Navbar() {
     };
   }, [user?.id]);
 
+  // Close on outside press (mouse or touch) and on Escape.
   useEffect(() => {
-    const fn = (e) => {
+    if (!notifOpen) return;
+    const onPress = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setNotifOpen(false);
       }
     };
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, []);
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setNotifOpen(false);
+        if (bellRef.current) bellRef.current.focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPress);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPress);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [notifOpen]);
 
-  const toggleNotifPanel = async () => {
-    const opening = !notifOpen;
-    setNotifOpen(opening);
-    if (!opening || !user?.id) return;
-    const unread = notifications.filter(n => !n.is_read);
-    if (unread.length === 0) return;
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+  const markAllRead = async () => {
+    if (!user?.id) return;
+    setNotifications(prev => (prev.some(n => !n.is_read) ? prev.map(n => ({ ...n, is_read: true })) : prev));
     await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false);
+  };
+
+  // Notifications stay marked as unread while the panel is open, and become read when it closes.
+  useEffect(() => {
+    if (notifOpen) {
+      wasNotifOpen.current = true;
+      return;
+    }
+    if (!wasNotifOpen.current) return;
+    wasNotifOpen.current = false;
+    markAllRead();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifOpen]);
+
+  const toggleNotifPanel = () => setNotifOpen(o => !o);
+
+  // Delete notifications the user already read. Rolls back if the database refuses.
+  const deleteNotifications = async (items) => {
+    if (!user?.id || items.length === 0) return;
+    const ids = items.map(n => n.id);
+    setNotifications(prev => prev.filter(n => !ids.includes(n.id)));
+    const { data, error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', user.id)
+      .in('id', ids)
+      .select('id');
+    const deleted = new Set((data || []).map(r => r.id));
+    const failed = error ? items : items.filter(n => !deleted.has(n.id));
+    if (failed.length > 0) {
+      setNotifications(prev =>
+        [...prev, ...failed].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      );
+      toast.error(ar ? 'ما قدرناش نمسح الإشعار، جرب تاني' : 'Could not delete the notification, try again');
+    }
   };
 
   useEffect(() => {
@@ -95,6 +156,7 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
+    setNotifOpen(false);
   }, [router.pathname]);
 
   useEffect(() => {
@@ -251,16 +313,25 @@ export default function Navbar() {
           {user && (
             <div ref={notifRef} style={{ position: 'relative' }}>
               <motion.button
+                ref={bellRef}
+                type="button"
                 whileTap={{ scale: 0.92 }}
                 transition={{ duration: 0.12 }}
                 onClick={toggleNotifPanel}
+                aria-label={
+                  ar
+                    ? (unreadCount > 0 ? `الإشعارات، ${unreadCount} غير مقروء` : 'الإشعارات')
+                    : (unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications')
+                }
+                aria-expanded={notifOpen}
+                aria-controls="notif-panel"
                 style={{
                   position: 'relative',
                   background: 'var(--glass-bg)',
                   border: notifOpen ? '1px solid var(--glass-border-hover)' : '1px solid var(--glass-border)',
                   color: 'var(--ash)',
-                  width: 34,
-                  height: 34,
+                  width: 44,
+                  height: 44,
                   borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
                   display: 'flex',
@@ -271,6 +342,7 @@ export default function Navbar() {
                 <Bell size={17} color={notifOpen ? 'var(--volt)' : 'var(--ash)'} />
                 {unreadCount > 0 && (
                   <span
+                    aria-hidden="true"
                     style={{
                       position: 'absolute',
                       top: -3,
@@ -304,6 +376,9 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
                     className="gymz-glass-popover"
+                    id="notif-panel"
+                    role="region"
+                    aria-label={ar ? 'الإشعارات' : 'Notifications'}
                     style={{
                       position: 'fixed',
                       top: 64,
@@ -325,23 +400,54 @@ export default function Navbar() {
                   >
                     <div
                       style={{
-                        padding: '10px 14px',
+                        padding: '8px 14px',
                         borderBottom: '1px solid var(--glass-border)',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.65rem',
-                        letterSpacing: '0.08em',
-                        color: 'var(--ash)',
-                        textTransform: 'uppercase',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 8,
                       }}
                     >
-                      {ar ? 'الإشعارات' : 'Notifications'}
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.75rem',
+                          letterSpacing: '0.08em',
+                          color: 'var(--ash)',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {ar ? 'الإشعارات' : 'Notifications'}
+                      </span>
+                      <span style={{ display: 'flex', gap: 4 }}>
+                        {unreadCount > 0 && (
+                          <button
+                            type="button"
+                            onClick={markAllRead}
+                            style={notifActionStyle}
+                          >
+                            <CheckCheck size={14} aria-hidden="true" />
+                            {ar ? 'علّم الكل مقروء' : 'Mark all read'}
+                          </button>
+                        )}
+                        {notifications.some(n => n.is_read) && (
+                          <button
+                            type="button"
+                            onClick={() => deleteNotifications(notifications.filter(n => n.is_read))}
+                            style={notifActionStyle}
+                          >
+                            <Trash2 size={14} aria-hidden="true" />
+                            {ar ? 'امسح المقروء' : 'Clear read'}
+                          </button>
+                        )}
+                      </span>
                     </div>
                     {notifications.length === 0 ? (
                       <div
                         style={{
                           padding: '24px 14px',
                           textAlign: 'center',
-                          fontSize: '0.78rem',
+                          fontSize: '0.85rem',
                           color: 'var(--ash)',
                           fontFamily: 'var(--font-body)',
                         }}
@@ -349,33 +455,62 @@ export default function Navbar() {
                         {ar ? 'مفيش إشعارات لسه' : 'No notifications yet'}
                       </div>
                     ) : (
-                      notifications.map(n => (
-                        <div
-                          key={n.id}
-                          style={{
-                            padding: '10px 14px',
-                            borderBottom: '1px solid rgba(255,255,255,0.05)',
-                            background: n.is_read ? 'transparent' : 'var(--volt-dim)',
-                          }}
-                        >
-                          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.82rem', color: 'var(--chalk)', marginBottom: 2 }}>
-                            {n.title}
-                          </div>
-                          {n.body && (
-                            <div style={{ fontSize: '0.72rem', color: 'var(--ash-light)', lineHeight: 1.5 }}>
-                              {n.body}
+                      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                        {notifications.map(n => (
+                          <li
+                            key={n.id}
+                            style={{
+                              padding: '10px 14px',
+                              borderBottom: '1px solid rgba(255,255,255,0.05)',
+                              background: n.is_read ? 'transparent' : 'var(--volt-dim)',
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: 8,
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem', color: 'var(--chalk)', marginBottom: 2 }}>
+                                {n.title}
+                              </div>
+                              {n.body && (
+                                <div style={{ fontSize: '0.8rem', color: 'var(--ash-light)', lineHeight: 1.6 }}>
+                                  {n.body}
+                                </div>
+                              )}
+                              <div style={{ fontSize: '0.72rem', color: 'var(--ash)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+                                {new Date(n.created_at).toLocaleDateString(ar ? 'ar-EG' : 'en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
                             </div>
-                          )}
-                          <div style={{ fontSize: '0.6rem', color: 'var(--ash)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
-                            {new Date(n.created_at).toLocaleDateString(ar ? 'ar-EG' : 'en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </div>
-                        </div>
-                      ))
+                            {n.is_read && (
+                              <button
+                                type="button"
+                                onClick={() => deleteNotifications([n])}
+                                aria-label={ar ? `امسح الإشعار: ${n.title}` : `Delete notification: ${n.title}`}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--ash)',
+                                  cursor: 'pointer',
+                                  width: 44,
+                                  height: 44,
+                                  marginTop: -8,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <Trash2 size={16} aria-hidden="true" />
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </motion.div>
                 )}
